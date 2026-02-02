@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cyber Master Bot</title>
+    <title>Cyber Master V10</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -25,17 +25,17 @@
             margin: 0; height: 100vh;
             display: flex; flex-direction: column; overflow: hidden;
             background-image: radial-gradient(circle at 50% -20%, #1a1a40, #000);
+            transition: direction 0.3s;
         }
 
-        /* --- الهيدر --- */
+        /* --- الهيدر واللغة --- */
         .header {
             padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
             background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .rank {
-            background: linear-gradient(90deg, var(--secondary), #6a00ff);
-            padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: bold;
-            box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
+        .lang-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;
         }
 
         /* --- العداد --- */
@@ -49,7 +49,7 @@
         /* --- منطقة اللعب --- */
         .game-area {
             flex-grow: 1; display: flex; justify-content: center; align-items: center;
-            position: relative; z-index: 1; /* جعلها في الطبقة الصحيحة */
+            position: relative; z-index: 1;
         }
         
         .coin-btn {
@@ -59,7 +59,6 @@
             box-shadow: 0 0 40px rgba(0, 243, 255, 0.3), inset 0 0 20px rgba(0, 243, 255, 0.2);
             display: flex; align-items: center; justify-content: center;
             font-size: 5rem; cursor: pointer; transition: transform 0.05s;
-            position: relative;
         }
         .coin-btn:active { transform: scale(0.92); border-color: #fff; }
         .coin-btn::after { content: '$'; color: #fff; font-weight: 900; text-shadow: 0 0 20px var(--primary); }
@@ -81,13 +80,12 @@
         }
         .nav-btn:active { background: rgba(255,255,255,0.15); transform: translateY(2px); }
 
-        /* --- النوافذ المنبثقة (تم إصلاح المشكلة هنا) --- */
+        /* --- النوافذ المنبثقة --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 999;
             display: flex; align-items: flex-end; justify-content: center;
-            opacity: 0; visibility: hidden; transition: 0.3s; /* الإصلاح: استخدام visibility */
-            backdrop-filter: blur(5px);
+            opacity: 0; visibility: hidden; transition: 0.3s; backdrop-filter: blur(5px);
         }
         .modal.active { opacity: 1; visibility: visible; }
 
@@ -100,7 +98,7 @@
         }
         .modal.active .modal-content { transform: translateY(0); }
 
-        /* عناصر القائمة */
+        /* العناصر */
         .task-row {
             background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;
             margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
@@ -110,22 +108,21 @@
         .btn-do { background: var(--primary); color: #000; }
         .btn-verify { background: var(--secondary); color: #fff; }
 
-        /* حقول الإدخال */
         .inp { width: 100%; background: #000; border: 1px solid #333; padding: 12px; color: #fff; border-radius: 8px; margin-bottom: 10px; font-family: inherit; }
         .buy-confirm { width: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border: none; padding: 14px; font-weight: 900; border-radius: 10px; color: #000; cursor: pointer; }
 
     </style>
 </head>
-<body>
+<body id="body">
 
     <div class="header">
-        <div class="rank">Admin 👑</div>
-        <div style="font-size:0.8rem; opacity:0.7">V9.0 Fixed</div>
+        <button class="lang-btn" onclick="toggleLang()" id="lang-icon">🇺🇸 EN</button>
+        <div style="font-size:0.8rem; opacity:0.7">Admin V10</div>
     </div>
 
     <div class="score-box">
         <div class="score-val" id="score">0</div>
-        <div style="color:#aaa; font-size:0.9rem">Rial Coin</div>
+        <div style="color:#aaa; font-size:0.9rem" data-key="score_title">رصيد النقاط</div>
     </div>
 
     <div class="game-area">
@@ -134,166 +131,245 @@
 
     <div class="energy-box">
         <div style="display:flex; justify-content:space-between; font-size:0.9rem">
-            <span>الطاقة ⚡</span>
+            <span data-key="energy_title">الطاقة ⚡</span>
             <span id="energy-txt">100/100</span>
         </div>
         <div class="bar-bg"><div class="bar-fill" id="energy-bar"></div></div>
     </div>
 
     <div class="nav">
-        <button class="nav-btn" onclick="openModal('shop')">🛒 المتجر</button>
-        <button class="nav-btn" onclick="openModal('tasks')">📋 المهام</button>
+        <button class="nav-btn" onclick="openModal('shop')">
+            🛒 <span data-key="shop_btn">المتجر</span>
+        </button>
+        <button class="nav-btn" onclick="openModal('tasks')">
+            📋 <span data-key="tasks_btn">المهام</span>
+        </button>
     </div>
 
     <div class="modal" id="shop">
         <div class="modal-content">
-            <h2 style="color:var(--secondary); margin-top:0">شراء متابعين 🚀</h2>
+            <h2 style="color:var(--secondary); margin-top:0" data-key="shop_title">شراء متابعين 🚀</h2>
             
             <div style="background:#0b0b15; padding:15px; border-radius:10px; margin-bottom:20px">
-                <label style="color:#888; display:block; margin-bottom:5px">رابط القناة/الحساب:</label>
+                <label style="color:#888; display:block; margin-bottom:5px" data-key="link_label">رابط القناة/الحساب:</label>
                 <input type="text" id="link" class="inp" placeholder="@username">
                 
-                <label style="color:#888; display:block; margin-bottom:5px">العدد:</label>
-                <input type="number" id="count" class="inp" placeholder="الحد الأدنى 10" oninput="calc()">
+                <label style="color:#888; display:block; margin-bottom:5px" data-key="count_label">العدد:</label>
+                <input type="number" id="count" class="inp" placeholder="Min 10" oninput="calc()">
                 
                 <div style="display:flex; justify-content:space-between; margin:15px 0; font-weight:bold">
-                    <span>السعر:</span> <span id="price" style="color:var(--primary)">0</span>
+                    <span data-key="price_label">السعر:</span> 
+                    <span id="price" style="color:var(--primary)">0</span>
                 </div>
                 
-                <button class="buy-confirm" onclick="sendOrder()">✅ شراء الآن</button>
+                <button class="buy-confirm" onclick="sendOrder()" data-key="buy_btn">✅ شراء الآن</button>
             </div>
 
-            <button class="nav-btn" style="width:100%; background:#222" onclick="closeModal('shop')">إغلاق</button>
+            <button class="nav-btn" style="width:100%; background:#222" onclick="closeModal('shop')" data-key="close_btn">إغلاق</button>
         </div>
     </div>
 
     <div class="modal" id="tasks">
         <div class="modal-content">
-            <h2 style="color:var(--primary); margin-top:0">المهام النشطة 📡</h2>
+            <h2 style="color:var(--primary); margin-top:0" data-key="tasks_title">المهام النشطة 📡</h2>
             <div id="task-container"></div>
-            <button class="nav-btn" style="width:100%; margin-top:15px; background:#222" onclick="closeModal('tasks')">إغلاق</button>
+            <button class="nav-btn" style="width:100%; margin-top:15px; background:#222" onclick="closeModal('tasks')" data-key="close_btn">إغلاق</button>
         </div>
     </div>
 
     <script>
         // ============================================
-        // 🔒 بياناتك الخاصة (تم دمجها بنجاح)
+        // 🔒 بياناتك
         // ============================================
         const BOT_TOKEN = "8207071306:AAFqIFqsANxB7srrBEsUfZJkb4xzhsY5FMQ";
         const ADMIN_ID = "1759629479";
-        
+
         // ============================================
-        // 📝 قائمة المهام (يمكنك التعديل هنا)
+        // 🌍 نظام اللغات (Dictionary)
         // ============================================
+        const translations = {
+            ar: {
+                score_title: "رصيد النقاط",
+                energy_title: "الطاقة ⚡",
+                shop_btn: "المتجر",
+                tasks_btn: "المهام",
+                shop_title: "شراء متابعين 🚀",
+                link_label: "رابط القناة/الحساب:",
+                count_label: "العدد (أقل شيء 10):",
+                price_label: "السعر:",
+                buy_btn: "✅ شراء الآن",
+                close_btn: "إغلاق",
+                tasks_title: "المهام النشطة 📡",
+                task_do: "تنفيذ",
+                task_verify: "تحقق ⏳",
+                no_tasks: "لا توجد مهام حالياً 🎉",
+                alert_verify: "هل اشتركت بالفعل؟ سيتم مراجعة حسابك.",
+                alert_added: "تمت إضافة النقاط!",
+                alert_link_error: "تأكد من الرابط والعدد",
+                alert_balance_error: "رصيدك غير كافي!",
+                alert_success: "✅ تم إرسال طلبك بنجاح!"
+            },
+            en: {
+                score_title: "Points Balance",
+                energy_title: "Energy ⚡",
+                shop_btn: "Shop",
+                tasks_btn: "Tasks",
+                shop_title: "Buy Followers 🚀",
+                link_label: "Channel/Account Link:",
+                count_label: "Count (Min 10):",
+                price_label: "Cost:",
+                buy_btn: "✅ Buy Now",
+                close_btn: "Close",
+                tasks_title: "Active Tasks 📡",
+                task_do: "Go",
+                task_verify: "Check ⏳",
+                no_tasks: "No tasks available 🎉",
+                alert_verify: "Did you subscribe? We will check manually.",
+                alert_added: "Points Added!",
+                alert_link_error: "Check link and count (Min 10)",
+                alert_balance_error: "Insufficient Balance!",
+                alert_success: "✅ Order Sent Successfully!"
+            }
+        };
+
+        // قائمة المهام (يجب إضافة الاسم بالعربي والانجليزي)
         const tasksList = [
-            { id: 101, title: 'اشترك في قناتنا', url: 'https://t.me/YOUR_CHANNEL', reward: 100 },
-            { id: 102, title: 'تابعنا انستقرام', url: 'https://instagram.com/YOUR_INSTA', reward: 100 },
-            { id: 103, title: 'اشترك يوتيوب', url: 'https://youtube.com', reward: 150 }
+            { id: 101, title_ar: 'اشترك في قناتنا', title_en: 'Join Channel', url: 'https://t.me/YOUR_CHANNEL', reward: 100 },
+            { id: 102, title_ar: 'تابعنا انستقرام', title_en: 'Follow Instagram', url: 'https://instagram.com/YOUR_INSTA', reward: 100 },
+            { id: 103, title_ar: 'اشترك يوتيوب', title_en: 'Subscribe YouTube', url: 'https://youtube.com', reward: 150 }
         ];
 
         // ============================================
-        // ⚙️ محرك اللعبة (لا تعدل شيئاً بالأسفل)
+        // ⚙️ محرك اللعبة
         // ============================================
-        
-        // تهيئة Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand(); // توسيع الشاشة بالكامل
+        tg.expand();
 
         let score = localStorage.getItem('score_v9') ? parseInt(localStorage.getItem('score_v9')) : 0;
         let energy = 100;
         let doneTasks = JSON.parse(localStorage.getItem('done_tasks_v9')) || [];
+        
+        // اللغة الافتراضية عربية، أو المحفوظة
+        let currentLang = localStorage.getItem('lang') || 'ar'; 
 
+        // تشغيل البوت
+        applyLanguage(currentLang);
         updateUI();
-        renderTasks();
+        
+        // تبديل اللغة
+        function toggleLang() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('lang', currentLang);
+            applyLanguage(currentLang);
+        }
 
-        // النقر
+        // تطبيق اللغة على النصوص والاتجاه
+        function applyLanguage(lang) {
+            // تحديث الاتجاه
+            document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            // تحديث زر اللغة
+            document.getElementById('lang-icon').innerText = lang === 'ar' ? '🇺🇸 EN' : '🇮🇶 AR';
+
+            // تحديث النصوص الثابتة
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if (translations[lang][key]) {
+                    el.innerText = translations[lang][key];
+                }
+            });
+
+            // إعادة رسم المهام لتغيير لغة العناوين
+            renderTasks();
+        }
+
         function tap(e) {
             if (energy > 0) {
                 score++; energy--; saveData(); updateUI();
                 floatNum(e.clientX, e.clientY);
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); // اهتزاز تيليجرام الرسمي
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             }
         }
 
-        // عرض المهام
         function renderTasks() {
             const container = document.getElementById('task-container');
             container.innerHTML = '';
             
             const active = tasksList.filter(t => !doneTasks.includes(t.id));
+            const txt = translations[currentLang]; // نصوص اللغة الحالية
 
             if(active.length === 0) {
-                container.innerHTML = '<div style="text-align:center; color:#555">لا توجد مهام حالياً 🎉</div>';
+                container.innerHTML = `<div style="text-align:center; color:#555">${txt.no_tasks}</div>`;
                 return;
             }
 
             active.forEach(t => {
+                // اختيار العنوان المناسب
+                const title = currentLang === 'ar' ? t.title_ar : t.title_en;
+                
                 container.innerHTML += `
                 <div class="task-row">
                     <div>
-                        <div style="font-weight:bold">${t.title}</div>
-                        <div style="font-size:0.8rem; color:#00ff99">+${t.reward} نقطة</div>
+                        <div style="font-weight:bold">${title}</div>
+                        <div style="font-size:0.8rem; color:#00ff99">+${t.reward}</div>
                     </div>
-                    <button class="btn-action btn-do" id="btn-${t.id}" onclick="clickTask(${t.id}, '${t.url}', ${t.reward})">تنفيذ</button>
+                    <button class="btn-action btn-do" id="btn-${t.id}" onclick="clickTask(${t.id}, '${t.url}', ${t.reward})">${txt.task_do}</button>
                 </div>`;
             });
         }
 
         function clickTask(id, url, reward) {
-            // فتح الرابط باستخدام تيليجرام أو المتصفح
             if(tg.openLink) { tg.openLink(url); } else { window.open(url, '_blank'); }
             
             const btn = document.getElementById(`btn-${id}`);
-            btn.innerText = "تحقق ⏳";
+            btn.innerText = translations[currentLang].task_verify;
             btn.className = "btn-action btn-verify";
             btn.onclick = () => verify(id, reward);
         }
 
         function verify(id, reward) {
-            tg.showConfirm("هل اشتركت بالفعل؟ سيتم مراجعة حسابك.", (confirm) => {
+            const txt = translations[currentLang];
+            tg.showConfirm(txt.alert_verify, (confirm) => {
                 if(confirm) {
                     score += reward;
                     doneTasks.push(id);
                     localStorage.setItem('done_tasks_v9', JSON.stringify(doneTasks));
                     saveData(); updateUI(); renderTasks();
-                    tg.showAlert(`تمت إضافة ${reward} نقطة!`);
+                    tg.showAlert(txt.alert_added);
                 }
             });
         }
 
-        // المتجر
         function calc() {
             const num = document.getElementById('count').value;
-            document.getElementById('price').innerText = (num * 4) + " نقطة";
+            const pts = currentLang === 'ar' ? 'نقطة' : 'Pts';
+            document.getElementById('price').innerText = (num * 4) + " " + pts;
         }
 
         function sendOrder() {
             const link = document.getElementById('link').value;
             const count = document.getElementById('count').value;
             const price = count * 4;
+            const txt = translations[currentLang];
 
-            if(!link || count < 10) return tg.showAlert("تأكد من الرابط والعدد (أقل شيء 10)");
-            if(score < price) return tg.showAlert("رصيدك غير كافي!");
+            if(!link || count < 10) return tg.showAlert(txt.alert_link_error);
+            if(score < price) return tg.showAlert(txt.alert_balance_error);
 
-            // خصم النقاط
             score -= price;
             saveData(); updateUI();
 
-            // إرسال الرسالة لك (الأدمن)
-            const msg = `🔥 *طلب شراء جديد*%0A👤 الرابط: ${link}%0A🔢 العدد: ${count}%0A💰 مخصوم: ${price} نقطة`;
+            const msg = `🔥 *Order (${currentLang.toUpperCase()})*%0A👤 Link: ${link}%0A🔢 Count: ${count}%0A💰 Paid: ${price}`;
             const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${msg}&parse_mode=Markdown`;
 
             fetch(url).then(() => {
-                tg.showAlert("✅ تم إرسال طلبك بنجاح!");
+                tg.showAlert(txt.alert_success);
                 closeModal('shop');
             }).catch(() => {
-                // حتى لو فشل الاتصال المباشر (CORS)، نعتبره ناجحاً للمستخدم
-                tg.showAlert("✅ تم استلام الطلب وسيتم التنفيذ.");
+                tg.showAlert(txt.alert_success);
                 closeModal('shop');
             });
         }
 
-        // أدوات النظام
         function updateUI() {
             document.getElementById('score').innerText = score.toLocaleString();
             document.getElementById('energy-txt').innerText = `${energy}/100`;
@@ -303,7 +379,6 @@
         
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
         setInterval(() => { if(energy < 100) { energy++; updateUI(); } }, 3000);
 
         function floatNum(x, y) {
