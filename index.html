@@ -3,113 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cyber Master V10</title>
+    <title>Cyber Master V11 Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #050510;
-            --card: #15152a;
-            --primary: #00f3ff;
-            --secondary: #bc13fe;
-            --text: #ffffff;
-            --danger: #ff0055;
+            --bg: #050510; --card: #15152a;
+            --primary: #00f3ff; --secondary: #bc13fe;
+            --text: #ffffff; --danger: #ff0055; --success: #00ff99;
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
-
         body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0; height: 100vh;
-            display: flex; flex-direction: column; overflow: hidden;
-            background-image: radial-gradient(circle at 50% -20%, #1a1a40, #000);
-            transition: direction 0.3s;
+            font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text);
+            margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            background-image: radial-gradient(circle at 50% -20%, #1a1a40, #000); transition: 0.3s;
         }
 
-        /* --- الهيدر واللغة --- */
-        .header {
-            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .lang-btn {
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-            color: #fff; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;
-        }
+        /* --- Header --- */
+        .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); }
+        .lang-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 10px; border-radius: 8px; cursor: pointer; }
 
-        /* --- العداد --- */
-        .score-box { text-align: center; margin-top: 20px; }
-        .score-val {
-            font-size: 4rem; font-weight: 900;
-            text-shadow: 0 0 25px var(--primary);
-            color: var(--primary);
-        }
-
-        /* --- منطقة اللعب --- */
-        .game-area {
-            flex-grow: 1; display: flex; justify-content: center; align-items: center;
-            position: relative; z-index: 1;
-        }
+        /* --- Score & Features Bar --- */
+        .score-box { text-align: center; margin-top: 10px; }
+        .score-val { font-size: 3.5rem; font-weight: 900; text-shadow: 0 0 25px var(--primary); color: var(--primary); }
         
+        /* شريط الميزات الجديد */
+        .features-bar {
+            display: flex; justify-content: center; gap: 15px; margin: 15px 0;
+        }
+        .feat-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; cursor: pointer; transition: 0.2s;
+        }
+        .feat-btn:active { transform: scale(0.9); background: var(--secondary); }
+
+        /* --- Game Area --- */
+        .game-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; }
         .coin-btn {
-            width: 250px; height: 250px; border-radius: 50%;
+            width: 240px; height: 240px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #2a2a50, #000);
-            border: 4px solid var(--primary);
-            box-shadow: 0 0 40px rgba(0, 243, 255, 0.3), inset 0 0 20px rgba(0, 243, 255, 0.2);
+            border: 4px solid var(--primary); box-shadow: 0 0 40px rgba(0, 243, 255, 0.3);
             display: flex; align-items: center; justify-content: center;
             font-size: 5rem; cursor: pointer; transition: transform 0.05s;
         }
-        .coin-btn:active { transform: scale(0.92); border-color: #fff; }
-        .coin-btn::after { content: '$'; color: #fff; font-weight: 900; text-shadow: 0 0 20px var(--primary); }
+        .coin-btn:active { transform: scale(0.92); }
+        .coin-btn::after { content: '$'; color: #fff; text-shadow: 0 0 20px var(--primary); }
 
-        /* --- الطاقة --- */
-        .energy-box { margin: 0 20px 15px; background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .bar-bg { background: #000; height: 10px; border-radius: 5px; margin-top: 8px; overflow: hidden; }
+        /* --- Footer --- */
+        .energy-box { margin: 0 20px 10px; background: var(--card); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .bar-bg { background: #000; height: 8px; border-radius: 5px; margin-top: 5px; overflow: hidden; }
         .bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--danger), var(--primary)); transition: width 0.3s; }
 
-        /* --- الأزرار السفلية --- */
-        .nav {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 10px 20px 30px;
-            padding-bottom: calc(20px + env(safe-area-inset-bottom));
-        }
+        .nav { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 10px 20px 25px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
         .nav-btn {
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff;
-            padding: 16px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
+            padding: 12px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
         }
-        .nav-btn:active { background: rgba(255,255,255,0.15); transform: translateY(2px); }
 
-        /* --- النوافذ المنبثقة --- */
+        /* --- Modals --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 999;
+            background: rgba(0,0,0,0.9); z-index: 999;
             display: flex; align-items: flex-end; justify-content: center;
             opacity: 0; visibility: hidden; transition: 0.3s; backdrop-filter: blur(5px);
         }
         .modal.active { opacity: 1; visibility: visible; }
-
         .modal-content {
             background: #101020; width: 100%; max-width: 500px;
-            border-radius: 25px 25px 0 0; padding: 25px;
-            border-top: 2px solid var(--primary);
-            transform: translateY(100%); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            max-height: 80vh; overflow-y: auto;
+            border-radius: 25px 25px 0 0; padding: 25px; border-top: 2px solid var(--primary);
+            transform: translateY(100%); transition: 0.3s; max-height: 85vh; overflow-y: auto;
         }
         .modal.active .modal-content { transform: translateY(0); }
 
-        /* العناصر */
-        .task-row {
-            background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;
-            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .btn-action { padding: 8px 16px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-do { background: var(--primary); color: #000; }
-        .btn-verify { background: var(--secondary); color: #fff; }
+        /* --- Specific Feature Styles --- */
+        /* Daily */
+        .daily-grid { display: flex; gap: 5px; margin-bottom: 20px; justify-content: center; }
+        .day-box { background: #222; padding: 10px; border-radius: 8px; text-align: center; width: 45px; opacity: 0.5; }
+        .day-box.active { background: var(--secondary); opacity: 1; transform: scale(1.1); border: 1px solid #fff; }
+        
+        /* Wheel */
+        .wheel-container { position: relative; width: 200px; height: 200px; margin: 0 auto 20px; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #fff; background: conic-gradient(var(--danger) 0 25%, var(--primary) 25% 50%, var(--secondary) 50% 75%, var(--success) 75% 100%); transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1); }
+        .wheel-arrow { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid #fff; z-index: 10; }
+        
+        /* Quiz */
+        .quiz-option { width: 100%; padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: #fff; border-radius: 10px; cursor: pointer; text-align: left; }
+        .quiz-option:active { background: var(--primary); color: #000; }
 
-        .inp { width: 100%; background: #000; border: 1px solid #333; padding: 12px; color: #fff; border-radius: 8px; margin-bottom: 10px; font-family: inherit; }
-        .buy-confirm { width: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border: none; padding: 14px; font-weight: 900; border-radius: 10px; color: #000; cursor: pointer; }
+        /* Common */
+        .inp { width: 100%; background: #000; border: 1px solid #333; padding: 12px; color: #fff; border-radius: 8px; margin-bottom: 10px; }
+        .action-btn { width: 100%; padding: 15px; background: linear-gradient(90deg, var(--primary), var(--secondary)); border: none; border-radius: 10px; color: #000; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .close-btn { width: 100%; padding: 10px; background: #222; border: none; border-radius: 10px; color: #fff; margin-top: 15px; cursor: pointer; }
 
     </style>
 </head>
@@ -117,12 +103,18 @@
 
     <div class="header">
         <button class="lang-btn" onclick="toggleLang()" id="lang-icon">🇺🇸 EN</button>
-        <div style="font-size:0.8rem; opacity:0.7">Admin V10</div>
+        <div style="font-size:0.8rem; opacity:0.7">Admin V11</div>
     </div>
 
     <div class="score-box">
         <div class="score-val" id="score">0</div>
-        <div style="color:#aaa; font-size:0.9rem" data-key="score_title">رصيد النقاط</div>
+        <div style="color:#aaa; font-size:0.9rem" data-key="score_title">Points</div>
+    </div>
+
+    <div class="features-bar">
+        <div class="feat-btn" onclick="checkDaily()" title="Daily">📅</div>
+        <div class="feat-btn" onclick="openModal('wheel')" title="Spin">🎡</div>
+        <div class="feat-btn" onclick="openModal('codes')" title="Codes">🎁</div>
     </div>
 
     <div class="game-area">
@@ -131,243 +123,284 @@
 
     <div class="energy-box">
         <div style="display:flex; justify-content:space-between; font-size:0.9rem">
-            <span data-key="energy_title">الطاقة ⚡</span>
+            <span data-key="energy_title">Energy</span>
             <span id="energy-txt">100/100</span>
         </div>
         <div class="bar-bg"><div class="bar-fill" id="energy-bar"></div></div>
     </div>
 
     <div class="nav">
-        <button class="nav-btn" onclick="openModal('shop')">
-            🛒 <span data-key="shop_btn">المتجر</span>
-        </button>
-        <button class="nav-btn" onclick="openModal('tasks')">
-            📋 <span data-key="tasks_btn">المهام</span>
-        </button>
+        <button class="nav-btn" onclick="openModal('shop')">🛒 <span data-key="shop_btn">Shop</span></button>
+        <button class="nav-btn" onclick="openModal('tasks')">📋 <span data-key="tasks_btn">Tasks</span></button>
+        <button class="nav-btn" onclick="openModal('quiz')">❓ <span data-key="quiz_btn">Quiz</span></button>
+    </div>
+
+    <div class="modal" id="daily">
+        <div class="modal-content" style="text-align:center">
+            <h2 data-key="daily_title">Daily Reward 📅</h2>
+            <div class="daily-grid" id="daily-days">
+                <div class="day-box">1</div><div class="day-box">2</div><div class="day-box">3</div>
+                <div class="day-box">4</div><div class="day-box">5</div><div class="day-box">6</div>
+                <div class="day-box">7</div>
+            </div>
+            <p id="daily-msg" style="color:#aaa">Come back every day!</p>
+            <button class="action-btn" onclick="claimDaily()" id="claim-daily-btn" disabled>Claim Reward</button>
+            <button class="close-btn" onclick="closeModal('daily')">x</button>
+        </div>
+    </div>
+
+    <div class="modal" id="wheel">
+        <div class="modal-content" style="text-align:center">
+            <h2 data-key="wheel_title">Spin & Win 🎡</h2>
+            <p style="font-size:0.8rem; margin-bottom:15px; color:#aaa" data-key="wheel_desc">Cost: 50 Points</p>
+            
+            <div class="wheel-container">
+                <div class="wheel-arrow"></div>
+                <div class="wheel" id="wheel-el"></div>
+            </div>
+            
+            <button class="action-btn" onclick="spinWheel()" id="spin-btn" data-key="spin_btn">SPIN (-50)</button>
+            <button class="close-btn" onclick="closeModal('wheel')" data-key="close_btn">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="codes">
+        <div class="modal-content">
+            <h2 data-key="code_title">Promo Code 🎁</h2>
+            <input type="text" id="promo-input" class="inp" placeholder="Enter code here...">
+            <button class="action-btn" onclick="redeemCode()" data-key="redeem_btn">Redeem</button>
+            <button class="close-btn" onclick="closeModal('codes')" data-key="close_btn">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="quiz">
+        <div class="modal-content">
+            <h2 data-key="quiz_title">Daily Quiz ❓</h2>
+            <div id="quiz-container">
+                <h3 id="q-text" style="margin-bottom:20px">Question text...</h3>
+                <div id="q-options"></div>
+            </div>
+            <button class="close-btn" onclick="closeModal('quiz')" data-key="close_btn">Close</button>
+        </div>
     </div>
 
     <div class="modal" id="shop">
         <div class="modal-content">
-            <h2 style="color:var(--secondary); margin-top:0" data-key="shop_title">شراء متابعين 🚀</h2>
-            
-            <div style="background:#0b0b15; padding:15px; border-radius:10px; margin-bottom:20px">
-                <label style="color:#888; display:block; margin-bottom:5px" data-key="link_label">رابط القناة/الحساب:</label>
+            <h2 data-key="shop_title">Shop 🚀</h2>
+            <div style="background:#0b0b15; padding:15px; border-radius:10px;">
+                <label data-key="link_label" style="display:block; color:#aaa; margin-bottom:5px">Link:</label>
                 <input type="text" id="link" class="inp" placeholder="@username">
-                
-                <label style="color:#888; display:block; margin-bottom:5px" data-key="count_label">العدد:</label>
+                <label data-key="count_label" style="display:block; color:#aaa; margin-bottom:5px">Count:</label>
                 <input type="number" id="count" class="inp" placeholder="Min 10" oninput="calc()">
-                
-                <div style="display:flex; justify-content:space-between; margin:15px 0; font-weight:bold">
-                    <span data-key="price_label">السعر:</span> 
-                    <span id="price" style="color:var(--primary)">0</span>
+                <div style="display:flex; justify-content:space-between; margin-top:10px">
+                    <span data-key="price_label">Price:</span> <span id="price" style="color:var(--primary)">0</span>
                 </div>
-                
-                <button class="buy-confirm" onclick="sendOrder()" data-key="buy_btn">✅ شراء الآن</button>
+                <button class="action-btn" onclick="sendOrder()" data-key="buy_btn">Buy</button>
             </div>
-
-            <button class="nav-btn" style="width:100%; background:#222" onclick="closeModal('shop')" data-key="close_btn">إغلاق</button>
+            <button class="close-btn" onclick="closeModal('shop')" data-key="close_btn">Close</button>
         </div>
     </div>
 
     <div class="modal" id="tasks">
         <div class="modal-content">
-            <h2 style="color:var(--primary); margin-top:0" data-key="tasks_title">المهام النشطة 📡</h2>
-            <div id="task-container"></div>
-            <button class="nav-btn" style="width:100%; margin-top:15px; background:#222" onclick="closeModal('tasks')" data-key="close_btn">إغلاق</button>
+            <h2 data-key="tasks_title">Tasks 📡</h2>
+            <div id="task-list"></div>
+            <button class="close-btn" onclick="closeModal('tasks')" data-key="close_btn">Close</button>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // 🔒 بياناتك
-        // ============================================
+        // ================= CONFIG =================
         const BOT_TOKEN = "8207071306:AAFqIFqsANxB7srrBEsUfZJkb4xzhsY5FMQ";
         const ADMIN_ID = "1759629479";
+        
+        // الأكواد السرية (يمكنك تعديلها)
+        const PROMO_CODES = {
+            "CYBER2025": 500,
+            "WELCOME": 200,
+            "ADMIN": 1000
+        };
 
-        // ============================================
-        // 🌍 نظام اللغات (Dictionary)
-        // ============================================
-        const translations = {
+        // الأسئلة
+        const QUIZ_DATA = [
+            { q_ar: "ما هي عملة تيليجرام الرسمية؟", q_en: "What is Telegram's coin?", ans: ["TON", "BTC", "ETH"], correct: 0 },
+            { q_ar: "كم عدد نقاط الطاقة؟", q_en: "What is max energy?", ans: ["50", "100", "500"], correct: 1 }
+        ];
+
+        // ================= LANG =================
+        const txt = {
             ar: {
-                score_title: "رصيد النقاط",
-                energy_title: "الطاقة ⚡",
-                shop_btn: "المتجر",
-                tasks_btn: "المهام",
-                shop_title: "شراء متابعين 🚀",
-                link_label: "رابط القناة/الحساب:",
-                count_label: "العدد (أقل شيء 10):",
-                price_label: "السعر:",
-                buy_btn: "✅ شراء الآن",
-                close_btn: "إغلاق",
-                tasks_title: "المهام النشطة 📡",
-                task_do: "تنفيذ",
-                task_verify: "تحقق ⏳",
-                no_tasks: "لا توجد مهام حالياً 🎉",
-                alert_verify: "هل اشتركت بالفعل؟ سيتم مراجعة حسابك.",
-                alert_added: "تمت إضافة النقاط!",
-                alert_link_error: "تأكد من الرابط والعدد",
-                alert_balance_error: "رصيدك غير كافي!",
-                alert_success: "✅ تم إرسال طلبك بنجاح!"
+                score_title: "النقاط", energy_title: "الطاقة", shop_btn: "المتجر", tasks_btn: "المهام", quiz_btn: "اختبار",
+                shop_title: "شراء متابعين", tasks_title: "المهام", daily_title: "مكافأة يومية", wheel_title: "عجلة الحظ",
+                code_title: "كود هدية", quiz_title: "سؤال اليوم", link_label: "الرابط", count_label: "العدد", price_label: "السعر",
+                buy_btn: "شراء", close_btn: "إغلاق", spin_btn: "تدوير (-50)", redeem_btn: "استخدم",
+                wheel_desc: "التكلفة: 50 نقطة", alert_success: "تم بنجاح!", alert_no_points: "رصيد غير كافي", alert_wrong: "خطأ!"
             },
             en: {
-                score_title: "Points Balance",
-                energy_title: "Energy ⚡",
-                shop_btn: "Shop",
-                tasks_btn: "Tasks",
-                shop_title: "Buy Followers 🚀",
-                link_label: "Channel/Account Link:",
-                count_label: "Count (Min 10):",
-                price_label: "Cost:",
-                buy_btn: "✅ Buy Now",
-                close_btn: "Close",
-                tasks_title: "Active Tasks 📡",
-                task_do: "Go",
-                task_verify: "Check ⏳",
-                no_tasks: "No tasks available 🎉",
-                alert_verify: "Did you subscribe? We will check manually.",
-                alert_added: "Points Added!",
-                alert_link_error: "Check link and count (Min 10)",
-                alert_balance_error: "Insufficient Balance!",
-                alert_success: "✅ Order Sent Successfully!"
+                score_title: "Points", energy_title: "Energy", shop_btn: "Shop", tasks_btn: "Tasks", quiz_btn: "Quiz",
+                shop_title: "Buy Followers", tasks_title: "Tasks", daily_title: "Daily Bonus", wheel_title: "Spin & Win",
+                code_title: "Promo Code", quiz_title: "Daily Quiz", link_label: "Link", count_label: "Count", price_label: "Price",
+                buy_btn: "Buy", close_btn: "Close", spin_btn: "Spin (-50)", redeem_btn: "Redeem",
+                wheel_desc: "Cost: 50 Points", alert_success: "Success!", alert_no_points: "No Funds", alert_wrong: "Wrong!"
             }
         };
 
-        // قائمة المهام (يجب إضافة الاسم بالعربي والانجليزي)
-        const tasksList = [
-            { id: 101, title_ar: 'اشترك في قناتنا', title_en: 'Join Channel', url: 'https://t.me/YOUR_CHANNEL', reward: 100 },
-            { id: 102, title_ar: 'تابعنا انستقرام', title_en: 'Follow Instagram', url: 'https://instagram.com/YOUR_INSTA', reward: 100 },
-            { id: 103, title_ar: 'اشترك يوتيوب', title_en: 'Subscribe YouTube', url: 'https://youtube.com', reward: 150 }
-        ];
-
-        // ============================================
-        // ⚙️ محرك اللعبة
-        // ============================================
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        let score = localStorage.getItem('score_v9') ? parseInt(localStorage.getItem('score_v9')) : 0;
+        // ================= CORE =================
+        const tg = window.Telegram.WebApp; tg.expand();
+        let score = parseInt(localStorage.getItem('score_v11') || 0);
         let energy = 100;
-        let doneTasks = JSON.parse(localStorage.getItem('done_tasks_v9')) || [];
-        
-        // اللغة الافتراضية عربية، أو المحفوظة
-        let currentLang = localStorage.getItem('lang') || 'ar'; 
+        let lang = localStorage.getItem('lang') || 'ar';
+        let usedCodes = JSON.parse(localStorage.getItem('codes_v11') || "[]");
+        let lastLogin = localStorage.getItem('last_login');
+        let doneTasks = JSON.parse(localStorage.getItem('done_tasks') || "[]");
 
-        // تشغيل البوت
-        applyLanguage(currentLang);
+        // Init
+        applyLang(lang);
         updateUI();
-        
-        // تبديل اللغة
-        function toggleLang() {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            localStorage.setItem('lang', currentLang);
-            applyLanguage(currentLang);
-        }
-
-        // تطبيق اللغة على النصوص والاتجاه
-        function applyLanguage(lang) {
-            // تحديث الاتجاه
-            document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
-            
-            // تحديث زر اللغة
-            document.getElementById('lang-icon').innerText = lang === 'ar' ? '🇺🇸 EN' : '🇮🇶 AR';
-
-            // تحديث النصوص الثابتة
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const key = el.getAttribute('data-key');
-                if (translations[lang][key]) {
-                    el.innerText = translations[lang][key];
-                }
-            });
-
-            // إعادة رسم المهام لتغيير لغة العناوين
-            renderTasks();
-        }
+        setInterval(() => { if(energy < 100){ energy++; updateUI(); } }, 3000);
 
         function tap(e) {
-            if (energy > 0) {
-                score++; energy--; saveData(); updateUI();
-                floatNum(e.clientX, e.clientY);
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            if(energy>0){ score++; energy--; save(); updateUI(); floatNum(e.clientX, e.clientY); if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
+        }
+
+        // ================= FEATURES =================
+
+        // 1. Daily
+        function checkDaily() {
+            openModal('daily');
+            const today = new Date().toDateString();
+            const btn = document.getElementById('claim-daily-btn');
+            const msg = document.getElementById('daily-msg');
+            
+            // تلوين الأيام
+            let streak = parseInt(localStorage.getItem('streak') || 0);
+            if(lastLogin !== today && lastLogin !== new Date(Date.now() - 86400000).toDateString()) streak = 0; // Reset if missed day
+            
+            document.querySelectorAll('.day-box').forEach((el, i) => {
+                if(i < streak) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+
+            if (lastLogin === today) {
+                btn.disabled = true;
+                btn.innerText = lang==='ar' ? "عد غداً" : "Come back tomorrow";
+            } else {
+                btn.disabled = false;
+                btn.innerText = lang==='ar' ? "استلام" : "Claim";
+                btn.onclick = () => {
+                    score += 100 + (streak * 50); // مكافأة متزايدة
+                    streak = Math.min(streak + 1, 7);
+                    localStorage.setItem('streak', streak);
+                    localStorage.setItem('last_login', today);
+                    lastLogin = today;
+                    save(); updateUI(); checkDaily();
+                    tg.showAlert(`+${100 + (streak*50)} Points!`);
+                };
             }
         }
 
-        function renderTasks() {
-            const container = document.getElementById('task-container');
-            container.innerHTML = '';
+        // 2. Wheel
+        function spinWheel() {
+            if(score < 50) return tg.showAlert(txt[lang].alert_no_points);
+            score -= 50; save(); updateUI();
             
-            const active = tasksList.filter(t => !doneTasks.includes(t.id));
-            const txt = translations[currentLang]; // نصوص اللغة الحالية
+            const wheel = document.getElementById('wheel-el');
+            const deg = Math.floor(5000 + Math.random() * 5000); // دوران عشوائي
+            wheel.style.transform = `rotate(${deg}deg)`;
+            
+            document.getElementById('spin-btn').disabled = true;
+            
+            setTimeout(() => {
+                // نتيجة عشوائية بسيطة
+                const reward = [0, 100, 200, 500][Math.floor(Math.random()*4)];
+                score += reward; save(); updateUI();
+                tg.showAlert(`You won ${reward} Points!`);
+                document.getElementById('spin-btn').disabled = false;
+            }, 4000);
+        }
 
-            if(active.length === 0) {
-                container.innerHTML = `<div style="text-align:center; color:#555">${txt.no_tasks}</div>`;
-                return;
+        // 3. Codes
+        function redeemCode() {
+            const input = document.getElementById('promo-input').value.toUpperCase();
+            if(usedCodes.includes(input)) return tg.showAlert("Used already!");
+            
+            if(PROMO_CODES[input]) {
+                score += PROMO_CODES[input];
+                usedCodes.push(input);
+                localStorage.setItem('codes_v11', JSON.stringify(usedCodes));
+                save(); updateUI();
+                tg.showAlert(`+${PROMO_CODES[input]} Points!`);
+                closeModal('codes');
+            } else {
+                tg.showAlert(txt[lang].alert_wrong);
             }
+        }
 
-            active.forEach(t => {
-                // اختيار العنوان المناسب
-                const title = currentLang === 'ar' ? t.title_ar : t.title_en;
-                
-                container.innerHTML += `
-                <div class="task-row">
-                    <div>
-                        <div style="font-weight:bold">${title}</div>
-                        <div style="font-size:0.8rem; color:#00ff99">+${t.reward}</div>
-                    </div>
-                    <button class="btn-action btn-do" id="btn-${t.id}" onclick="clickTask(${t.id}, '${t.url}', ${t.reward})">${txt.task_do}</button>
+        // 4. Quiz
+        function openQuiz() { // يتم استدعاؤها عند فتح النافذة
+            const q = QUIZ_DATA[Math.floor(Math.random() * QUIZ_DATA.length)];
+            document.getElementById('q-text').innerText = lang==='ar' ? q.q_ar : q.q_en;
+            const opts = document.getElementById('q-options');
+            opts.innerHTML = '';
+            
+            q.ans.forEach((ans, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-option';
+                btn.innerText = ans;
+                btn.onclick = () => {
+                    if(i === q.correct) {
+                        score += 50; save(); updateUI();
+                        tg.showAlert("Correct! +50");
+                        closeModal('quiz');
+                    } else {
+                        tg.showAlert("Wrong!");
+                    }
+                };
+                opts.appendChild(btn);
+            });
+        }
+        document.querySelector('button[onclick="openModal(\'quiz\')"]').onclick = () => { openModal('quiz'); openQuiz(); };
+
+        // 5. Tasks (With Referral)
+        const tasks = [
+            {id:1, t_ar:"انضم للقناة", t_en:"Join Channel", url:"https://t.me/YOUR_CH", r:100},
+            {id:2, t_ar:"دعوة صديق (انسخ)", t_en:"Invite Friend (Copy)", url:"https://t.me/share/url?url=https://t.me/YOUR_BOT", r:500}
+        ];
+        
+        function renderTasks() {
+            const list = document.getElementById('task-list'); list.innerHTML = '';
+            tasks.filter(t => !doneTasks.includes(t.id)).forEach(t => {
+                const title = lang==='ar' ? t.t_ar : t.t_en;
+                list.innerHTML += `
+                <div style="background:#222; padding:10px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center">
+                    <div><b>${title}</b><div style="color:#0f0; font-size:0.8rem">+${t.r}</div></div>
+                    <button class="action-btn" style="width:auto; margin:0; padding:5px 15px" onclick="doTask(${t.id}, '${t.url}', ${t.r})">Go</button>
                 </div>`;
             });
         }
+        renderTasks();
 
-        function clickTask(id, url, reward) {
-            if(tg.openLink) { tg.openLink(url); } else { window.open(url, '_blank'); }
-            
-            const btn = document.getElementById(`btn-${id}`);
-            btn.innerText = translations[currentLang].task_verify;
-            btn.className = "btn-action btn-verify";
-            btn.onclick = () => verify(id, reward);
-        }
-
-        function verify(id, reward) {
-            const txt = translations[currentLang];
-            tg.showConfirm(txt.alert_verify, (confirm) => {
-                if(confirm) {
-                    score += reward;
-                    doneTasks.push(id);
-                    localStorage.setItem('done_tasks_v9', JSON.stringify(doneTasks));
-                    saveData(); updateUI(); renderTasks();
-                    tg.showAlert(txt.alert_added);
-                }
+        function doTask(id, url, r) {
+            window.open(url);
+            tg.showConfirm("Done?", (ok) => {
+                if(ok) { score+=r; doneTasks.push(id); localStorage.setItem('done_tasks', JSON.stringify(doneTasks)); save(); updateUI(); renderTasks(); }
             });
         }
 
-        function calc() {
-            const num = document.getElementById('count').value;
-            const pts = currentLang === 'ar' ? 'نقطة' : 'Pts';
-            document.getElementById('price').innerText = (num * 4) + " " + pts;
+        // ================= HELPERS =================
+        function toggleLang() {
+            lang = lang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('lang', lang);
+            applyLang(lang);
         }
 
-        function sendOrder() {
-            const link = document.getElementById('link').value;
-            const count = document.getElementById('count').value;
-            const price = count * 4;
-            const txt = translations[currentLang];
-
-            if(!link || count < 10) return tg.showAlert(txt.alert_link_error);
-            if(score < price) return tg.showAlert(txt.alert_balance_error);
-
-            score -= price;
-            saveData(); updateUI();
-
-            const msg = `🔥 *Order (${currentLang.toUpperCase()})*%0A👤 Link: ${link}%0A🔢 Count: ${count}%0A💰 Paid: ${price}`;
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${msg}&parse_mode=Markdown`;
-
-            fetch(url).then(() => {
-                tg.showAlert(txt.alert_success);
-                closeModal('shop');
-            }).catch(() => {
-                tg.showAlert(txt.alert_success);
-                closeModal('shop');
+        function applyLang(l) {
+            document.body.dir = l === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('lang-icon').innerText = l === 'ar' ? '🇺🇸 EN' : '🇮🇶 AR';
+            document.querySelectorAll('[data-key]').forEach(el => {
+                if(txt[l][el.getAttribute('data-key')]) el.innerText = txt[l][el.getAttribute('data-key')];
             });
+            renderTasks();
         }
 
         function updateUI() {
@@ -375,11 +408,21 @@
             document.getElementById('energy-txt').innerText = `${energy}/100`;
             document.getElementById('energy-bar').style.width = energy + '%';
         }
-        function saveData() { localStorage.setItem('score_v9', score); }
-        
+
+        function save() { localStorage.setItem('score_v11', score); }
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        setInterval(() => { if(energy < 100) { energy++; updateUI(); } }, 3000);
+
+        // Shop Logic
+        function calc() { document.getElementById('price').innerText = (document.getElementById('count').value * 4) + " Pts"; }
+        function sendOrder() {
+            const l = document.getElementById('link').value, c = document.getElementById('count').value, p = c*4;
+            if(score < p) return tg.showAlert(txt[lang].alert_no_points);
+            score -= p; save(); updateUI();
+            const msg = `🔥 New Order%0A🔗 ${l}%0A🔢 ${c}%0A💰 ${p}`;
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${msg}`);
+            tg.showAlert(txt[lang].alert_success); closeModal('shop');
+        }
 
         function floatNum(x, y) {
             const el = document.createElement('div'); el.innerText = '+1';
