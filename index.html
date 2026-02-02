@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dream Clicker V6</title>
+    <title>Dream Clicker V7 Connected</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -17,19 +17,18 @@
             --success: #2ed573;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
         body {
             font-family: 'Cairo', sans-serif;
             background-color: var(--bg-dark);
             color: var(--text);
             margin: 0;
-            height: 100vh;
+            height: 100vh; /* ارتفاع الشاشة بالكامل */
             display: flex;
             flex-direction: column;
             overflow: hidden;
             user-select: none;
-            /* خلفية متحركة متطورة */
             background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #2c3e50);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
@@ -41,7 +40,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* --- التصميم الزجاجي للقوائم --- */
         .glass-panel {
             background: var(--glass);
             backdrop-filter: blur(16px);
@@ -51,7 +49,6 @@
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- الرأس --- */
         .header {
             padding: 20px;
             display: flex;
@@ -60,167 +57,94 @@
         }
 
         .user-rank {
-            font-size: 0.9rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0,0,0,0.3);
-            padding: 5px 15px;
-            border-radius: 50px;
+            font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; gap: 8px;
+            background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 50px;
         }
 
-        /* --- عرض النقاط --- */
         .score-display {
-            text-align: center;
-            margin-top: 10px;
-            animation: float 6s ease-in-out infinite;
+            text-align: center; margin-top: 10px; animation: float 6s ease-in-out infinite;
         }
         .score-number {
-            font-size: 4rem;
-            font-weight: 900;
+            font-size: 4rem; font-weight: 900;
             background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 20px rgba(79, 172, 254, 0.4));
         }
 
-        /* --- العملة ثلاثية الأبعاد --- */
         .game-stage {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
+            flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative;
         }
         
         .coin-3d {
-            width: 260px;
-            height: 260px;
-            border-radius: 50%;
+            width: 250px; height: 250px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe);
-            box-shadow: 
-                inset -10px -10px 20px rgba(0,0,0,0.5),
-                inset 10px 10px 20px rgba(255,255,255,0.4),
-                0 20px 50px rgba(0, 242, 254, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 5rem;
-            cursor: pointer;
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5), inset 10px 10px 20px rgba(255,255,255,0.4), 0 20px 50px rgba(0, 242, 254, 0.3);
+            display: flex; align-items: center; justify-content: center; font-size: 5rem; cursor: pointer;
             transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            z-index: 10;
-            border: 5px solid rgba(255,255,255,0.1);
+            position: relative; z-index: 10; border: 5px solid rgba(255,255,255,0.1);
         }
-        
         .coin-3d:active { transform: scale(0.9); }
         
-        /* --- شريط الطاقة --- */
+        /* --- إصلاح مشكلة الأسفل --- */
         .energy-container {
-            margin: 0 20px 20px;
+            margin: 0 20px 10px; /* تقليل الهامش السفلي */
             padding: 15px;
         }
         .energy-bar-bg {
-            background: rgba(0,0,0,0.4);
-            height: 12px;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 8px;
+            background: rgba(0,0,0,0.4); height: 12px; border-radius: 10px; overflow: hidden; margin-top: 8px;
         }
         .energy-fill {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(90deg, var(--danger), var(--primary));
-            transition: width 0.3s;
+            height: 100%; width: 100%; background: linear-gradient(90deg, var(--danger), var(--primary)); transition: width 0.3s;
             box-shadow: 0 0 10px var(--primary);
         }
 
-        /* --- القائمة السفلية --- */
+        /* القائمة السفلية مع حماية المناطق الآمنة */
         .nav-bar {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding: 20px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+            padding: 10px 20px 30px 20px; /* زيادة التباعد من الأسفل */
+            padding-bottom: calc(20px + env(safe-area-inset-bottom)); /* آيفون X وما بعده */
         }
         
         .nav-btn {
-            padding: 18px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            transition: 0.2s;
+            padding: 18px; font-size: 1.1rem; font-weight: bold; color: white; border: none; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s;
         }
         .nav-btn:active { transform: scale(0.95); }
 
         /* --- النوافذ (Modals) --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            z-index: 100;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100;
             opacity: 0; pointer-events: none; transition: 0.3s;
             display: flex; justify-content: center; align-items: flex-end;
         }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
 
         .modal-card {
-            background: #1e293b;
-            width: 100%;
-            max-width: 500px;
-            border-radius: 30px 30px 0 0;
-            padding: 30px 20px;
-            transform: translateY(100%);
-            transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            background: #1e293b; width: 100%; max-width: 500px;
+            border-radius: 30px 30px 0 0; padding: 30px 20px;
+            transform: translateY(100%); transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
             border-top: 1px solid var(--glass-border);
-            max-height: 85vh;
-            overflow-y: auto;
+            max-height: 80vh; overflow-y: auto;
+            
+            /* مساحة إضافية في الأسفل لتجنب القطع */
+            padding-bottom: 50px;
         }
         .modal-overlay.active .modal-card { transform: translateY(0); }
 
-        /* --- عناصر المتجر --- */
         .shop-item {
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05);
         }
         .buy-btn {
-            background: var(--primary);
-            color: #000;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
+            background: var(--primary); color: #000; border: none; padding: 8px 20px; border-radius: 10px; font-weight: bold; cursor: pointer;
         }
-
-        /* مدخلات الشراء */
         .input-group {
-            margin-top: 15px;
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 12px;
+            margin-top: 15px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px;
         }
         .custom-input {
-            width: 100%;
-            background: transparent;
-            border: 1px solid #444;
-            padding: 10px;
-            color: white;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-family: inherit;
+            width: 100%; background: transparent; border: 1px solid #444; padding: 12px; color: white;
+            border-radius: 8px; margin-bottom: 10px; font-family: inherit; font-size: 1rem;
         }
 
     </style>
@@ -228,10 +152,8 @@
 <body>
 
     <div class="header">
-        <div class="user-rank glass-panel">
-            <span>🚀</span> <span id="rank-name">مبتدئ</span>
-        </div>
-        <div class="glass-panel" style="padding: 5px 15px; font-size:0.8rem">ID: 9921</div>
+        <div class="user-rank glass-panel"><span>🚀</span> <span id="rank-name">مبتدئ</span></div>
+        <div class="glass-panel" style="padding: 5px 15px; font-size:0.8rem">ID: 8821</div>
     </div>
 
     <div class="score-display">
@@ -240,9 +162,7 @@
     </div>
 
     <div class="game-stage">
-        <div class="coin-3d" id="coin-btn" onclick="tap(event)">
-            $
-        </div>
+        <div class="coin-3d" id="coin-btn" onclick="tap(event)">$</div>
     </div>
 
     <div class="energy-container glass-panel">
@@ -253,18 +173,12 @@
         <div class="energy-bar-bg">
             <div class="energy-fill" id="energy-bar"></div>
         </div>
-        <div style="font-size:0.75rem; text-align:center; margin-top:5px; opacity:0.6">تعبئة سريعة (+1 كل 3 ثواني)</div>
     </div>
 
     <div class="nav-bar">
-        <button class="nav-btn glass-panel" onclick="openModal('shop-modal')">
-            🛒 المتجر
-        </button>
-        <button class="nav-btn glass-panel" onclick="openModal('tasks-modal')">
-            📋 مهام (+نقاط)
-        </button>
+        <button class="nav-btn glass-panel" onclick="openModal('shop-modal')">🛒 المتجر</button>
+        <button class="nav-btn glass-panel" onclick="openModal('tasks-modal')">📋 مهام</button>
     </div>
-
 
     <div class="modal-overlay" id="shop-modal">
         <div class="modal-card">
@@ -273,30 +187,22 @@
             <div class="glass-panel" style="padding:15px; border-color:var(--primary); margin-bottom:20px;">
                 <h3 style="margin:0 0 10px 0;">🚀 زيادة متابعين تيليجرام</h3>
                 <p style="font-size:0.8rem; color:#ccc">سعر العضو الواحد = <b>4 نقاط</b></p>
-                
                 <div class="input-group">
-                    <input type="number" id="members-count" class="custom-input" placeholder="عدد المتابعين المطلوب" oninput="calcPrice()">
-                    <input type="text" id="channel-link" class="custom-input" placeholder="رابط قناتك (مثال: @mychannel)">
-                    
+                    <input type="number" id="members-count" class="custom-input" placeholder="العدد المطلوب" oninput="calcPrice()">
+                    <input type="text" id="channel-link" class="custom-input" placeholder="رابط القناة (@channel)">
                     <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold">
-                        <span>التكلفة الكلية:</span>
-                        <span style="color:var(--primary)" id="total-price">0 نقطة</span>
+                        <span>التكلفة:</span> <span style="color:var(--primary)" id="total-price">0 نقطة</span>
                     </div>
-                    
-                    <button class="buy-btn" style="width:100%; margin-top:15px;" onclick="buyFollowers()">تنفيذ الطلب ✅</button>
+                    <button class="buy-btn" style="width:100%; margin-top:15px;" onclick="buyFollowers()">🚀 إرسال الطلب</button>
                 </div>
             </div>
 
             <div style="border-top:1px solid #333; margin:20px 0;"></div>
-
+            
             <div class="shop-item">
-                <div>
-                    <strong>⚡ طاقة كاملة</strong>
-                    <div style="font-size:0.8rem; color:#888">إعادة تعبئة فورية</div>
-                </div>
+                <div><strong>⚡ طاقة كاملة</strong><div style="font-size:0.8rem; color:#888">إعادة تعبئة فورية</div></div>
                 <button class="buy-btn" onclick="buyEnergy()">50 نقطة</button>
             </div>
-
             <button class="nav-btn glass-panel" style="width:100%; margin-top:20px;" onclick="closeModal('shop-modal')">إغلاق</button>
         </div>
     </div>
@@ -305,10 +211,7 @@
         <div class="modal-card">
             <h2>المهام اليومية 📅</h2>
             <div class="shop-item">
-                <div>
-                    <strong>اشتراك في القناة الرسمية</strong>
-                    <div style="font-size:0.8rem; color:#2ed573">+100 نقطة</div>
-                </div>
+                <div><strong>اشتراك في القناة الرسمية</strong><div style="font-size:0.8rem; color:#2ed573">+100 نقطة</div></div>
                 <button class="buy-btn" style="background:none; border:1px solid #fff; color:#fff" onclick="doTask()">تنفيذ</button>
             </div>
             <button class="nav-btn glass-panel" style="width:100%; margin-top:20px;" onclick="closeModal('tasks-modal')">إغلاق</button>
@@ -316,142 +219,123 @@
     </div>
 
     <script>
-        // --- البيانات الأساسية ---
-        let score = localStorage.getItem('score_v6') ? parseInt(localStorage.getItem('score_v6')) : 0;
-        let energy = 100; // زيادة سعة الطاقة لتتناسب مع التصميم المتطور
+        // ==========================================
+        // ⚙️ إعدادات الأدمن (عدل هذه البيانات ليصلك الطلب)
+        // ==========================================
+        const BOT_TOKEN = "8207071306:AAFqIFqsANxB7srrBEsUfZJkb4xzhsY5FMQ"; // مثال: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+        const ADMIN_ID = "1759629479"; // مثال: 1759629479
+        // ==========================================
+
+        let score = localStorage.getItem('score_v7') ? parseInt(localStorage.getItem('score_v7')) : 0;
+        let energy = 100;
         const maxEnergy = 100;
-        
+
         updateUI();
 
-        // --- النقر ---
         function tap(e) {
             if (energy > 0) {
                 score++;
                 energy--;
                 saveData();
                 updateUI();
-                
-                // تأثير الرقم الطائر
                 showFloat(e.clientX, e.clientY);
-                
-                // اهتزاز
                 if (navigator.vibrate) navigator.vibrate(15);
             }
         }
 
-        // --- حساب سعر المتابعين ---
         function calcPrice() {
             const count = document.getElementById('members-count').value;
-            const price = count * 4; // السعر المحدد: 4 نقاط لكل متابع
+            const price = count * 4;
             document.getElementById('total-price').innerText = price + " نقطة";
         }
 
-        // --- شراء المتابعين (المنطق) ---
+        // --- دالة الشراء وإرسال الرسالة للأدمن ---
         function buyFollowers() {
             const count = parseInt(document.getElementById('members-count').value);
             const link = document.getElementById('channel-link').value;
-            
-            if (!count || count <= 0) {
-                alert("يرجى كتابة عدد صحيح!");
-                return;
-            }
-            if (!link || link.length < 3) {
-                alert("يرجى وضع رابط القناة!");
-                return;
-            }
-
             const cost = count * 4;
 
+            // التحقق من المدخلات
+            if (!count || count <= 0) { alert("أدخل عدداً صحيحاً"); return; }
+            if (!link || link.length < 2) { alert("أدخل رابط القناة"); return; }
+            
+            // التحقق من الرصيد
             if (score >= cost) {
-                // خصم النقاط
-                score -= cost;
-                saveData();
-                updateUI();
-                
-                // رسالة نجاح (وهمية حالياً - يمكنك ربطها بAPI لاحقاً)
-                alert(`✅ تم استلام طلبك بنجاح!\n\nسيتم إرسال ${count} متابع إلى القناة: ${link}\nتم خصم ${cost} نقطة.`);
-                closeModal('shop-modal');
-                
-                // تفريغ الحقول
-                document.getElementById('members-count').value = '';
-                document.getElementById('channel-link').value = '';
-                document.getElementById('total-price').innerText = '0 نقطة';
+                // محاولة إرسال الطلب إلى تيليجرام
+                sendOrderToAdmin(link, count, cost);
             } else {
                 alert(`❌ رصيدك غير كافي! تحتاج إلى ${cost} نقطة.`);
             }
         }
 
-        // --- شراء الطاقة ---
-        function buyEnergy() {
-            if (score >= 50) {
-                score -= 50;
-                energy = maxEnergy;
-                saveData();
-                updateUI();
-                alert("تم شحن الطاقة بالكامل! ⚡");
-            } else {
-                alert("نقاطك لا تكفي!");
-            }
+        function sendOrderToAdmin(link, count, cost) {
+            // نص الرسالة التي ستصلك
+            const message = `🛍️ *طلب جديد من المتجر!*%0A%0A👤 الرابط: ${link}%0A🔢 العدد: ${count} عضو%0A💰 التكلفة: ${cost} نقطة`;
+            
+            const telegramUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${message}&parse_mode=Markdown`;
+
+            // تنفيذ الإرسال
+            fetch(telegramUrl)
+                .then(response => {
+                    if (response.ok) {
+                        // إذا تم الإرسال بنجاح، نخصم النقاط
+                        score -= cost;
+                        saveData();
+                        updateUI();
+                        alert(`✅ تم استلام طلبك بنجاح! سيتم التنفيذ قريباً.\nتم خصم ${cost} نقطة.`);
+                        closeModal('shop-modal');
+                        
+                        // تنظيف الحقول
+                        document.getElementById('members-count').value = '';
+                        document.getElementById('channel-link').value = '';
+                        document.getElementById('total-price').innerText = '0 نقطة';
+                    } else {
+                        alert("⚠️ حدث خطأ في الاتصال بالسيرفر، تأكد من الإعدادات.");
+                        console.error("Telegram API Error");
+                    }
+                })
+                .catch(error => {
+                    alert("خطأ في الاتصال بالانترنت.");
+                });
         }
 
-        // --- تحديث الواجهة ---
+        function buyEnergy() {
+            if (score >= 50) {
+                score -= 50; energy = maxEnergy; saveData(); updateUI(); alert("تم شحن الطاقة! ⚡");
+            } else { alert("نقاطك لا تكفي!"); }
+        }
+
         function updateUI() {
             document.getElementById('score').innerText = score.toLocaleString();
             document.getElementById('energy-txt').innerText = `${energy}/${maxEnergy}`;
             document.getElementById('energy-bar').style.width = (energy/maxEnergy*100) + '%';
             
-            // تحديث الرتبة
             let rank = "مبتدئ";
-            if(score > 500) rank = "محترف";
-            if(score > 2000) rank = "خبير";
+            if(score > 1000) rank = "محترف";
             if(score > 5000) rank = "أسطورة";
             document.getElementById('rank-name').innerText = rank;
         }
 
-        // --- حفظ البيانات ---
-        function saveData() {
-            localStorage.setItem('score_v6', score);
-        }
+        function saveData() { localStorage.setItem('score_v7', score); }
 
-        // --- تعبئة الطاقة (سريع) ---
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy++;
-                updateUI();
-            }
-        }, 3000); // كل 3 ثواني
+        setInterval(() => { if (energy < maxEnergy) { energy++; updateUI(); } }, 3000);
 
-        // --- وظائف مساعدة ---
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         
         function showFloat(x, y) {
-            const el = document.createElement('div');
-            el.innerText = '+1';
+            const el = document.createElement('div'); el.innerText = '+1';
             el.style.position = 'fixed'; el.style.left = x+'px'; el.style.top = y+'px';
-            el.style.color = '#fff'; el.style.fontWeight='900'; el.style.fontSize='1.5rem';
-            el.style.pointerEvents='none'; el.style.textShadow='0 0 10px var(--primary)';
-            el.style.animation = 'floatUp 0.8s forwards';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 800);
+            el.style.color = '#fff'; el.style.fontWeight='900'; el.style.pointerEvents='none';
+            el.style.textShadow='0 0 10px var(--primary)'; el.style.animation = 'floatUp 0.8s forwards';
+            document.body.appendChild(el); setTimeout(() => el.remove(), 800);
         }
-
         function doTask() {
             window.open('https://t.me/telegram', '_blank');
-            setTimeout(() => {
-                score += 100;
-                saveData();
-                updateUI();
-                alert("حصلت على 100 نقطة!");
-            }, 5000);
+            setTimeout(() => { score += 100; saveData(); updateUI(); alert("تمت المهمة!"); }, 5000);
         }
-
-        // CSS Injection for animation
         const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes floatUp { 0% {transform:translateY(0) scale(1); opacity:1} 100% {transform:translateY(-80px) scale(1.5); opacity:0} }
-            @keyframes float { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-10px)} }
-        `;
+        style.innerHTML = `@keyframes floatUp { 0% {transform:translateY(0); opacity:1} 100% {transform:translateY(-80px); opacity:0} } @keyframes float { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-10px)} }`;
         document.head.appendChild(style);
     </script>
 </body>
