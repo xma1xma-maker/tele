@@ -128,8 +128,8 @@
     <script>
         // المتغيرات الأساسية
         let score = localStorage.getItem('userScore') ? parseInt(localStorage.getItem('userScore')) : 0;
-        let energy = 1000;
-        const maxEnergy = 1000;
+        let energy = 5;
+        const maxEnergy = 5;
         
         // تحديث الواجهة عند البدء
         document.getElementById('score').innerText = score;
@@ -168,7 +168,7 @@
 
             setTimeout(() => {
                 floatEl.remove();
-            }, 1000);
+            }, 5);
         }
 
         // إعادة تعبئة الطاقة تلقائياً
@@ -177,8 +177,9 @@
                 energy += 1; // سرعة تعبئة الطاقة
                 updateUI();
             }
-        }, 1000); // كل ثانية
+        }, 5); // كل ثانية
 
     </script>
 </body>
 </html>
+
