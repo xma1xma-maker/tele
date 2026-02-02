@@ -257,4 +257,253 @@
             z-index: 20;
         }
         @keyframes flyUp {
-            0% { opacity: 1;
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.2); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-fx"></div>
+    <div class="background-grid"></div>
+
+    <div class="header">
+        <div class="level-badge" id="level-badge">مبتدئ 🔥</div>
+        <div style="font-size:0.9rem; opacity:0.7">Crypto Miner</div>
+    </div>
+
+    <div class="score-area">
+        <div class="score-count" id="score">0</div>
+        <div style="color:#aaa; margin-top: 5px;">عملة ذهبية</div>
+    </div>
+
+    <div class="game-area">
+        <div class="main-coin" id="coin" onclick="tap(event)">
+            $
+        </div>
+    </div>
+
+    <div class="energy-section">
+        <div class="energy-info">
+            <span>⚡ الطاقة المتبقية</span>
+            <span id="energy-text">10 / 10</span>
+        </div>
+        <div class="progress-bg">
+            <div class="progress-fill" id="energy-bar"></div>
+        </div>
+        <div style="margin-top:10px; font-size: 0.8rem; color:#aaa">يتم التعبئة كل دقيقتين تلقائياً (+1)</div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-boost" onclick="openTaskModal()">
+            🚀 تعبئة الطاقة الآن!
+        </button>
+    </div>
+
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <h3>نفذت طاقتك! 😱</h3>
+            <p style="color:#ccc; margin-bottom:20px;">أكمل إحدى المهام السريعة للحصول على طاقة كاملة فوراً.</p>
+            
+            <div class="task-list" id="task-list-container">
+                <button class="task-btn" onclick="performTask('ad')">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="task-icon">📺</span>
+                        <span>شاهد إعلاناً قصيراً</span>
+                    </div>
+                    <span class="task-reward">+10 طاقة</span>
+                </button>
+
+                <button class="task-btn" style="border-color: var(--insta)" onclick="performTask('insta', 'https://instagram.com/YOUR_USERNAME')">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="task-icon" style="color:var(--insta)">📸</span>
+                        <span>تابعنا على انستقرام</span>
+                    </div>
+                    <span class="task-reward">+10 طاقة</span>
+                </button>
+
+                <button class="task-btn" style="border-color: var(--tele)" onclick="performTask('tele', 'https://t.me/YOUR_CHANNEL')">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="task-icon" style="color:var(--tele)">✈️</span>
+                        <span>اشترك في قناتنا</span>
+                    </div>
+                    <span class="task-reward">+10 طاقة</span>
+                </button>
+            </div>
+
+            <button class="btn" style="background:#333; width:100%; margin-top:10px;" onclick="closeModal('task-modal')">إغلاق</button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- إعدادات اللعبة ---
+        let score = localStorage.getItem('score_v2') ? parseInt(localStorage.getItem('score_v2')) : 0;
+        let energy = 10;
+        const maxEnergy = 10;
+        // سرعة التعبئة التلقائية: 120000 ملي ثانية = دقيقتين
+        const refillRate = 120000; 
+
+        const scoreEl = document.getElementById('score');
+        const energyTextEl = document.getElementById('energy-text');
+        const energyBarEl = document.getElementById('energy-bar');
+        const levelBadgeEl = document.getElementById('level-badge');
+
+        updateUI();
+        updateLevel();
+
+        // --- دالة النقر الرئيسية ---
+        function tap(e) {
+            if (energy > 0) {
+                score++;
+                energy--;
+                localStorage.setItem('score_v2', score); // حفظ الرصيد
+
+                updateUI();
+                updateLevel();
+                showFloatingText(e.clientX, e.clientY);
+                
+                if (navigator.vibrate) navigator.vibrate(40); // اهتزاز خفيف
+            } else {
+                openTaskModal(); // فتح قائمة المهام إذا انتهت الطاقة
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // اهتزاز الرفض
+            }
+        }
+
+        // --- تحديث الواجهة ---
+        function updateUI() {
+            scoreEl.innerText = score.toLocaleString();
+            energyTextEl.innerText = `${energy} / ${maxEnergy}`;
+            const percentage = (energy / maxEnergy) * 100;
+            energyBarEl.style.width = percentage + '%';
+            
+            // تغيير لون الشريط للأحمر عند انخفاض الطاقة
+            if(percentage <= 30) {
+                energyBarEl.style.background = 'var(--danger)';
+            } else {
+                energyBarEl.style.background = 'linear-gradient(90deg, var(--danger), var(--primary))';
+            }
+        }
+
+        // --- تحديث الرتب ---
+        function updateLevel() {
+            let level = "مبتدئ 🔥";
+            if (score > 500) level = "محترف 🥉";
+            if (score > 2000) level = "زعيم 🥈";
+            if (score > 5000) level = "أسطورة 🥇";
+            if (score > 10000) level = "ملك الكريبتو 💎";
+            levelBadgeEl.innerText = level;
+        }
+
+        // --- تأثير الرقم الطائر ---
+        function showFloatingText(x, y) {
+            const el = document.createElement('div');
+            el.classList.add('floating-text');
+            el.innerText = '+1';
+            // محاولة توسيط الرقم فوق مكان الضغط
+            el.style.left = (x - 20) + 'px';
+            el.style.top = (y - 60) + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 8000);
+        }
+
+        // --- التعبئة التلقائية ---
+        setInterval(() => {
+            if (energy < maxEnergy) {
+                energy++;
+                updateUI();
+            }
+        }, refillRate);
+
+
+        // =========================================
+        // --- نظام المهام الجديد (The New Task System) ---
+        // =========================================
+
+        function openTaskModal() {
+            document.getElementById('task-modal').classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            // إعادة تفعيل الأزرار في حال تم تعطيلها
+            const buttons = document.querySelectorAll('.task-btn');
+            buttons.forEach(btn => {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'all';
+                if(btn.querySelector('.timer-count')) btn.querySelector('.timer-count').remove();
+            });
+        }
+
+        // دالة تنفيذ المهمة
+        function performTask(type, url = null) {
+            const container = document.getElementById('task-list-container');
+            // تعطيل الأزرار الأخرى مؤقتاً
+            container.style.pointerEvents = 'none';
+            container.style.opacity = '0.7';
+
+            if (type === 'ad') {
+                // --- هنا تضع كود الإعلان الحقيقي لاحقاً ---
+                simulateLoading("جاري تحميل الإعلان...", 3, () => {
+                    completeTaskReward("شكراً لمشاهدة الإعلان!");
+                });
+
+            } else if (type === 'insta' || type === 'tele') {
+                // فتح الرابط في نافذة جديدة
+                if(url) window.open(url, '_blank');
+                
+                // بدء عداد الانتظار (خدعة التحقق)
+                simulateLoading("جاري التحقق من الاشتراك...", 10, () => {
+                    completeTaskReward("تم التحقق بنجاح! حصلت على الطاقة.");
+                });
+            }
+        }
+
+        // محاكاة الانتظار مع عداد تنازلي
+        function simulateLoading(messageText, seconds, callback) {
+            let timeLeft = seconds;
+            // العثور على الزر الذي تم ضغطه لإظهار العداد عليه (اختياري، سنستخدم تنبيه بسيط حالياً)
+            
+            // إنشاء عنصر العداد
+            const timerEl = document.createElement('div');
+            timerEl.style.position = 'absolute';
+            timerEl.style.top = '0'; left:'0'; right:'0'; bottom:'0';
+            timerEl.style.background = 'rgba(0,0,0,0.9)';
+            timerEl.style.color = 'var(--primary)';
+            timerEl.style.display = 'flex';
+            timerEl.style.flexDirection = 'column';
+            timerEl.style.alignItems = 'center';
+            timerEl.style.justifyContent = 'center';
+            timerEl.style.zIndex = '10';
+            timerEl.style.borderRadius = '15px';
+            timerEl.innerHTML = `<span>${messageText}</span><h2 style="font-size:3rem; margin:10px 0">${timeLeft}</h2><small>يرجى الانتظار وعدم إغلاق اللعبة</small>`;
+            
+            document.querySelector('.modal-content').appendChild(timerEl);
+
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.querySelector('h2').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerEl.remove();
+                    callback();
+                }
+            }, 1000);
+        }
+
+        // منح المكافأة وإغلاق النافذة
+        function completeTaskReward(successMsg) {
+            energy = maxEnergy;
+            updateUI();
+            closeModal('task-modal');
+            alert(successMsg);
+            
+            // إعادة تفعيل حاوية المهام
+            document.getElementById('task-list-container').style.pointerEvents = 'all';
+            document.getElementById('task-list-container').style.opacity = '1';
+        }
+
+    </script>
+</body>
+</html>
