@@ -3,66 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cyber Master V11 Ultimate</title>
+    <title>TON Clicker V12</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #050510; --card: #15152a;
-            --primary: #00f3ff; --secondary: #bc13fe;
-            --text: #ffffff; --danger: #ff0055; --success: #00ff99;
+            --bg: #101010; --card: #1f1f2e;
+            --ton: #0098EA; /* لون عملة تون الرسمي */
+            --text: #ffffff; --danger: #ff4050; --success: #29cc7a;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
         body {
             font-family: 'Tajawal', sans-serif; background-color: var(--bg); color: var(--text);
             margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-            background-image: radial-gradient(circle at 50% -20%, #1a1a40, #000); transition: 0.3s;
+            background-image: radial-gradient(circle at 50% 0%, #004080, #000); transition: 0.3s;
         }
 
-        /* --- Header --- */
-        .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); }
+        /* --- الهيدر والعداد --- */
+        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
         .lang-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 10px; border-radius: 8px; cursor: pointer; }
 
-        /* --- Score & Features Bar --- */
-        .score-box { text-align: center; margin-top: 10px; }
-        .score-val { font-size: 3.5rem; font-weight: 900; text-shadow: 0 0 25px var(--primary); color: var(--primary); }
-        
-        /* شريط الميزات الجديد */
-        .features-bar {
-            display: flex; justify-content: center; gap: 15px; margin: 15px 0;
-        }
+        .score-box { text-align: center; margin-top: 5px; }
+        .score-val { font-size: 3.8rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--ton); }
+        .score-label { color: #888; font-size: 0.9rem; margin-top: -10px; display: block; }
+
+        /* شريط الميزات */
+        .features-bar { display: flex; justify-content: center; gap: 12px; margin: 10px 0; }
         .feat-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; cursor: pointer; transition: 0.2s;
+            background: rgba(255,255,255,0.08); width: 55px; height: 55px; border-radius: 15px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.6rem; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;
         }
-        .feat-btn:active { transform: scale(0.9); background: var(--secondary); }
+        .feat-btn:active { transform: scale(0.9); background: var(--ton); }
 
-        /* --- Game Area --- */
-        .game-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; }
-        .coin-btn {
+        /* --- عملة TON --- */
+        .game-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
+        
+        .ton-coin {
             width: 240px; height: 240px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #2a2a50, #000);
-            border: 4px solid var(--primary); box-shadow: 0 0 40px rgba(0, 243, 255, 0.3);
+            background: var(--ton);
+            box-shadow: 0 0 50px rgba(0, 152, 234, 0.4), inset 0 10px 30px rgba(255,255,255,0.3);
             display: flex; align-items: center; justify-content: center;
-            font-size: 5rem; cursor: pointer; transition: transform 0.05s;
+            cursor: pointer; transition: transform 0.08s; position: relative;
+            border: 5px solid rgba(255,255,255,0.1);
         }
-        .coin-btn:active { transform: scale(0.92); }
-        .coin-btn::after { content: '$'; color: #fff; text-shadow: 0 0 20px var(--primary); }
+        .ton-coin:active { transform: scale(0.94); }
+        
+        /* رسمة شعار الجوهرة داخل العملة */
+        .ton-logo {
+            width: 120px; height: 120px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+        }
 
-        /* --- Footer --- */
-        .energy-box { margin: 0 20px 10px; background: var(--card); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        /* --- الفوتر --- */
+        .energy-box { margin: 0 20px 10px; background: var(--card); padding: 10px 15px; border-radius: 12px; }
         .bar-bg { background: #000; height: 8px; border-radius: 5px; margin-top: 5px; overflow: hidden; }
-        .bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--danger), var(--primary)); transition: width 0.3s; }
+        .bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #fff, var(--ton)); transition: width 0.3s; }
 
-        .nav { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 10px 20px 25px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+        .nav { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 10px 20px 30px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
         .nav-btn {
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff;
             padding: 12px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        /* --- Modals --- */
+        /* --- النوافذ --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 999;
@@ -71,31 +79,32 @@
         }
         .modal.active { opacity: 1; visibility: visible; }
         .modal-content {
-            background: #101020; width: 100%; max-width: 500px;
-            border-radius: 25px 25px 0 0; padding: 25px; border-top: 2px solid var(--primary);
+            background: #181825; width: 100%; max-width: 500px;
+            border-radius: 25px 25px 0 0; padding: 25px; border-top: 3px solid var(--ton);
             transform: translateY(100%); transition: 0.3s; max-height: 85vh; overflow-y: auto;
         }
         .modal.active .modal-content { transform: translateY(0); }
 
-        /* --- Specific Feature Styles --- */
-        /* Daily */
-        .daily-grid { display: flex; gap: 5px; margin-bottom: 20px; justify-content: center; }
-        .day-box { background: #222; padding: 10px; border-radius: 8px; text-align: center; width: 45px; opacity: 0.5; }
-        .day-box.active { background: var(--secondary); opacity: 1; transform: scale(1.1); border: 1px solid #fff; }
-        
-        /* Wheel */
-        .wheel-container { position: relative; width: 200px; height: 200px; margin: 0 auto 20px; }
-        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #fff; background: conic-gradient(var(--danger) 0 25%, var(--primary) 25% 50%, var(--secondary) 50% 75%, var(--success) 75% 100%); transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1); }
-        .wheel-arrow { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid #fff; z-index: 10; }
-        
-        /* Quiz */
-        .quiz-option { width: 100%; padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: #fff; border-radius: 10px; cursor: pointer; text-align: left; }
-        .quiz-option:active { background: var(--primary); color: #000; }
+        /* --- تصميم عجلة الحظ بالأرقام --- */
+        .wheel-container { position: relative; width: 220px; height: 220px; margin: 0 auto 20px; }
+        .wheel { 
+            width: 100%; height: 100%; border-radius: 50%; border: 5px solid #fff; 
+            background: conic-gradient(#ff4050 0 60deg, #ff9f1a 60deg 120deg, #fff200 120deg 180deg, #29cc7a 180deg 240deg, #18dcff 240deg 300deg, #7d5fff 300deg 360deg);
+            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            position: relative;
+        }
+        .wheel-arrow { 
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%); 
+            width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fff; z-index: 10; 
+        }
+        /* أرقام العجلة */
+        .w-num { position: absolute; top: 50%; left: 50%; transform-origin: 0 0; font-weight: bold; font-size: 0.9rem; color: #000; width: 100px; padding-left: 40px; }
 
-        /* Common */
-        .inp { width: 100%; background: #000; border: 1px solid #333; padding: 12px; color: #fff; border-radius: 8px; margin-bottom: 10px; }
-        .action-btn { width: 100%; padding: 15px; background: linear-gradient(90deg, var(--primary), var(--secondary)); border: none; border-radius: 10px; color: #000; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .close-btn { width: 100%; padding: 10px; background: #222; border: none; border-radius: 10px; color: #fff; margin-top: 15px; cursor: pointer; }
+        /* عناصر عامة */
+        .task-row { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .quiz-opt { background: #2a2a3a; padding: 15px; margin-bottom: 8px; border-radius: 10px; cursor: pointer; text-align: right; }
+        .btn { width: 100%; padding: 15px; background: var(--ton); border: none; border-radius: 12px; color: #fff; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .inp { width: 100%; background: #000; border: 1px solid #333; padding: 12px; color: #fff; border-radius: 10px; margin-bottom: 10px; }
 
     </style>
 </head>
@@ -103,22 +112,24 @@
 
     <div class="header">
         <button class="lang-btn" onclick="toggleLang()" id="lang-icon">🇺🇸 EN</button>
-        <div style="font-size:0.8rem; opacity:0.7">Admin V11</div>
+        <div style="font-size:0.8rem; opacity:0.7">Admin V12</div>
     </div>
 
     <div class="score-box">
         <div class="score-val" id="score">0</div>
-        <div style="color:#aaa; font-size:0.9rem" data-key="score_title">Points</div>
+        <span class="score-label" data-key="score_title">TON Points</span>
     </div>
 
     <div class="features-bar">
-        <div class="feat-btn" onclick="checkDaily()" title="Daily">📅</div>
-        <div class="feat-btn" onclick="openModal('wheel')" title="Spin">🎡</div>
-        <div class="feat-btn" onclick="openModal('codes')" title="Codes">🎁</div>
+        <div class="feat-btn" onclick="checkDaily()">📅</div>
+        <div class="feat-btn" onclick="openModal('wheel')">🎡</div>
+        <div class="feat-btn" onclick="openModal('codes')">🎁</div>
     </div>
 
     <div class="game-area">
-        <div class="coin-btn" id="coin" onclick="tap(event)"></div>
+        <div class="ton-coin" id="coin" onclick="tap(event)">
+            <div class="ton-logo"></div>
+        </div>
     </div>
 
     <div class="energy-box">
@@ -135,69 +146,35 @@
         <button class="nav-btn" onclick="openModal('quiz')">❓ <span data-key="quiz_btn">Quiz</span></button>
     </div>
 
-    <div class="modal" id="daily">
-        <div class="modal-content" style="text-align:center">
-            <h2 data-key="daily_title">Daily Reward 📅</h2>
-            <div class="daily-grid" id="daily-days">
-                <div class="day-box">1</div><div class="day-box">2</div><div class="day-box">3</div>
-                <div class="day-box">4</div><div class="day-box">5</div><div class="day-box">6</div>
-                <div class="day-box">7</div>
-            </div>
-            <p id="daily-msg" style="color:#aaa">Come back every day!</p>
-            <button class="action-btn" onclick="claimDaily()" id="claim-daily-btn" disabled>Claim Reward</button>
-            <button class="close-btn" onclick="closeModal('daily')">x</button>
-        </div>
-    </div>
-
     <div class="modal" id="wheel">
         <div class="modal-content" style="text-align:center">
             <h2 data-key="wheel_title">Spin & Win 🎡</h2>
-            <p style="font-size:0.8rem; margin-bottom:15px; color:#aaa" data-key="wheel_desc">Cost: 50 Points</p>
             
             <div class="wheel-container">
                 <div class="wheel-arrow"></div>
-                <div class="wheel" id="wheel-el"></div>
+                <div class="wheel" id="wheel-el">
+                    <div class="w-num" style="transform: rotate(30deg) translateY(-50%)">100</div>
+                    <div class="w-num" style="transform: rotate(90deg) translateY(-50%)">500</div>
+                    <div class="w-num" style="transform: rotate(150deg) translateY(-50%)">0</div>
+                    <div class="w-num" style="transform: rotate(210deg) translateY(-50%)">1000</div>
+                    <div class="w-num" style="transform: rotate(270deg) translateY(-50%)">250</div>
+                    <div class="w-num" style="transform: rotate(330deg) translateY(-50%)">50</div>
+                </div>
             </div>
             
-            <button class="action-btn" onclick="spinWheel()" id="spin-btn" data-key="spin_btn">SPIN (-50)</button>
-            <button class="close-btn" onclick="closeModal('wheel')" data-key="close_btn">Close</button>
-        </div>
-    </div>
-
-    <div class="modal" id="codes">
-        <div class="modal-content">
-            <h2 data-key="code_title">Promo Code 🎁</h2>
-            <input type="text" id="promo-input" class="inp" placeholder="Enter code here...">
-            <button class="action-btn" onclick="redeemCode()" data-key="redeem_btn">Redeem</button>
-            <button class="close-btn" onclick="closeModal('codes')" data-key="close_btn">Close</button>
+            <button class="btn" onclick="spinWheel()" id="spin-btn" data-key="spin_btn">SPIN (-100 Pts)</button>
+            <button class="btn" style="background:#222" onclick="closeModal('wheel')" data-key="close_btn">Close</button>
         </div>
     </div>
 
     <div class="modal" id="quiz">
         <div class="modal-content">
-            <h2 data-key="quiz_title">Daily Quiz ❓</h2>
+            <h2 data-key="quiz_title">Flag Quiz ❓</h2>
             <div id="quiz-container">
-                <h3 id="q-text" style="margin-bottom:20px">Question text...</h3>
+                <h3 id="q-text" style="text-align:center; margin-bottom:20px; font-size:1.5rem"></h3>
                 <div id="q-options"></div>
             </div>
-            <button class="close-btn" onclick="closeModal('quiz')" data-key="close_btn">Close</button>
-        </div>
-    </div>
-
-    <div class="modal" id="shop">
-        <div class="modal-content">
-            <h2 data-key="shop_title">Shop 🚀</h2>
-            <div style="background:#0b0b15; padding:15px; border-radius:10px;">
-                <label data-key="link_label" style="display:block; color:#aaa; margin-bottom:5px">Link:</label>
-                <input type="text" id="link" class="inp" placeholder="@username">
-                <label data-key="count_label" style="display:block; color:#aaa; margin-bottom:5px">Count:</label>
-                <input type="number" id="count" class="inp" placeholder="Min 10" oninput="calc()">
-                <div style="display:flex; justify-content:space-between; margin-top:10px">
-                    <span data-key="price_label">Price:</span> <span id="price" style="color:var(--primary)">0</span>
-                </div>
-                <button class="action-btn" onclick="sendOrder()" data-key="buy_btn">Buy</button>
-            </div>
-            <button class="close-btn" onclick="closeModal('shop')" data-key="close_btn">Close</button>
+            <button class="btn" style="background:#222" onclick="closeModal('quiz')" data-key="close_btn">Close</button>
         </div>
     </div>
 
@@ -205,176 +182,131 @@
         <div class="modal-content">
             <h2 data-key="tasks_title">Tasks 📡</h2>
             <div id="task-list"></div>
-            <button class="close-btn" onclick="closeModal('tasks')" data-key="close_btn">Close</button>
+            <button class="btn" style="background:#222" onclick="closeModal('tasks')" data-key="close_btn">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="shop">
+        <div class="modal-content">
+            <h2 data-key="shop_title">Shop 🚀</h2>
+            <label data-key="link_label" style="color:#888">Link:</label>
+            <input type="text" id="link" class="inp" placeholder="@username">
+            <label data-key="count_label" style="color:#888">Count:</label>
+            <input type="number" id="count" class="inp" placeholder="Min 10" oninput="calc()">
+            <div style="display:flex; justify-content:space-between; margin:10px 0; font-weight:bold">
+                <span data-key="price_label">Cost:</span> <span id="price" style="color:var(--ton)">0</span>
+            </div>
+            <button class="btn" onclick="sendOrder()" data-key="buy_btn">Buy</button>
+            <button class="btn" style="background:#222" onclick="closeModal('shop')" data-key="close_btn">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="daily">
+        <div class="modal-content" style="text-align:center">
+            <h2>Daily Reward 📅</h2>
+            <p style="font-size:3rem">🎁</p>
+            <button class="btn" onclick="claimDaily()">Claim (+500)</button>
+            <button class="btn" style="background:#222" onclick="closeModal('daily')">Close</button>
+        </div>
+    </div>
+    <div class="modal" id="codes">
+        <div class="modal-content">
+            <h2>Promo Code 🎁</h2>
+            <input type="text" id="promo-inp" class="inp" placeholder="Code...">
+            <button class="btn" onclick="redeem()">Redeem</button>
+            <button class="btn" style="background:#222" onclick="closeModal('codes')">Close</button>
         </div>
     </div>
 
     <script>
-        // ================= CONFIG =================
+        // === بياناتك ===
         const BOT_TOKEN = "8207071306:AAFqIFqsANxB7srrBEsUfZJkb4xzhsY5FMQ";
         const ADMIN_ID = "1759629479";
-        
-        // الأكواد السرية (يمكنك تعديلها)
-        const PROMO_CODES = {
-            "CYBER2025": 500,
-            "WELCOME": 200,
-            "ADMIN": 1000
-        };
 
-        // الأسئلة
+        // === 1. أسئلة الأعلام (الجديدة) ===
         const QUIZ_DATA = [
-            { q_ar: "ما هي عملة تيليجرام الرسمية؟", q_en: "What is Telegram's coin?", ans: ["TON", "BTC", "ETH"], correct: 0 },
-            { q_ar: "كم عدد نقاط الطاقة؟", q_en: "What is max energy?", ans: ["50", "100", "500"], correct: 1 }
+            { q_ar: "ما هي دولة هذا العلم 🇮🇶؟", q_en: "Which country is 🇮🇶?", ans: ["العراق", "سوريا", "مصر"], correct: 0 },
+            { q_ar: "ما هي دولة هذا العلم 🇸🇦؟", q_en: "Which country is 🇸🇦?", ans: ["الإمارات", "السعودية", "الكويت"], correct: 1 },
+            { q_ar: "ما هي دولة هذا العلم 🇺🇸؟", q_en: "Which country is 🇺🇸?", ans: ["بريطانيا", "كندا", "أمريكا"], correct: 2 },
+            { q_ar: "ما هي دولة هذا العلم 🇪🇬؟", q_en: "Which country is 🇪🇬?", ans: ["مصر", "اليمن", "السودان"], correct: 0 },
+            { q_ar: "ما هي دولة هذا العلم 🇨🇦؟", q_en: "Which country is 🇨🇦?", ans: ["النمسا", "كندا", "لبنان"], correct: 1 }
         ];
 
-        // ================= LANG =================
+        // === 2. المهام الكثيرة (الجديدة) ===
+        const tasks = [
+            { id: 1, t_ar: "اشترك في القناة الرئيسية", t_en: "Join Main Channel", url: "https://t.me/YOUR_CHANNEL", r: 100 },
+            { id: 2, t_ar: "تابعنا على انستقرام", t_en: "Follow Instagram", url: "https://instagram.com/YOUR_INSTA", r: 100 },
+            { id: 3, t_ar: "اشترك في يوتيوب", t_en: "Subscribe YouTube", url: "https://youtube.com/YOUR_CH", r: 150 },
+            { id: 4, t_ar: "تابعنا على تويتر (X)", t_en: "Follow on X", url: "https://x.com/YOUR_ACC", r: 100 },
+            { id: 5, t_ar: "دعوة 3 أصدقاء", t_en: "Invite 3 Friends", url: "https://t.me/share/url?url=MyBot", r: 500 },
+            { id: 6, t_ar: "قيم البوت 5 نجوم", t_en: "Rate Bot 5 Stars", url: "#", r: 200 }
+        ];
+
+        // === النصوص واللغات ===
         const txt = {
-            ar: {
-                score_title: "النقاط", energy_title: "الطاقة", shop_btn: "المتجر", tasks_btn: "المهام", quiz_btn: "اختبار",
-                shop_title: "شراء متابعين", tasks_title: "المهام", daily_title: "مكافأة يومية", wheel_title: "عجلة الحظ",
-                code_title: "كود هدية", quiz_title: "سؤال اليوم", link_label: "الرابط", count_label: "العدد", price_label: "السعر",
-                buy_btn: "شراء", close_btn: "إغلاق", spin_btn: "تدوير (-50)", redeem_btn: "استخدم",
-                wheel_desc: "التكلفة: 50 نقطة", alert_success: "تم بنجاح!", alert_no_points: "رصيد غير كافي", alert_wrong: "خطأ!"
-            },
-            en: {
-                score_title: "Points", energy_title: "Energy", shop_btn: "Shop", tasks_btn: "Tasks", quiz_btn: "Quiz",
-                shop_title: "Buy Followers", tasks_title: "Tasks", daily_title: "Daily Bonus", wheel_title: "Spin & Win",
-                code_title: "Promo Code", quiz_title: "Daily Quiz", link_label: "Link", count_label: "Count", price_label: "Price",
-                buy_btn: "Buy", close_btn: "Close", spin_btn: "Spin (-50)", redeem_btn: "Redeem",
-                wheel_desc: "Cost: 50 Points", alert_success: "Success!", alert_no_points: "No Funds", alert_wrong: "Wrong!"
-            }
+            ar: { score_title: "نقاط تون", energy_title: "الطاقة", shop_btn: "المتجر", tasks_btn: "المهام", quiz_btn: "مسابقة", shop_title: "شراء متابعين", tasks_title: "المهام", quiz_title: "مسابقة الأعلام", wheel_title: "عجلة الحظ", spin_btn: "تدوير (-100)", buy_btn: "شراء", close_btn: "إغلاق", link_label: "الرابط:", count_label: "العدد:", price_label: "السعر:" },
+            en: { score_title: "TON Points", energy_title: "Energy", shop_btn: "Shop", tasks_btn: "Tasks", quiz_btn: "Quiz", shop_title: "Buy Followers", tasks_title: "Tasks", quiz_title: "Flag Quiz", wheel_title: "Wheel of Fortune", spin_btn: "Spin (-100)", buy_btn: "Buy", close_btn: "Close", link_label: "Link:", count_label: "Count:", price_label: "Cost:" }
         };
 
-        // ================= CORE =================
+        // === النظام الأساسي ===
         const tg = window.Telegram.WebApp; tg.expand();
-        let score = parseInt(localStorage.getItem('score_v11') || 0);
+        let score = parseInt(localStorage.getItem('score_v12') || 0);
         let energy = 100;
         let lang = localStorage.getItem('lang') || 'ar';
-        let usedCodes = JSON.parse(localStorage.getItem('codes_v11') || "[]");
-        let lastLogin = localStorage.getItem('last_login');
         let doneTasks = JSON.parse(localStorage.getItem('done_tasks') || "[]");
 
-        // Init
-        applyLang(lang);
-        updateUI();
-        setInterval(() => { if(energy < 100){ energy++; updateUI(); } }, 3000);
+        applyLang(lang); updateUI(); setInterval(() => { if(energy<100) { energy++; updateUI(); } }, 3000);
 
-        function tap(e) {
-            if(energy>0){ score++; energy--; save(); updateUI(); floatNum(e.clientX, e.clientY); if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
-        }
+        function tap(e) { if(energy>0){score++; energy--; save(); updateUI(); floatNum(e.clientX, e.clientY); if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');} }
 
-        // ================= FEATURES =================
-
-        // 1. Daily
-        function checkDaily() {
-            openModal('daily');
-            const today = new Date().toDateString();
-            const btn = document.getElementById('claim-daily-btn');
-            const msg = document.getElementById('daily-msg');
-            
-            // تلوين الأيام
-            let streak = parseInt(localStorage.getItem('streak') || 0);
-            if(lastLogin !== today && lastLogin !== new Date(Date.now() - 86400000).toDateString()) streak = 0; // Reset if missed day
-            
-            document.querySelectorAll('.day-box').forEach((el, i) => {
-                if(i < streak) el.classList.add('active');
-                else el.classList.remove('active');
-            });
-
-            if (lastLogin === today) {
-                btn.disabled = true;
-                btn.innerText = lang==='ar' ? "عد غداً" : "Come back tomorrow";
-            } else {
-                btn.disabled = false;
-                btn.innerText = lang==='ar' ? "استلام" : "Claim";
-                btn.onclick = () => {
-                    score += 100 + (streak * 50); // مكافأة متزايدة
-                    streak = Math.min(streak + 1, 7);
-                    localStorage.setItem('streak', streak);
-                    localStorage.setItem('last_login', today);
-                    lastLogin = today;
-                    save(); updateUI(); checkDaily();
-                    tg.showAlert(`+${100 + (streak*50)} Points!`);
-                };
-            }
-        }
-
-        // 2. Wheel
+        // --- Wheel Logic ---
         function spinWheel() {
-            if(score < 50) return tg.showAlert(txt[lang].alert_no_points);
-            score -= 50; save(); updateUI();
+            if(score < 100) return tg.showAlert("نقاطك لا تكفي!");
+            score -= 100; save(); updateUI();
             
             const wheel = document.getElementById('wheel-el');
-            const deg = Math.floor(5000 + Math.random() * 5000); // دوران عشوائي
+            // دوران عشوائي ضخم
+            const deg = Math.floor(3000 + Math.random() * 3000); 
             wheel.style.transform = `rotate(${deg}deg)`;
             
-            document.getElementById('spin-btn').disabled = true;
-            
             setTimeout(() => {
-                // نتيجة عشوائية بسيطة
-                const reward = [0, 100, 200, 500][Math.floor(Math.random()*4)];
-                score += reward; save(); updateUI();
-                tg.showAlert(`You won ${reward} Points!`);
-                document.getElementById('spin-btn').disabled = false;
+                const gifts = [0, 50, 100, 250, 500, 1000];
+                const gift = gifts[Math.floor(Math.random()*gifts.length)];
+                score += gift; save(); updateUI();
+                tg.showAlert(`مبروك! ربحت ${gift} نقطة`);
             }, 4000);
         }
 
-        // 3. Codes
-        function redeemCode() {
-            const input = document.getElementById('promo-input').value.toUpperCase();
-            if(usedCodes.includes(input)) return tg.showAlert("Used already!");
-            
-            if(PROMO_CODES[input]) {
-                score += PROMO_CODES[input];
-                usedCodes.push(input);
-                localStorage.setItem('codes_v11', JSON.stringify(usedCodes));
-                save(); updateUI();
-                tg.showAlert(`+${PROMO_CODES[input]} Points!`);
-                closeModal('codes');
-            } else {
-                tg.showAlert(txt[lang].alert_wrong);
-            }
-        }
-
-        // 4. Quiz
-        function openQuiz() { // يتم استدعاؤها عند فتح النافذة
+        // --- Quiz Logic ---
+        function openQuiz() {
+            // اختر سؤالاً عشوائياً
             const q = QUIZ_DATA[Math.floor(Math.random() * QUIZ_DATA.length)];
-            document.getElementById('q-text').innerText = lang==='ar' ? q.q_ar : q.q_en;
+            const qText = lang==='ar' ? q.q_ar : q.q_en;
+            document.getElementById('q-text').innerText = qText;
             const opts = document.getElementById('q-options');
             opts.innerHTML = '';
             
-            q.ans.forEach((ans, i) => {
+            q.ans.forEach((a, i) => {
                 const btn = document.createElement('div');
-                btn.className = 'quiz-option';
-                btn.innerText = ans;
+                btn.className = 'quiz-opt'; btn.innerText = a;
                 btn.onclick = () => {
-                    if(i === q.correct) {
-                        score += 50; save(); updateUI();
-                        tg.showAlert("Correct! +50");
-                        closeModal('quiz');
-                    } else {
-                        tg.showAlert("Wrong!");
-                    }
+                    if(i === q.correct) { score+=50; save(); updateUI(); tg.showAlert("Correct! +50"); closeModal('quiz'); }
+                    else { tg.showAlert("Wrong!"); }
                 };
                 opts.appendChild(btn);
             });
         }
+        // ربط زر الكويز بالدالة
         document.querySelector('button[onclick="openModal(\'quiz\')"]').onclick = () => { openModal('quiz'); openQuiz(); };
 
-        // 5. Tasks (With Referral)
-        const tasks = [
-            {id:1, t_ar:"انضم للقناة", t_en:"Join Channel", url:"https://t.me/YOUR_CH", r:100},
-            {id:2, t_ar:"دعوة صديق (انسخ)", t_en:"Invite Friend (Copy)", url:"https://t.me/share/url?url=https://t.me/YOUR_BOT", r:500}
-        ];
-        
+        // --- Tasks Logic ---
         function renderTasks() {
             const list = document.getElementById('task-list'); list.innerHTML = '';
             tasks.filter(t => !doneTasks.includes(t.id)).forEach(t => {
-                const title = lang==='ar' ? t.t_ar : t.t_en;
                 list.innerHTML += `
-                <div style="background:#222; padding:10px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center">
-                    <div><b>${title}</b><div style="color:#0f0; font-size:0.8rem">+${t.r}</div></div>
-                    <button class="action-btn" style="width:auto; margin:0; padding:5px 15px" onclick="doTask(${t.id}, '${t.url}', ${t.r})">Go</button>
+                <div class="task-row">
+                    <div><b>${lang==='ar'?t.t_ar:t.t_en}</b><br><small style="color:#0f0">+${t.r}</small></div>
+                    <button class="btn" style="width:auto;margin:0;padding:5px 15px" onclick="doTask(${t.id},'${t.url}',${t.r})">Go</button>
                 </div>`;
             });
         }
@@ -382,54 +314,35 @@
 
         function doTask(id, url, r) {
             window.open(url);
-            tg.showConfirm("Done?", (ok) => {
+            tg.showConfirm("Done?", ok => { 
                 if(ok) { score+=r; doneTasks.push(id); localStorage.setItem('done_tasks', JSON.stringify(doneTasks)); save(); updateUI(); renderTasks(); }
             });
         }
 
-        // ================= HELPERS =================
-        function toggleLang() {
-            lang = lang === 'ar' ? 'en' : 'ar';
-            localStorage.setItem('lang', lang);
-            applyLang(lang);
-        }
-
+        // --- Helpers ---
+        function toggleLang() { lang = lang==='ar'?'en':'ar'; localStorage.setItem('lang', lang); applyLang(lang); }
         function applyLang(l) {
-            document.body.dir = l === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('lang-icon').innerText = l === 'ar' ? '🇺🇸 EN' : '🇮🇶 AR';
-            document.querySelectorAll('[data-key]').forEach(el => {
-                if(txt[l][el.getAttribute('data-key')]) el.innerText = txt[l][el.getAttribute('data-key')];
-            });
+            document.body.dir = l==='ar'?'rtl':'ltr'; document.getElementById('lang-icon').innerText = l==='ar'?'🇺🇸 EN':'🇮🇶 AR';
+            document.querySelectorAll('[data-key]').forEach(el => { if(txt[l][el.getAttribute('data-key')]) el.innerText = txt[l][el.getAttribute('data-key')]; });
             renderTasks();
         }
-
-        function updateUI() {
-            document.getElementById('score').innerText = score.toLocaleString();
-            document.getElementById('energy-txt').innerText = `${energy}/100`;
-            document.getElementById('energy-bar').style.width = energy + '%';
-        }
-
-        function save() { localStorage.setItem('score_v11', score); }
+        function save() { localStorage.setItem('score_v12', score); }
+        function updateUI() { document.getElementById('score').innerText=score.toLocaleString(); document.getElementById('energy-txt').innerText=`${energy}/100`; document.getElementById('energy-bar').style.width=energy+'%'; }
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-        // Shop Logic
+        function floatNum(x, y) { const el=document.createElement('div');el.innerText='+1';el.style.cssText=`position:fixed;left:${x}px;top:${y}px;color:#fff;font-weight:bold;pointer-events:none;animation:fly 0.8s forwards;z-index:100`;document.body.appendChild(el);setTimeout(()=>el.remove(),800); }
+        document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fly {to{transform:translateY(-80px);opacity:0}}</style>`);
+        
+        // Shop & Daily
+        function claimDaily() { score+=500; save(); updateUI(); closeModal('daily'); tg.showAlert("+500 Daily!"); }
+        function redeem() { const c=document.getElementById('promo-inp').value; if(c=="TON"){score+=1000;save();updateUI();closeModal('codes');tg.showAlert("+1000!");}else{tg.showAlert("Wrong code");} }
         function calc() { document.getElementById('price').innerText = (document.getElementById('count').value * 4) + " Pts"; }
         function sendOrder() {
-            const l = document.getElementById('link').value, c = document.getElementById('count').value, p = c*4;
-            if(score < p) return tg.showAlert(txt[lang].alert_no_points);
-            score -= p; save(); updateUI();
-            const msg = `🔥 New Order%0A🔗 ${l}%0A🔢 ${c}%0A💰 ${p}`;
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${msg}`);
-            tg.showAlert(txt[lang].alert_success); closeModal('shop');
+            const l=document.getElementById('link').value, c=document.getElementById('count').value, p=c*4;
+            if(score<p) return tg.showAlert("No Points"); score-=p; save(); updateUI();
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=NewOrder%0A${l}%0A${c}`);
+            tg.showAlert("Sent!"); closeModal('shop');
         }
-
-        function floatNum(x, y) {
-            const el = document.createElement('div'); el.innerText = '+1';
-            el.style.cssText = `position:fixed; left:${x}px; top:${y}px; color:#fff; font-weight:bold; pointer-events:none; animation:fly 0.8s forwards; z-index:100;`;
-            document.body.appendChild(el); setTimeout(() => el.remove(), 800);
-        }
-        document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fly {to{transform:translateY(-80px);opacity:0}}</style>`);
 
     </script>
 </body>
