@@ -2,185 +2,396 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>لعبة تجميع العملات</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Crypto Clicker Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #f3ba2f;
+            --bg: #0f0f0f;
+            --card: #1e1e1e;
+            --text: #ffffff;
+            --accent: #8e44ad;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
-            color: white;
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
             overflow: hidden;
-            user-select: none; /* منع تحديد النص */
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* حاوية الرصيد */
-        .score-container {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #f1c40f;
-            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
-        }
-
-        /* العملة */
-        .coin {
-            width: 250px;
-            height: 250px;
-            background: radial-gradient(circle, #f1c40f, #b7950b);
-            border-radius: 50%;
-            border: 10px solid #d4ac0d;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 5px 10px rgba(255,255,255,0.4);
+        /* رأس الصفحة */
+        .header {
+            padding: 20px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
+            background: linear-gradient(180deg, rgba(30,30,30,1) 0%, rgba(15,15,15,0) 100%);
+        }
+
+        .level-badge {
+            background: linear-gradient(45deg, var(--accent), #3498db);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(142, 68, 173, 0.5);
+        }
+
+        /* الرصيد */
+        .score-area {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .score-count {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(243, 186, 47, 0.3);
+            line-height: 1;
+        }
+
+        .currency-name {
+            font-size: 1rem;
+            color: #888;
+        }
+
+        /* منطقة اللعب */
+        .game-area {
+            flex-grow: 1;
+            display: flex;
             justify-content: center;
-            font-size: 4rem;
-            cursor: pointer;
-            transition: transform 0.1s;
+            align-items: center;
             position: relative;
-            z-index: 2;
         }
 
-        .coin:active {
-            transform: scale(0.95);
-        }
-
-        /* تأثير الرقم الطائر عند النقر */
-        .floating-number {
-            position: absolute;
-            font-size: 1.5rem;
-            color: white;
-            font-weight: bold;
-            pointer-events: none;
-            animation: floatUp 1s ease-out forwards;
-            z-index: 3;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-50px); }
-        }
-
-        /* مكان الإعلانات */
-        .ad-banner {
-            width: 100%;
-            max-width: 320px;
-            height: 50px;
-            background-color: #333;
-            margin-top: 40px;
+        .main-coin {
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, #fcd058 0%, #d89b0e 100%);
+            border-radius: 50%;
+            border: 8px solid #b68208;
+            box-shadow: 0 0 50px rgba(243, 186, 47, 0.2), inset 0 10px 20px rgba(255,255,255,0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #777;
-            border-radius: 8px;
-            font-size: 0.8rem;
+            font-size: 5rem;
+            cursor: pointer;
+            transition: transform 0.05s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .main-coin:active {
+            transform: scale(0.92);
         }
 
         /* شريط الطاقة */
-        .energy-bar-container {
-            width: 80%;
-            height: 10px;
-            background-color: #333;
-            border-radius: 5px;
-            margin-top: 20px;
-            overflow: hidden;
+        .energy-section {
+            padding: 20px;
+            text-align: center;
         }
 
-        .energy-bar {
-            height: 100%;
-            width: 100%;
-            background-color: #2ecc71;
-            transition: width 0.2s;
+        .energy-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
         }
+
+        .progress-bg {
+            background: #333;
+            height: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #f1c40f);
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        /* أزرار التحكم */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 0 20px 20px 20px;
+        }
+
+        .btn {
+            background: var(--card);
+            border: 1px solid #333;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-boost {
+            background: linear-gradient(45deg, #2980b9, #2c3e50);
+            border: none;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+        }
+
+        /* تأثيرات النقر */
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 2rem;
+            color: white;
+            pointer-events: none;
+            animation: flyUp 0.8s ease-out forwards;
+            z-index: 20;
+        }
+
+        @keyframes flyUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.5); }
+        }
+
+        /* نافذة منبثقة (Modal) */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+        }
+        .modal.active { opacity: 1; pointer-events: all; }
         
-        .energy-text {
-            margin-top: 5px;
-            font-size: 0.9rem;
-            color: #ccc;
+        .modal-content {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            width: 80%;
+            max-width: 300px;
+            border: 1px solid #444;
+        }
+
+        .modal h3 { color: var(--primary); margin-top: 0; }
+        .modal p { color: #ccc; }
+        .close-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: bold;
         }
 
     </style>
 </head>
 <body>
 
-    <div class="score-container">
-        <span id="score">0</span> 💰
+    <div class="header">
+        <div class="level-badge" id="level-badge">مبتدئ 🔥</div>
+        <div style="font-size:0.9rem; opacity:0.7">ID: 8821</div>
     </div>
 
-    <div class="coin" id="coin-btn" onclick="clickCoin(event)">
-        $
+    <div class="score-area">
+        <div class="score-count" id="score">0</div>
+        <div class="currency-name">عملة ذهبية</div>
     </div>
 
-    <div class="energy-bar-container">
-        <div class="energy-bar" id="energy-bar"></div>
+    <div class="game-area">
+        <div class="main-coin" id="coin" onclick="tap(event)">
+            $
+        </div>
     </div>
-    <div class="energy-text" id="energy-text">5 / 5</div>
 
-    <div class="ad-banner">
-        مساحة إعلانية (Google AdSense)
+    <div class="energy-section">
+        <div class="energy-info">
+            <span>⚡ الطاقة</span>
+            <span id="energy-text">10 / 10</span>
+        </div>
+        <div class="progress-bg">
+            <div class="progress-fill" id="energy-bar"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-boost" onclick="openAdModal()">
+            📺 ملء الطاقة
+        </button>
+        <button class="btn" onclick="openShop()">
+            🛒 المتجر
+        </button>
+    </div>
+
+    <div class="modal" id="ad-modal">
+        <div class="modal-content">
+            <h3>طاقة منخفضة!</h3>
+            <p>شاهد إعلاناً قصيراً لملء طاقتك فوراً والاستمرار في الجمع.</p>
+            <button class="btn" style="background:var(--primary); color:#000; width:100%" onclick="watchAd()">شاهد الفيديو (+10 طاقة)</button>
+            <button class="close-btn" onclick="closeModal('ad-modal')">إغلاق</button>
+        </div>
+    </div>
+
+    <div class="modal" id="shop-modal">
+        <div class="modal-content">
+            <h3>المتجر 🛒</h3>
+            <p>قريباً.. ستتمكن من شراء تطويرات لزيادة الربح.</p>
+            <button class="close-btn" onclick="closeModal('shop-modal')">حسناً</button>
+        </div>
     </div>
 
     <script>
-        // المتغيرات الأساسية
-        let score = localStorage.getItem('userScore') ? parseInt(localStorage.getItem('userScore')) : 0;
-        let energy = 5;
-        const maxEnergy = 5;
-        
-        // تحديث الواجهة عند البدء
-        document.getElementById('score').innerText = score;
+        // إعدادات اللعبة
+        let score = localStorage.getItem('score') ? parseInt(localStorage.getItem('score')) : 0;
+        let energy = 10;
+        const maxEnergy = 10;
+        const refillRate = 2000; // ملي ثانية (كل ثانيتين تزيد 1 طاقة)
 
-        // دالة النقر
-        function clickCoin(event) {
+        // العناصر
+        const scoreEl = document.getElementById('score');
+        const energyTextEl = document.getElementById('energy-text');
+        const energyBarEl = document.getElementById('energy-bar');
+        const levelBadgeEl = document.getElementById('level-badge');
+
+        // التحديث الأولي
+        updateUI();
+        updateLevel();
+
+        function tap(e) {
+            // التحقق من الطاقة
             if (energy > 0) {
-                // زيادة الرصيد
+                // المنطق
                 score++;
                 energy--;
-                updateUI();
                 
-                // حفظ الرصيد في المتصفح
-                localStorage.setItem('userScore', score);
+                // الحفظ
+                localStorage.setItem('score', score);
 
-                // إظهار الرقم العائم (+1)
-                showFloatingText(event.clientX, event.clientY);
+                // تأثيرات
+                updateUI();
+                updateLevel();
+                showFloatingText(e.clientX, e.clientY);
+                animateCoin();
+
+                // اهتزاز الهاتف (Haptic Feedback)
+                if (navigator.vibrate) navigator.vibrate(50);
+            } else {
+                // إذا انتهت الطاقة
+                openAdModal();
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // اهتزاز الرفض
             }
         }
 
-        // دالة تحديث الواجهة
         function updateUI() {
-            document.getElementById('score').innerText = score;
-            document.getElementById('energy-bar').style.width = (energy / maxEnergy * 100) + '%';
-            document.getElementById('energy-text').innerText = `${energy} / ${maxEnergy}`;
+            scoreEl.innerText = score.toLocaleString();
+            energyTextEl.innerText = `${energy} / ${maxEnergy}`;
+            
+            const percentage = (energy / maxEnergy) * 100;
+            energyBarEl.style.width = percentage + '%';
+            
+            // تغيير لون الشريط إذا كانت الطاقة منخفضة
+            if(percentage < 30) {
+                energyBarEl.style.background = '#e74c3c';
+            } else {
+                energyBarEl.style.background = 'linear-gradient(90deg, #e74c3c, #f1c40f)';
+            }
         }
 
-        // دالة الرقم العائم
+        function updateLevel() {
+            let level = "مبتدئ 🔥";
+            if (score > 100) level = "محترف 🥉";
+            if (score > 500) level = "خبير 🥈";
+            if (score > 1000) level = "زعيم 🥇";
+            if (score > 5000) level = "أسطورة 💎";
+            
+            levelBadgeEl.innerText = level;
+        }
+
+        // تأثيرات بصرية
         function showFloatingText(x, y) {
-            const floatEl = document.createElement('div');
-            floatEl.classList.add('floating-number');
-            floatEl.innerText = '+1';
-            floatEl.style.left = x + 'px';
-            floatEl.style.top = y + 'px';
-            document.body.appendChild(floatEl);
-
-            setTimeout(() => {
-                floatEl.remove();
-            }, 5);
+            const el = document.createElement('div');
+            el.classList.add('floating-text');
+            el.innerText = '+1';
+            el.style.left = x - 20 + 'px'; // تعديل الموقع قليلاً
+            el.style.top = y - 50 + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 8000);
         }
 
-        // إعادة تعبئة الطاقة تلقائياً
+        function animateCoin() {
+            const coin = document.getElementById('coin');
+            coin.style.transform = 'scale(0.95)';
+            setTimeout(() => coin.style.transform = 'scale(1)', 100);
+        }
+
+        // نظام إعادة تعبئة الطاقة
         setInterval(() => {
             if (energy < maxEnergy) {
-                energy += 1; // سرعة تعبئة الطاقة
+                energy++;
                 updateUI();
             }
-        }, 5); // كل ثانية
+        }, refillRate);
+
+        // وظائف النوافذ والإعلانات
+        function openAdModal() {
+            document.getElementById('ad-modal').classList.add('active');
+        }
+
+        function openShop() {
+            document.getElementById('shop-modal').classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // محاكاة مشاهدة الإعلان
+        function watchAd() {
+            // هنا تضع كود الإعلان الحقيقي (AdMob / Google Ads)
+            // الآن سنحاكي الأمر فقط
+            const btn = document.querySelector('#ad-modal button');
+            const originalText = btn.innerText;
+            
+            btn.innerText = "جاري المشاهدة...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                energy = maxEnergy;
+                updateUI();
+                closeModal('ad-modal');
+                btn.innerText = originalText;
+                btn.disabled = false;
+                alert("تمت تعبئة الطاقة بنجاح! شكراً لمشاهدة الإعلان.");
+            }, 3000); // 3 ثواني محاكاة للإعلان
+        }
 
     </script>
 </body>
 </html>
-
-
