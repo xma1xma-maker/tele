@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crypto Clicker Pro</title>
+    <title>Crypto Clicker Ultimate</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #f3ba2f;
-            --bg: #0f0f0f;
-            --card: #1e1e1e;
+            --primary: #f3ba2f; /* لون ذهبي */
+            --bg-dark: #050505;
+            --card-bg: rgba(30, 30, 30, 0.8); /* شفافية */
             --text: #ffffff;
-            --accent: #8e44ad;
+            --accent: #8e44ad; /* بنفسجي */
+            --danger: #e74c3c;
+            --insta: #C13584;
+            --tele: #0088cc;
         }
 
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: var(--bg);
+            background-color: var(--bg-dark);
             color: var(--text);
             margin: 0;
             height: 100vh;
@@ -25,15 +28,45 @@
             overflow: hidden;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            position: relative;
         }
 
-        /* رأس الصفحة */
+        /* --- الخلفية المتطورة --- */
+        .background-fx {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(142, 68, 173, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(243, 186, 47, 0.1) 0%, transparent 50%);
+            background-size: 150% 150%;
+            animation: bgMove 15s ease infinite alternate;
+        }
+        
+        .background-grid {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+
+        @keyframes bgMove {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        /* --- مكونات اللعبة --- */
         .header {
-            padding: 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(180deg, rgba(30,30,30,1) 0%, rgba(15,15,15,0) 100%);
+            background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+            backdrop-filter: blur(5px);
         }
 
         .level-badge {
@@ -42,145 +75,128 @@
             border-radius: 20px;
             font-size: 0.9rem;
             font-weight: bold;
-            box-shadow: 0 0 10px rgba(142, 68, 173, 0.5);
+            box-shadow: 0 0 15px rgba(142, 68, 173, 0.6);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* الرصيد */
         .score-area {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 20px;
+            position: relative;
         }
 
         .score-count {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: 900;
-            color: var(--primary);
-            text-shadow: 0 0 20px rgba(243, 186, 47, 0.3);
+            background: linear-gradient(to bottom, var(--primary), #e67e22);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(243, 186, 47, 0.4));
             line-height: 1;
         }
 
-        .currency-name {
-            font-size: 1rem;
-            color: #888;
-        }
-
-        /* منطقة اللعب */
         .game-area {
             flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
         }
 
         .main-coin {
-            width: 280px;
-            height: 280px;
-            background: radial-gradient(circle, #fcd058 0%, #d89b0e 100%);
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle at 30% 30%, #ffe082, #d89b0e);
             border-radius: 50%;
-            border: 8px solid #b68208;
-            box-shadow: 0 0 50px rgba(243, 186, 47, 0.2), inset 0 10px 20px rgba(255,255,255,0.4);
+            border: 6px solid #b68208;
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.5),
+                inset 0 10px 20px rgba(255,255,255,0.4),
+                0 0 40px rgba(243, 186, 47, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 5rem;
             cursor: pointer;
-            transition: transform 0.05s;
             position: relative;
             z-index: 10;
+            transition: transform 0.08s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .main-coin:active {
-            transform: scale(0.92);
+            transform: scale(0.93);
         }
 
-        /* شريط الطاقة */
         .energy-section {
             padding: 20px;
             text-align: center;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            margin: 0 20px 20px 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .energy-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
+            margin-bottom: 10px;
             font-weight: bold;
         }
 
         .progress-bg {
-            background: #333;
-            height: 15px;
+            background: rgba(0,0,0,0.5);
+            height: 12px;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #e74c3c, #f1c40f);
+            background: linear-gradient(90deg, var(--danger), var(--primary));
             width: 100%;
-            transition: width 0.3s ease;
+            transition: width 0.3s ease, background 0.3s ease;
         }
 
-        /* أزرار التحكم */
         .controls {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding: 0 20px 20px 20px;
+            grid-template-columns: 1fr;
+            padding: 0 20px 30px 20px;
         }
 
         .btn {
-            background: var(--card);
-            border: 1px solid #333;
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);
             color: white;
             padding: 15px;
             border-radius: 12px;
             font-family: inherit;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             transition: 0.2s;
+            backdrop-filter: blur(10px);
         }
 
         .btn-boost {
-            background: linear-gradient(45deg, #2980b9, #2c3e50);
+            background: linear-gradient(45deg, #2980b9, #6dd5fa);
             border: none;
+            box-shadow: 0 5px 15px rgba(41, 128, 185, 0.4);
         }
+        .btn-boost:active { transform: translateY(2px); }
 
-        .btn:active {
-            transform: translateY(2px);
-        }
-
-        /* تأثيرات النقر */
-        .floating-text {
-            position: absolute;
-            font-weight: bold;
-            font-size: 2rem;
-            color: white;
-            pointer-events: none;
-            animation: flyUp 0.8s ease-out forwards;
-            z-index: 20;
-        }
-
-        @keyframes flyUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-80px) scale(1.5); }
-        }
-
-        /* نافذة منبثقة (Modal) */
+        /* --- النوافذ المنبثقة (Modals) --- */
         .modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-end; /* تظهر من الأسفل */
             z-index: 100;
             opacity: 0;
             pointer-events: none;
@@ -189,209 +205,56 @@
         .modal.active { opacity: 1; pointer-events: all; }
         
         .modal-content {
-            background: var(--card);
-            padding: 30px;
-            border-radius: 20px;
+            background: #1a1a1a;
+            padding: 30px 20px;
+            border-radius: 25px 25px 0 0;
             text-align: center;
-            width: 80%;
-            max-width: 300px;
-            border: 1px solid #444;
+            width: 100%;
+            max-width: 500px;
+            border-top: 2px solid var(--primary);
+            transform: translateY(100%);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .modal.active .modal-content { transform: translateY(0); }
 
-        .modal h3 { color: var(--primary); margin-top: 0; }
-        .modal p { color: #ccc; }
-        .close-btn {
-            background: #e74c3c;
+        .modal h3 { color: var(--primary); margin: 0 0 20px 0; font-size: 1.5rem;}
+        
+        /* قائمة المهام */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .task-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 15px;
             color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            margin-top: 15px;
-            cursor: pointer;
+            font-family: inherit;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: 0.2s;
         }
+        .task-btn:active { background: rgba(255,255,255,0.1); }
+        .task-icon { font-size: 1.4rem; }
+        .task-reward { color: #2ecc71; font-size: 0.9rem; }
 
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <div class="level-badge" id="level-badge">مبتدئ 🔥</div>
-        <div style="font-size:0.9rem; opacity:0.7">ID: 8821</div>
-    </div>
-
-    <div class="score-area">
-        <div class="score-count" id="score">0</div>
-        <div class="currency-name">عملة ذهبية</div>
-    </div>
-
-    <div class="game-area">
-        <div class="main-coin" id="coin" onclick="tap(event)">
-            $
-        </div>
-    </div>
-
-    <div class="energy-section">
-        <div class="energy-info">
-            <span>⚡ الطاقة</span>
-            <span id="energy-text">10 / 10</span>
-        </div>
-        <div class="progress-bg">
-            <div class="progress-fill" id="energy-bar"></div>
-        </div>
-    </div>
-
-    <div class="controls">
-        <button class="btn btn-boost" onclick="openAdModal()">
-            📺 ملء الطاقة
-        </button>
-        <button class="btn" onclick="openShop()">
-            🛒 المتجر
-        </button>
-    </div>
-
-    <div class="modal" id="ad-modal">
-        <div class="modal-content">
-            <h3>طاقة منخفضة!</h3>
-            <p>شاهد إعلاناً قصيراً لملء طاقتك فوراً والاستمرار في الجمع.</p>
-            <button class="btn" style="background:var(--primary); color:#000; width:100%" onclick="watchAd()">شاهد الفيديو (+10 طاقة)</button>
-            <button class="close-btn" onclick="closeModal('ad-modal')">إغلاق</button>
-        </div>
-    </div>
-
-    <div class="modal" id="shop-modal">
-        <div class="modal-content">
-            <h3>المتجر 🛒</h3>
-            <p>قريباً.. ستتمكن من شراء تطويرات لزيادة الربح.</p>
-            <button class="close-btn" onclick="closeModal('shop-modal')">حسناً</button>
-        </div>
-    </div>
-
-    <script>
-        // إعدادات اللعبة
-        let score = localStorage.getItem('score') ? parseInt(localStorage.getItem('score')) : 0;
-        let energy = 10;
-        const maxEnergy = 10;
-        const refillRate = 2000; // ملي ثانية (كل ثانيتين تزيد 1 طاقة)
-
-        // العناصر
-        const scoreEl = document.getElementById('score');
-        const energyTextEl = document.getElementById('energy-text');
-        const energyBarEl = document.getElementById('energy-bar');
-        const levelBadgeEl = document.getElementById('level-badge');
-
-        // التحديث الأولي
-        updateUI();
-        updateLevel();
-
-        function tap(e) {
-            // التحقق من الطاقة
-            if (energy > 0) {
-                // المنطق
-                score++;
-                energy--;
-                
-                // الحفظ
-                localStorage.setItem('score', score);
-
-                // تأثيرات
-                updateUI();
-                updateLevel();
-                showFloatingText(e.clientX, e.clientY);
-                animateCoin();
-
-                // اهتزاز الهاتف (Haptic Feedback)
-                if (navigator.vibrate) navigator.vibrate(50);
-            } else {
-                // إذا انتهت الطاقة
-                openAdModal();
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // اهتزاز الرفض
-            }
+        /* تأثير الطيران */
+        .floating-text {
+            position: absolute;
+            font-weight: 900;
+            font-size: 2.5rem;
+            color: var(--primary);
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            animation: flyUp 0.8s ease-out forwards;
+            z-index: 20;
         }
-
-        function updateUI() {
-            scoreEl.innerText = score.toLocaleString();
-            energyTextEl.innerText = `${energy} / ${maxEnergy}`;
-            
-            const percentage = (energy / maxEnergy) * 100;
-            energyBarEl.style.width = percentage + '%';
-            
-            // تغيير لون الشريط إذا كانت الطاقة منخفضة
-            if(percentage < 30) {
-                energyBarEl.style.background = '#e74c3c';
-            } else {
-                energyBarEl.style.background = 'linear-gradient(90deg, #e74c3c, #f1c40f)';
-            }
-        }
-
-        function updateLevel() {
-            let level = "مبتدئ 🔥";
-            if (score > 100) level = "محترف 🥉";
-            if (score > 500) level = "خبير 🥈";
-            if (score > 1000) level = "زعيم 🥇";
-            if (score > 5000) level = "أسطورة 💎";
-            
-            levelBadgeEl.innerText = level;
-        }
-
-        // تأثيرات بصرية
-        function showFloatingText(x, y) {
-            const el = document.createElement('div');
-            el.classList.add('floating-text');
-            el.innerText = '+1';
-            el.style.left = x - 20 + 'px'; // تعديل الموقع قليلاً
-            el.style.top = y - 50 + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 8000);
-        }
-
-        function animateCoin() {
-            const coin = document.getElementById('coin');
-            coin.style.transform = 'scale(0.95)';
-            setTimeout(() => coin.style.transform = 'scale(1)', 100);
-        }
-
-        // نظام إعادة تعبئة الطاقة
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy++;
-                updateUI();
-            }
-        }, refillRate);
-
-        // وظائف النوافذ والإعلانات
-        function openAdModal() {
-            document.getElementById('ad-modal').classList.add('active');
-        }
-
-        function openShop() {
-            document.getElementById('shop-modal').classList.add('active');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-
-        // محاكاة مشاهدة الإعلان
-        function watchAd() {
-            // هنا تضع كود الإعلان الحقيقي (AdMob / Google Ads)
-            // الآن سنحاكي الأمر فقط
-            const btn = document.querySelector('#ad-modal button');
-            const originalText = btn.innerText;
-            
-            btn.innerText = "جاري المشاهدة...";
-            btn.disabled = true;
-
-            setTimeout(() => {
-                energy = maxEnergy;
-                updateUI();
-                closeModal('ad-modal');
-                btn.innerText = originalText;
-                btn.disabled = false;
-                alert("تمت تعبئة الطاقة بنجاح! شكراً لمشاهدة الإعلان.");
-            }, 3000); // 3 ثواني محاكاة للإعلان
-        }
-
-    </script>
-</body>
-</html>
+        @keyframes flyUp {
+            0% { opacity: 1;
