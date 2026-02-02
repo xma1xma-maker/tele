@@ -2,44 +2,183 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق تيليجرام</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>لعبة تجميع العملات</title>
     <style>
         body {
-            font-family: sans-serif;
-            background-color: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify_content: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
+            user-select: none; /* منع تحديد النص */
         }
-        button {
-            padding: 10px 20px;
-            background-color: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #fff);
-            border: none;
-            border-radius: 8px;
+
+        /* حاوية الرصيد */
+        .score-container {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #f1c40f;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+        }
+
+        /* العملة */
+        .coin {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, #f1c40f, #b7950b);
+            border-radius: 50%;
+            border: 10px solid #d4ac0d;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 5px 10px rgba(255,255,255,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
             cursor: pointer;
-            font-size: 16px;
+            transition: transform 0.1s;
+            position: relative;
+            z-index: 2;
         }
+
+        .coin:active {
+            transform: scale(0.95);
+        }
+
+        /* تأثير الرقم الطائر عند النقر */
+        .floating-number {
+            position: absolute;
+            font-size: 1.5rem;
+            color: white;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 3;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+
+        /* مكان الإعلانات */
+        .ad-banner {
+            width: 100%;
+            max-width: 320px;
+            height: 50px;
+            background-color: #333;
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+
+        /* شريط الطاقة */
+        .energy-bar-container {
+            width: 80%;
+            height: 10px;
+            background-color: #333;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .energy-bar {
+            height: 100%;
+            width: 100%;
+            background-color: #2ecc71;
+            transition: width 0.2s;
+        }
+        
+        .energy-text {
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
     </style>
 </head>
 <body>
 
-    <h1>مرحباً بك 666666666666في البوت! 👋</h1>
-    <p>هذه صفحة تجريبية تعمل666666666 داخل تيليجرام.</p>
-    <button onclick="Telegram.WebApp.close()">إغلاق النافذة</button>
+    <div class="score-container">
+        <span id="score">0</span> 💰
+    </div>
+
+    <div class="coin" id="coin-btn" onclick="clickCoin(event)">
+        $
+    </div>
+
+    <div class="energy-bar-container">
+        <div class="energy-bar" id="energy-bar"></div>
+    </div>
+    <div class="energy-text" id="energy-text">1000 / 1000</div>
+
+    <div class="ad-banner">
+        مساحة إعلانية (Google AdSense)
+    </div>
 
     <script>
-        // إخبار تيليجرام أن التطبيق جاهز للعرض
-        Telegram.WebApp.ready();
-        // توسيع النافذة لتأخذ كامل الارتفاع
-        Telegram.WebApp.expand();
+        // المتغيرات الأساسية
+        let score = localStorage.getItem('userScore') ? parseInt(localStorage.getItem('userScore')) : 0;
+        let energy = 1000;
+        const maxEnergy = 1000;
+        
+        // تحديث الواجهة عند البدء
+        document.getElementById('score').innerText = score;
+
+        // دالة النقر
+        function clickCoin(event) {
+            if (energy > 0) {
+                // زيادة الرصيد
+                score++;
+                energy--;
+                updateUI();
+                
+                // حفظ الرصيد في المتصفح
+                localStorage.setItem('userScore', score);
+
+                // إظهار الرقم العائم (+1)
+                showFloatingText(event.clientX, event.clientY);
+            }
+        }
+
+        // دالة تحديث الواجهة
+        function updateUI() {
+            document.getElementById('score').innerText = score;
+            document.getElementById('energy-bar').style.width = (energy / maxEnergy * 100) + '%';
+            document.getElementById('energy-text').innerText = `${energy} / ${maxEnergy}`;
+        }
+
+        // دالة الرقم العائم
+        function showFloatingText(x, y) {
+            const floatEl = document.createElement('div');
+            floatEl.classList.add('floating-number');
+            floatEl.innerText = '+1';
+            floatEl.style.left = x + 'px';
+            floatEl.style.top = y + 'px';
+            document.body.appendChild(floatEl);
+
+            setTimeout(() => {
+                floatEl.remove();
+            }, 1000);
+        }
+
+        // إعادة تعبئة الطاقة تلقائياً
+        setInterval(() => {
+            if (energy < maxEnergy) {
+                energy += 1; // سرعة تعبئة الطاقة
+                updateUI();
+            }
+        }, 1000); // كل ثانية
+
     </script>
 </body>
-
 </html>
