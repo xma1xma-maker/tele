@@ -3,24 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crypto Clicker Ultimate</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>Crypto Empire Task</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #f3ba2f; /* لون ذهبي */
-            --bg-dark: #050505;
-            --card-bg: rgba(30, 30, 30, 0.8); /* شفافية */
-            --text: #ffffff;
-            --accent: #8e44ad; /* بنفسجي */
-            --danger: #e74c3c;
-            --insta: #C13584;
-            --tele: #0088cc;
+            --bg-deep: #0b0c15;
+            --primary: #f3ba2f; 
+            --accent: #3498db;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
         }
 
         body {
-            font-family: 'Cairo', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text);
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg-deep);
+            color: #fff;
             margin: 0;
             height: 100vh;
             display: flex;
@@ -28,481 +27,492 @@
             overflow: hidden;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            position: relative;
         }
 
-        /* --- الخلفية المتطورة --- */
-        .background-fx {
+        /* --- خلفية مميزة (Deep Space Gradient) --- */
+        .cosmic-bg {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
+            background: radial-gradient(circle at 50% -20%, #1a1a2e, #000);
+        }
+        .nebula {
+            position: absolute;
+            width: 100%; height: 100%;
             background: 
-                radial-gradient(circle at 20% 30%, rgba(142, 68, 173, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(243, 186, 47, 0.1) 0%, transparent 50%);
-            background-size: 150% 150%;
-            animation: bgMove 15s ease infinite alternate;
-        }
-        
-        .background-grid {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -2;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+                radial-gradient(circle at 80% 20%, rgba(188, 19, 254, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 20% 80%, rgba(0, 243, 255, 0.1) 0%, transparent 40%);
+            animation: pulseBg 10s ease-in-out infinite alternate;
         }
 
-        @keyframes bgMove {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 100% 100%; }
+        @keyframes pulseBg {
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.1); }
         }
 
-        /* --- مكونات اللعبة --- */
+        /* --- الواجهة العلوية --- */
         .header {
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
         }
 
-        .level-badge {
-            background: linear-gradient(45deg, var(--accent), #3498db);
+        .rank-badge {
+            background: rgba(0,0,0,0.5);
             padding: 5px 15px;
             border-radius: 20px;
+            border: 1px solid var(--primary);
             font-size: 0.9rem;
-            font-weight: bold;
-            box-shadow: 0 0 15px rgba(142, 68, 173, 0.6);
-            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .score-area {
+        .score-container {
             text-align: center;
             margin-top: 20px;
-            position: relative;
         }
 
-        .score-count {
-            font-size: 4rem;
+        .score-val {
+            font-size: 3.8rem;
             font-weight: 900;
-            background: linear-gradient(to bottom, var(--primary), #e67e22);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 15px rgba(243, 186, 47, 0.4));
-            line-height: 1;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
 
+        /* --- العملة المتطورة (تتغير حسب المستوى) --- */
         .game-area {
             flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
 
-        .main-coin {
+        .coin-skin {
             width: 260px;
             height: 260px;
-            background: radial-gradient(circle at 30% 30%, #ffe082, #d89b0e);
             border-radius: 50%;
-            border: 6px solid #b68208;
-            box-shadow: 
-                0 10px 30px rgba(0,0,0,0.5),
-                inset 0 10px 20px rgba(255,255,255,0.4),
-                0 0 40px rgba(243, 186, 47, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 5rem;
+            font-size: 6rem;
             cursor: pointer;
+            transition: all 0.1s;
             position: relative;
             z-index: 10;
-            transition: transform 0.08s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+        
+        /* تأثيرات العملة حسب المستوى */
+        .skin-bronze {
+            background: radial-gradient(circle at 30% 30%, #cd7f32, #8c5822);
+            border: 8px solid #5d3a15;
+            box-shadow: 0 0 30px rgba(205, 127, 50, 0.3);
+        }
+        .skin-silver {
+            background: radial-gradient(circle at 30% 30%, #e0e0e0, #7f8c8d);
+            border: 8px solid #555;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+        }
+        .skin-gold {
+            background: radial-gradient(circle at 30% 30%, #ffd700, #f39c12);
+            border: 8px solid #b76e05;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
+        .skin-diamond {
+            background: radial-gradient(circle at 30% 30%, #00f3ff, #2980b9);
+            border: 8px solid #008cff;
+            box-shadow: 0 0 60px rgba(0, 243, 255, 0.6);
+            animation: diamondPulse 2s infinite;
         }
 
-        .main-coin:active {
-            transform: scale(0.93);
-        }
+        .coin-skin:active { transform: scale(0.94); }
 
-        .energy-section {
-            padding: 20px;
-            text-align: center;
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            margin: 0 20px 20px 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.05);
+        /* --- شريط الطاقة --- */
+        .energy-wrapper {
+            margin: 0 20px 10px 20px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid var(--border);
         }
-
-        .energy-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        .progress-bg {
-            background: rgba(0,0,0,0.5);
-            height: 12px;
-            border-radius: 10px;
+        .energy-bar-bg {
+            background: #000;
+            height: 10px;
+            border-radius: 5px;
             overflow: hidden;
+            margin-top: 5px;
         }
-
-        .progress-fill {
+        .energy-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--danger), var(--primary));
             width: 100%;
-            transition: width 0.3s ease, background 0.3s ease;
+            background: linear-gradient(90deg, #ff0055, #ffcc00);
+            transition: width 0.3s;
         }
 
-        .controls {
+        /* --- القوائم السفلية --- */
+        .bottom-nav {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
             padding: 0 20px 30px 20px;
         }
-
-        .btn {
-            background: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.1);
+        
+        .nav-btn {
+            background: var(--glass);
+            border: 1px solid var(--border);
             color: white;
-            padding: 15px;
-            border-radius: 12px;
-            font-family: inherit;
+            padding: 16px;
+            border-radius: 15px;
+            font-size: 1rem;
             font-weight: bold;
-            font-size: 1.1rem;
             cursor: pointer;
+            backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            transition: 0.2s;
-            backdrop-filter: blur(10px);
+            gap: 8px;
         }
-
-        .btn-boost {
-            background: linear-gradient(45deg, #2980b9, #6dd5fa);
-            border: none;
-            box-shadow: 0 5px 15px rgba(41, 128, 185, 0.4);
-        }
-        .btn-boost:active { transform: translateY(2px); }
 
         /* --- النوافذ المنبثقة (Modals) --- */
         .modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
-            display: flex;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 999;
+            display: none;
             justify-content: center;
-            align-items: flex-end; /* تظهر من الأسفل */
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: 0.3s;
+            align-items: flex-end;
         }
-        .modal.active { opacity: 1; pointer-events: all; }
+        .modal.open { display: flex; animation: slideUp 0.3s ease; }
         
-        .modal-content {
-            background: #1a1a1a;
-            padding: 30px 20px;
-            border-radius: 25px 25px 0 0;
-            text-align: center;
-            width: 100%;
-            max-width: 500px;
-            border-top: 2px solid var(--primary);
-            transform: translateY(100%);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .modal.active .modal-content { transform: translateY(0); }
+        @keyframes slideUp { from {transform: translateY(100%)} to {transform: translateY(0)} }
 
-        .modal h3 { color: var(--primary); margin: 0 0 20px 0; font-size: 1.5rem;}
-        
-        /* قائمة المهام */
-        .task-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
+        .modal-body {
+            background: #15151e;
+            width: 100%;
+            border-radius: 25px 25px 0 0;
+            padding: 25px;
+            border-top: 2px solid var(--primary);
+            max-height: 80vh;
+            overflow-y: auto;
         }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .task-info h4 { margin: 0; font-size: 1rem; }
+        .task-info p { margin: 3px 0 0 0; font-size: 0.8rem; color: #aaa; }
         
-        .task-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
+        .btn-claim {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-claim:disabled { background: #555; color: #888; }
+
+        /* --- المتجر --- */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .shop-item {
+            background: #20202a;
             padding: 15px;
             border-radius: 15px;
-            color: white;
-            font-family: inherit;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            transition: 0.2s;
+            text-align: center;
+            border: 1px solid var(--border);
         }
-        .task-btn:active { background: rgba(255,255,255,0.1); }
-        .task-icon { font-size: 1.4rem; }
-        .task-reward { color: #2ecc71; font-size: 0.9rem; }
-
-        /* تأثير الطيران */
-        .floating-text {
-            position: absolute;
-            font-weight: 900;
-            font-size: 2.5rem;
-            color: var(--primary);
-            pointer-events: none;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
-            animation: flyUp 0.8s ease-out forwards;
-            z-index: 20;
-        }
-        @keyframes flyUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-100px) scale(1.2); }
-        }
+        .shop-icon { font-size: 2.5rem; margin-bottom: 10px; display: block;}
+        .shop-price { color: var(--neon-blue); font-size: 0.9rem; margin-top: 5px; }
 
     </style>
 </head>
 <body>
 
-    <div class="background-fx"></div>
-    <div class="background-grid"></div>
+    <div class="cosmic-bg"><div class="nebula"></div></div>
 
     <div class="header">
-        <div class="level-badge" id="level-badge">مبتدئ 🔥</div>
-        <div style="font-size:0.9rem; opacity:0.7">Crypto Miner</div>
+        <div class="rank-badge" id="rank-display">
+            <span>🥉</span> <span id="rank-name">برونزي</span>
+        </div>
+        <div>LVL <span id="level-num">1</span></div>
     </div>
 
-    <div class="score-area">
-        <div class="score-count" id="score">0</div>
-        <div style="color:#aaa; margin-top: 5px;">عملة ذهبية</div>
+    <div class="score-container">
+        <div class="score-val" id="score">0</div>
     </div>
 
     <div class="game-area">
-        <div class="main-coin" id="coin" onclick="tap(event)">
+        <div class="coin-skin skin-bronze" id="coin-btn" onclick="tap(event)">
             $
         </div>
     </div>
 
-    <div class="energy-section">
-        <div class="energy-info">
-            <span>⚡ الطاقة المتبقية</span>
-            <span id="energy-text">10 / 10</span>
+    <div class="energy-wrapper">
+        <div style="display:flex; justify-content:space-between; font-size:0.9rem">
+            <span>⚡ الطاقة</span>
+            <span id="energy-txt">10/10</span>
         </div>
-        <div class="progress-bg">
-            <div class="progress-fill" id="energy-bar"></div>
+        <div class="energy-bar-bg">
+            <div class="energy-fill" id="energy-bar"></div>
         </div>
-        <div style="margin-top:10px; font-size: 0.8rem; color:#aaa">يتم التعبئة كل دقيقتين تلقائياً (+1)</div>
     </div>
 
-    <div class="controls">
-        <button class="btn btn-boost" onclick="openTaskModal()">
-            🚀 تعبئة الطاقة الآن!
+    <div class="bottom-nav">
+        <button class="nav-btn" onclick="openModal('tasks-modal')">
+            📋 المهام (+طاقة)
+        </button>
+        <button class="nav-btn" onclick="openModal('shop-modal')">
+            🛍️ المتجر
         </button>
     </div>
 
-    <div class="modal" id="task-modal">
-        <div class="modal-content">
-            <h3>نفذت طاقتك! 😱</h3>
-            <p style="color:#ccc; margin-bottom:20px;">أكمل إحدى المهام السريعة للحصول على طاقة كاملة فوراً.</p>
+    <div class="modal" id="tasks-modal">
+        <div class="modal-body">
+            <h3 style="color:var(--primary)">مهام التعبئة ⚡</h3>
+            <p style="font-size:0.8rem; color:#aaa">أكمل المهام لملء الطاقة. <span style="color:#e74c3c">تحذير: التلاعب يعرض حسابك للحظر.</span></p>
             
-            <div class="task-list" id="task-list-container">
-                <button class="task-btn" onclick="performTask('ad')">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span class="task-icon">📺</span>
-                        <span>شاهد إعلاناً قصيراً</span>
-                    </div>
-                    <span class="task-reward">+10 طاقة</span>
-                </button>
+            <div id="tasks-list-container">
+                </div>
 
-                <button class="task-btn" style="border-color: var(--insta)" onclick="performTask('insta', 'https://instagram.com/YOUR_USERNAME')">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span class="task-icon" style="color:var(--insta)">📸</span>
-                        <span>تابعنا على انستقرام</span>
-                    </div>
-                    <span class="task-reward">+10 طاقة</span>
-                </button>
-
-                <button class="task-btn" style="border-color: var(--tele)" onclick="performTask('tele', 'https://t.me/YOUR_CHANNEL')">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span class="task-icon" style="color:var(--tele)">✈️</span>
-                        <span>اشترك في قناتنا</span>
-                    </div>
-                    <span class="task-reward">+10 طاقة</span>
-                </button>
-            </div>
-
-            <button class="btn" style="background:#333; width:100%; margin-top:10px;" onclick="closeModal('task-modal')">إغلاق</button>
+            <button class="nav-btn" style="width:100%; margin-top:20px; background:#333" onclick="closeModal('tasks-modal')">إغلاق</button>
         </div>
     </div>
 
+    <div class="modal" id="shop-modal">
+        <div class="modal-body">
+            <h3 style="color:var(--neon-blue)">سوق الكريبتو 🛒</h3>
+            <div class="shop-grid">
+                <div class="shop-item">
+                    <span class="shop-icon">⭐</span>
+                    <h4>نجمة تيليجرام</h4>
+                    <div class="shop-price">500 نقطة</div>
+                </div>
+                <div class="shop-item">
+                    <span class="shop-icon">💎</span>
+                    <h4>عملة TON</h4>
+                    <div class="shop-price">مغلق (LVL 10)</div>
+                </div>
+                <div class="shop-item">
+                    <span class="shop-icon">🤖</span>
+                    <h4>بوت تلقائي</h4>
+                    <div class="shop-price">100 نجمة</div>
+                </div>
+                <div class="shop-item">
+                    <span class="shop-icon">⚡</span>
+                    <h4>طاقة مضاعفة</h4>
+                    <div class="shop-price">قريباً..</div>
+                </div>
+            </div>
+            <button class="nav-btn" style="width:100%; margin-top:20px; background:#333" onclick="closeModal('shop-modal')">إغلاق</button>
+        </div>
+    </div>
 
     <script>
-        // --- إعدادات اللعبة ---
-        let score = localStorage.getItem('score_v2') ? parseInt(localStorage.getItem('score_v2')) : 0;
+        // ==========================================
+        // 1️⃣ إعدادات القنوات والحسابات (أضف هنا ما تريد)
+        // ==========================================
+        const allTasks = [
+            { id: 'tg1', type: 'telegram', title: 'قناة الأخبار', url: 'https://t.me/YOUR_CHANNEL_1' },
+            { id: 'tg2', type: 'telegram', title: 'مجموعة المناقشة', url: 'https://t.me/YOUR_GROUP' },
+            { id: 'insta1', type: 'insta', title: 'تابعني انستقرام', url: 'https://instagram.com/YOUR_USER' },
+            { id: 'yt1', type: 'youtube', title: 'اشترك يوتيوب', url: 'https://youtube.com/@YOUR_CHANNEL' }
+        ];
+
+        // ==========================================
+        // 2️⃣ محرك اللعبة (Game Engine)
+        // ==========================================
+        let score = localStorage.getItem('score_v3') ? parseInt(localStorage.getItem('score_v3')) : 0;
         let energy = 10;
         const maxEnergy = 10;
-        // سرعة التعبئة التلقائية: 120000 ملي ثانية = دقيقتين
-        const refillRate = 120000; 
+        let claimedTasks = JSON.parse(localStorage.getItem('claimedTasks')) || [];
 
-        const scoreEl = document.getElementById('score');
-        const energyTextEl = document.getElementById('energy-text');
-        const energyBarEl = document.getElementById('energy-bar');
-        const levelBadgeEl = document.getElementById('level-badge');
-
+        // تحديث أولي
         updateUI();
-        updateLevel();
+        renderTasks();
 
-        // --- دالة النقر الرئيسية ---
         function tap(e) {
             if (energy > 0) {
                 score++;
                 energy--;
-                localStorage.setItem('score_v2', score); // حفظ الرصيد
-
-                updateUI();
-                updateLevel();
-                showFloatingText(e.clientX, e.clientY);
+                localStorage.setItem('score_v3', score);
                 
-                if (navigator.vibrate) navigator.vibrate(40); // اهتزاز خفيف
-            } else {
-                openTaskModal(); // فتح قائمة المهام إذا انتهت الطاقة
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // اهتزاز الرفض
-            }
-        }
-
-        // --- تحديث الواجهة ---
-        function updateUI() {
-            scoreEl.innerText = score.toLocaleString();
-            energyTextEl.innerText = `${energy} / ${maxEnergy}`;
-            const percentage = (energy / maxEnergy) * 100;
-            energyBarEl.style.width = percentage + '%';
-            
-            // تغيير لون الشريط للأحمر عند انخفاض الطاقة
-            if(percentage <= 30) {
-                energyBarEl.style.background = 'var(--danger)';
-            } else {
-                energyBarEl.style.background = 'linear-gradient(90deg, var(--danger), var(--primary))';
-            }
-        }
-
-        // --- تحديث الرتب ---
-        function updateLevel() {
-            let level = "مبتدئ 🔥";
-            if (score > 500) level = "محترف 🥉";
-            if (score > 2000) level = "زعيم 🥈";
-            if (score > 5000) level = "أسطورة 🥇";
-            if (score > 10000) level = "ملك الكريبتو 💎";
-            levelBadgeEl.innerText = level;
-        }
-
-        // --- تأثير الرقم الطائر ---
-        function showFloatingText(x, y) {
-            const el = document.createElement('div');
-            el.classList.add('floating-text');
-            el.innerText = '+1';
-            // محاولة توسيط الرقم فوق مكان الضغط
-            el.style.left = (x - 20) + 'px';
-            el.style.top = (y - 60) + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 8000);
-        }
-
-        // --- التعبئة التلقائية ---
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy++;
+                // تأثيرات
                 updateUI();
+                showFloat(e.clientX, e.clientY);
+                if(navigator.vibrate) navigator.vibrate(30);
+
+            } else {
+                openModal('tasks-modal');
+                if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
             }
-        }, refillRate);
-
-
-        // =========================================
-        // --- نظام المهام الجديد (The New Task System) ---
-        // =========================================
-
-        function openTaskModal() {
-            document.getElementById('task-modal').classList.add('active');
         }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-            // إعادة تفعيل الأزرار في حال تم تعطيلها
-            const buttons = document.querySelectorAll('.task-btn');
-            buttons.forEach(btn => {
-                btn.style.opacity = '1';
-                btn.style.pointerEvents = 'all';
-                if(btn.querySelector('.timer-count')) btn.querySelector('.timer-count').remove();
+        function updateUI() {
+            document.getElementById('score').innerText = score.toLocaleString();
+            document.getElementById('energy-txt').innerText = `${energy}/${maxEnergy}`;
+            document.getElementById('energy-bar').style.width = (energy/maxEnergy*100) + '%';
+            
+            // تحديث الرتبة وشكل العملة
+            updateRankAndSkin();
+        }
+
+        function updateRankAndSkin() {
+            const coinBtn = document.getElementById('coin-btn');
+            const rankName = document.getElementById('rank-name');
+            const levelNum = document.getElementById('level-num');
+
+            // إزالة جميع الكلاسات القديمة
+            coinBtn.classList.remove('skin-bronze', 'skin-silver', 'skin-gold', 'skin-diamond');
+
+            if (score < 500) {
+                coinBtn.classList.add('skin-bronze');
+                rankName.innerText = "برونزي";
+                levelNum.innerText = "1";
+            } else if (score < 2000) {
+                coinBtn.classList.add('skin-silver');
+                rankName.innerText = "فضي";
+                levelNum.innerText = "2";
+                coinBtn.innerText = "🥈";
+            } else if (score < 10000) {
+                coinBtn.classList.add('skin-gold');
+                rankName.innerText = "ذهبي";
+                levelNum.innerText = "3";
+                coinBtn.innerText = "🥇";
+            } else {
+                coinBtn.classList.add('skin-diamond');
+                rankName.innerText = "ماسي";
+                levelNum.innerText = "MAX";
+                coinBtn.innerText = "💎";
+            }
+        }
+
+        // ==========================================
+        // 3️⃣ نظام المهام الذكي (The Smart Task System)
+        // ==========================================
+        function renderTasks() {
+            const container = document.getElementById('tasks-list-container');
+            container.innerHTML = ''; // مسح القائمة القديمة
+
+            allTasks.forEach(task => {
+                // التحقق هل المهمة تم تنفيذها سابقاً؟
+                const isClaimed = claimedTasks.includes(task.id);
+                
+                // تحديد الأيقونة
+                let icon = '🔗';
+                if(task.type === 'telegram') icon = '✈️';
+                if(task.type === 'insta') icon = '📸';
+                if(task.type === 'youtube') icon = '🔴';
+
+                // إنشاء العنصر HTML
+                const taskHtml = `
+                <div class="task-item" style="${isClaimed ? 'opacity:0.5' : ''}">
+                    <div class="task-info" style="display:flex; gap:10px; align-items:center">
+                        <span style="font-size:1.5rem">${icon}</span>
+                        <div>
+                            <h4>${task.title}</h4>
+                            <p>+10 طاقة كاملة</p>
+                        </div>
+                    </div>
+                    ${isClaimed 
+                        ? '<span style="color:#2ecc71">✅ تم</span>' 
+                        : `<button class="btn-claim" id="btn-${task.id}" onclick="startTask('${task.id}', '${task.url}')">تنفيذ</button>`
+                    }
+                </div>
+                `;
+                container.innerHTML += taskHtml;
             });
         }
 
-        // دالة تنفيذ المهمة
-        function performTask(type, url = null) {
-            const container = document.getElementById('task-list-container');
-            // تعطيل الأزرار الأخرى مؤقتاً
-            container.style.pointerEvents = 'none';
-            container.style.opacity = '0.7';
+        function startTask(taskId, url) {
+            const btn = document.getElementById(`btn-${taskId}`);
+            
+            // الخطوة 1: فتح الرابط
+            window.open(url, '_blank');
 
-            if (type === 'ad') {
-                // --- هنا تضع كود الإعلان الحقيقي لاحقاً ---
-                simulateLoading("جاري تحميل الإعلان...", 3, () => {
-                    completeTaskReward("شكراً لمشاهدة الإعلان!");
-                });
+            // الخطوة 2: تغيير الزر إلى "تحقق"
+            btn.innerText = "تحقق ⏳";
+            btn.style.background = "#e67e22"; // برتقالي
+            
+            // تغيير وظيفة الزر ليكون زر التحقق
+            btn.onclick = function() {
+                verifyTask(taskId);
+            };
+        }
 
-            } else if (type === 'insta' || type === 'tele') {
-                // فتح الرابط في نافذة جديدة
-                if(url) window.open(url, '_blank');
+        function verifyTask(taskId) {
+            // الخطوة 3: إظهار رسالة التحذير (Confirmation)
+            const isConfirmed = confirm(
+                "⚠️ تحذير النظام:\n\nهل قمت بالاشتراك بالفعل؟\nسيقوم الروبوت بالتحقق اليدوي لاحقاً، وإذا تبين أنك لم تشترك، سيتم تصفير نقاطك وحظرك.\n\nهل أنت متأكد من إتمام المهمة؟"
+            );
+
+            if (isConfirmed) {
+                // منح المكافأة
+                energy = maxEnergy;
+                score += 100; // مكافأة إضافية
+                updateUI();
                 
-                // بدء عداد الانتظار (خدعة التحقق)
-                simulateLoading("جاري التحقق من الاشتراك...", 10, () => {
-                    completeTaskReward("تم التحقق بنجاح! حصلت على الطاقة.");
-                });
+                // تسجيل المهمة أنها انتهت
+                claimedTasks.push(taskId);
+                localStorage.setItem('claimedTasks', JSON.stringify(claimedTasks));
+                
+                // تحديث القائمة لإخفاء الزر
+                renderTasks();
+                closeModal('tasks-modal');
+                
+                alert("تمت إضافة الطاقة والنقاط بنجاح! ✅");
             }
         }
 
-        // محاكاة الانتظار مع عداد تنازلي
-        function simulateLoading(messageText, seconds, callback) {
-            let timeLeft = seconds;
-            // العثور على الزر الذي تم ضغطه لإظهار العداد عليه (اختياري، سنستخدم تنبيه بسيط حالياً)
-            
-            // إنشاء عنصر العداد
-            const timerEl = document.createElement('div');
-            timerEl.style.position = 'absolute';
-            timerEl.style.top = '0'; left:'0'; right:'0'; bottom:'0';
-            timerEl.style.background = 'rgba(0,0,0,0.9)';
-            timerEl.style.color = 'var(--primary)';
-            timerEl.style.display = 'flex';
-            timerEl.style.flexDirection = 'column';
-            timerEl.style.alignItems = 'center';
-            timerEl.style.justifyContent = 'center';
-            timerEl.style.zIndex = '10';
-            timerEl.style.borderRadius = '15px';
-            timerEl.innerHTML = `<span>${messageText}</span><h2 style="font-size:3rem; margin:10px 0">${timeLeft}</h2><small>يرجى الانتظار وعدم إغلاق اللعبة</small>`;
-            
-            document.querySelector('.modal-content').appendChild(timerEl);
-
-            const timerInterval = setInterval(() => {
-                timeLeft--;
-                timerEl.querySelector('h2').innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    timerEl.remove();
-                    callback();
-                }
-            }, 1000);
+        // ==========================================
+        // 4️⃣ وظائف مساعدة (Helpers)
+        // ==========================================
+        function openModal(id) {
+            document.getElementById(id).classList.add('open');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
         }
 
-        // منح المكافأة وإغلاق النافذة
-        function completeTaskReward(successMsg) {
-            energy = maxEnergy;
-            updateUI();
-            closeModal('task-modal');
-            alert(successMsg);
-            
-            // إعادة تفعيل حاوية المهام
-            document.getElementById('task-list-container').style.pointerEvents = 'all';
-            document.getElementById('task-list-container').style.opacity = '1';
+        function showFloat(x, y) {
+            const el = document.createElement('div');
+            el.innerText = '+1';
+            el.style.position = 'fixed';
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            el.style.color = '#fff';
+            el.style.fontWeight = 'bold';
+            el.style.pointerEvents = 'none';
+            el.style.animation = 'floatUp 0.8s forwards';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
         }
+        
+        // CSS Animation for float via JS injection style not needed since simple animate logic
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes floatUp {
+                0% { transform: translateY(0); opacity: 1; }
+                100% { transform: translateY(-50px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
 
     </script>
 </body>
