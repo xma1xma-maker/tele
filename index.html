@@ -3,199 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crypto Shop System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>Dream Clicker V6</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #0b0c15;
-            --primary: #f3ba2f; 
-            --accent: #3498db;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
-            --green: #2ecc71;
-            --red: #e74c3c;
+            --primary: #4facfe;
+            --secondary: #00f2fe;
+            --bg-dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text: #ffffff;
+            --danger: #ff4757;
+            --success: #2ed573;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: var(--bg-deep);
-            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text);
             margin: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            /* خلفية متحركة متطورة */
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #2c3e50);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
         }
 
-        /* --- الخلفية --- */
-        .cosmic-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(circle at 50% -20%, #1a1a2e, #000);
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .nebula {
-            position: absolute; width: 100%; height: 100%;
-            background: radial-gradient(circle at 80% 20%, rgba(188, 19, 254, 0.15) 0%, transparent 40%),
-                        radial-gradient(circle at 20% 80%, rgba(0, 243, 255, 0.1) 0%, transparent 40%);
-            animation: pulseBg 10s ease-in-out infinite alternate;
-        }
-        @keyframes pulseBg { 0% {opacity: 0.5; transform: scale(1);} 100% {opacity: 1; transform: scale(1.1);} }
 
-        /* --- الواجهة --- */
+        /* --- التصميم الزجاجي للقوائم --- */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- الرأس --- */
         .header {
-            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
-            backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
-        }
-        .rank-badge {
-            background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px;
-            border: 1px solid var(--primary); font-size: 0.9rem; display: flex; align-items: center; gap: 5px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .score-container { text-align: center; margin-top: 20px; }
-        .score-val { font-size: 3.5rem; font-weight: 900; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
-
-        /* --- العملة --- */
-        .game-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
-        .coin-skin {
-            width: 260px; height: 260px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 6rem; cursor: pointer; transition: all 0.1s; position: relative; z-index: 10;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            background: radial-gradient(circle at 30% 30%, #ffd700, #f39c12); border: 8px solid #b76e05;
+        .user-rank {
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 15px;
+            border-radius: 50px;
         }
-        .coin-skin:active { transform: scale(0.94); }
 
-        /* --- الطاقة --- */
-        .energy-wrapper {
-            margin: 0 20px 10px 20px; background: #1a1a1a; border-radius: 12px; padding: 15px; border: 1px solid var(--border);
+        /* --- عرض النقاط --- */
+        .score-display {
+            text-align: center;
+            margin-top: 10px;
+            animation: float 6s ease-in-out infinite;
         }
-        .energy-bar-bg { background: #000; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 5px; }
-        .energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff0055, #ffcc00); transition: width 0.5s; }
+        .score-number {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(79, 172, 254, 0.4));
+        }
 
-        /* --- الأزرار --- */
-        .bottom-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px 30px 20px; }
+        /* --- العملة ثلاثية الأبعاد --- */
+        .game-stage {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .coin-3d {
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe);
+            box-shadow: 
+                inset -10px -10px 20px rgba(0,0,0,0.5),
+                inset 10px 10px 20px rgba(255,255,255,0.4),
+                0 20px 50px rgba(0, 242, 254, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            cursor: pointer;
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            z-index: 10;
+            border: 5px solid rgba(255,255,255,0.1);
+        }
+        
+        .coin-3d:active { transform: scale(0.9); }
+        
+        /* --- شريط الطاقة --- */
+        .energy-container {
+            margin: 0 20px 20px;
+            padding: 15px;
+        }
+        .energy-bar-bg {
+            background: rgba(0,0,0,0.4);
+            height: 12px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .energy-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--danger), var(--primary));
+            transition: width 0.3s;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* --- القائمة السفلية --- */
+        .nav-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 20px;
+        }
+        
         .nav-btn {
-            background: var(--glass); border: 1px solid var(--border); color: white; padding: 16px;
-            border-radius: 15px; font-size: 1rem; font-weight: bold; cursor: pointer; backdrop-filter: blur(10px);
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: 0.2s;
         }
+        .nav-btn:active { transform: scale(0.95); }
 
-        /* --- النوافذ (Shop & Tasks) --- */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
-            z-index: 999; display: none; justify-content: center; align-items: flex-end;
+        /* --- النوافذ (Modals) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            opacity: 0; pointer-events: none; transition: 0.3s;
+            display: flex; justify-content: center; align-items: flex-end;
         }
-        .modal.open { display: flex; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from {transform: translateY(100%)} to {transform: translateY(0)} }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
 
-        .modal-body {
-            background: #15151e; width: 100%; border-radius: 25px 25px 0 0; padding: 25px;
-            border-top: 2px solid var(--primary); max-height: 80vh; overflow-y: auto;
+        .modal-card {
+            background: #1e293b;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 30px 30px 0 0;
+            padding: 30px 20px;
+            transform: translateY(100%);
+            transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            border-top: 1px solid var(--glass-border);
+            max-height: 85vh;
+            overflow-y: auto;
         }
+        .modal-overlay.active .modal-card { transform: translateY(0); }
 
-        /* --- تصميم المتجر الجديد --- */
-        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        /* --- عناصر المتجر --- */
         .shop-item {
-            background: #252530; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        .shop-icon { font-size: 2.5rem; margin-bottom: 5px; }
-        .shop-name { font-size: 0.9rem; margin-bottom: 5px; font-weight: bold; }
-        .shop-btn {
-            background: var(--green); color: #fff; border: none; padding: 8px 15px; width: 100%;
-            border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; margin-top: 5px;
+        .buy-btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
         }
-        .shop-btn.expensive { background: #555; cursor: not-allowed; } /* لون رمادي إذا الرصيد لا يكفي */
+
+        /* مدخلات الشراء */
+        .input-group {
+            margin-top: 15px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 12px;
+        }
+        .custom-input {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #444;
+            padding: 10px;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-family: inherit;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="cosmic-bg"><div class="nebula"></div></div>
-
     <div class="header">
-        <div class="rank-badge">🏆 <span id="rank-name">لاعب</span></div>
-        <div>💰 المتجر مفتوح</div>
+        <div class="user-rank glass-panel">
+            <span>🚀</span> <span id="rank-name">مبتدئ</span>
+        </div>
+        <div class="glass-panel" style="padding: 5px 15px; font-size:0.8rem">ID: 9921</div>
     </div>
 
-    <div class="score-container">
-        <div class="score-val" id="score">0</div>
-        <div style="color:#aaa; font-size:0.9rem">رصيدك الحالي</div>
+    <div class="score-display">
+        <div class="score-number" id="score">0</div>
+        <div style="opacity:0.6; font-size:0.9rem">رصيد النقاط</div>
     </div>
 
-    <div class="game-area">
-        <div class="coin-skin" id="coin-btn" onclick="tap(event)">$</div>
+    <div class="game-stage">
+        <div class="coin-3d" id="coin-btn" onclick="tap(event)">
+            $
+        </div>
     </div>
 
-    <div class="energy-wrapper">
-        <div style="display:flex; justify-content:space-between; font-size:0.9rem">
-            <span>⚡ الطاقة (3 ثواني)</span>
-            <span id="energy-txt">10/10</span>
+    <div class="energy-container glass-panel">
+        <div style="display:flex; justify-content:space-between; font-weight:bold;">
+            <span>⚡ الطاقة</span>
+            <span id="energy-txt">100/100</span>
         </div>
         <div class="energy-bar-bg">
             <div class="energy-fill" id="energy-bar"></div>
         </div>
+        <div style="font-size:0.75rem; text-align:center; margin-top:5px; opacity:0.6">تعبئة سريعة (+1 كل 3 ثواني)</div>
     </div>
 
-    <div class="bottom-nav">
-        <button class="nav-btn" onclick="openModal('tasks-modal')">📋 المهام</button>
-        <button class="nav-btn" onclick="openModal('shop-modal')">🛍️ المتجر</button>
+    <div class="nav-bar">
+        <button class="nav-btn glass-panel" onclick="openModal('shop-modal')">
+            🛒 المتجر
+        </button>
+        <button class="nav-btn glass-panel" onclick="openModal('tasks-modal')">
+            📋 مهام (+نقاط)
+        </button>
     </div>
 
-    <div class="modal" id="shop-modal">
-        <div class="modal-body">
-            <h3 style="color:var(--primary); margin:0">🛒 استبدال النقاط</h3>
-            <p style="color:#aaa; font-size:0.8rem; margin-bottom:15px">انقر لشراء الهدية. سيتم خصم النقاط فوراً.</p>
+
+    <div class="modal-overlay" id="shop-modal">
+        <div class="modal-card">
+            <h2 style="margin-top:0; color:var(--secondary)">خدمات الكريبتو 💎</h2>
             
-            <div class="shop-grid">
+            <div class="glass-panel" style="padding:15px; border-color:var(--primary); margin-bottom:20px;">
+                <h3 style="margin:0 0 10px 0;">🚀 زيادة متابعين تيليجرام</h3>
+                <p style="font-size:0.8rem; color:#ccc">سعر العضو الواحد = <b>4 نقاط</b></p>
                 
-                <div class="shop-item">
-                    <span class="shop-icon">⚡</span>
-                    <span class="shop-name">طاقة كاملة</span>
-                    <button class="shop-btn" onclick="buyItem(50, 'energy')">شراء (50 نقطة)</button>
+                <div class="input-group">
+                    <input type="number" id="members-count" class="custom-input" placeholder="عدد المتابعين المطلوب" oninput="calcPrice()">
+                    <input type="text" id="channel-link" class="custom-input" placeholder="رابط قناتك (مثال: @mychannel)">
+                    
+                    <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold">
+                        <span>التكلفة الكلية:</span>
+                        <span style="color:var(--primary)" id="total-price">0 نقطة</span>
+                    </div>
+                    
+                    <button class="buy-btn" style="width:100%; margin-top:15px;" onclick="buyFollowers()">تنفيذ الطلب ✅</button>
                 </div>
-
-                <div class="shop-item">
-                    <span class="shop-icon">⭐</span>
-                    <span class="shop-name">نجمة تيليجرام</span>
-                    <button class="shop-btn" onclick="buyItem(500, 'star')">شراء (500 نقطة)</button>
-                </div>
-
-                <div class="shop-item">
-                    <span class="shop-icon">💎</span>
-                    <span class="shop-name">1 USDT</span>
-                    <button class="shop-btn" onclick="buyItem(5000, 'usdt')">سحب (5,000 نقطة)</button>
-                </div>
-
-                <div class="shop-item">
-                    <span class="shop-icon">🎨</span>
-                    <span class="shop-name">عملة زرقاء</span>
-                    <button class="shop-btn" onclick="buyItem(200, 'skin_blue')">شراء (200 نقطة)</button>
-                </div>
-
             </div>
-            <button class="nav-btn" style="width:100%; margin-top:20px; background:#333" onclick="closeModal('shop-modal')">إغلاق</button>
+
+            <div style="border-top:1px solid #333; margin:20px 0;"></div>
+
+            <div class="shop-item">
+                <div>
+                    <strong>⚡ طاقة كاملة</strong>
+                    <div style="font-size:0.8rem; color:#888">إعادة تعبئة فورية</div>
+                </div>
+                <button class="buy-btn" onclick="buyEnergy()">50 نقطة</button>
+            </div>
+
+            <button class="nav-btn glass-panel" style="width:100%; margin-top:20px;" onclick="closeModal('shop-modal')">إغلاق</button>
         </div>
     </div>
 
-    <div class="modal" id="tasks-modal">
-        <div class="modal-body">
-            <h3>المهام (+10 نقاط)</h3>
-            <button class="nav-btn" style="width:100%; margin-bottom:10px" onclick="window.open('https://t.me/telegram'); addPoints(10)">
-                ✈️ اشترك في القناة
-            </button>
-            <button class="nav-btn" style="width:100%; background:#333" onclick="closeModal('tasks-modal')">إغلاق</button>
+    <div class="modal-overlay" id="tasks-modal">
+        <div class="modal-card">
+            <h2>المهام اليومية 📅</h2>
+            <div class="shop-item">
+                <div>
+                    <strong>اشتراك في القناة الرسمية</strong>
+                    <div style="font-size:0.8rem; color:#2ed573">+100 نقطة</div>
+                </div>
+                <button class="buy-btn" style="background:none; border:1px solid #fff; color:#fff" onclick="doTask()">تنفيذ</button>
+            </div>
+            <button class="nav-btn glass-panel" style="width:100%; margin-top:20px;" onclick="closeModal('tasks-modal')">إغلاق</button>
         </div>
     </div>
 
     <script>
-        // المتغيرات
-        let score = localStorage.getItem('score_v5') ? parseInt(localStorage.getItem('score_v5')) : 0;
-        let energy = 10;
-        const maxEnergy = 10;
+        // --- البيانات الأساسية ---
+        let score = localStorage.getItem('score_v6') ? parseInt(localStorage.getItem('score_v6')) : 0;
+        let energy = 100; // زيادة سعة الطاقة لتتناسب مع التصميم المتطور
+        const maxEnergy = 100;
         
-        // تحديث الواجهة عند البدء
         updateUI();
 
-        // 1. دالة النقر
+        // --- النقر ---
         function tap(e) {
             if (energy > 0) {
                 score++;
@@ -203,99 +331,128 @@
                 saveData();
                 updateUI();
                 
-                // تأثير بصري
-                const el = document.createElement('div');
-                el.innerText = '+1';
-                el.style.position = 'fixed'; 
-                el.style.left = e.clientX+'px'; 
-                el.style.top = e.clientY+'px';
-                el.style.color = '#fff'; 
-                el.style.fontWeight='bold';
-                el.style.pointerEvents='none';
-                document.body.appendChild(el);
+                // تأثير الرقم الطائر
+                showFloat(e.clientX, e.clientY);
                 
-                // تحريك الرقم للأعلى
-                let pos = 0;
-                let op = 1;
-                const anim = setInterval(()=>{
-                    pos+=2; op-=0.05;
-                    el.style.transform = `translateY(-${pos}px)`;
-                    el.style.opacity = op;
-                    if(op<=0){ clearInterval(anim); el.remove(); }
-                }, 30);
-
-            } else {
-                openModal('tasks-modal');
+                // اهتزاز
+                if (navigator.vibrate) navigator.vibrate(15);
             }
         }
 
-        // 2. دالة الشراء من المتجر (Core Feature)
-        function buyItem(price, type) {
-            // التحقق من الرصيد
-            if (score >= price) {
-                const confirmBuy = confirm(`هل أنت متأكد من الشراء مقابل ${price} نقطة؟`);
-                
-                if (confirmBuy) {
-                    // عملية الخصم
-                    score -= price; 
-                    saveData();
-                    updateUI();
+        // --- حساب سعر المتابعين ---
+        function calcPrice() {
+            const count = document.getElementById('members-count').value;
+            const price = count * 4; // السعر المحدد: 4 نقاط لكل متابع
+            document.getElementById('total-price').innerText = price + " نقطة";
+        }
 
-                    // تسليم الهدية حسب النوع
-                    if (type === 'energy') {
-                        energy = maxEnergy;
-                        alert("تم الشراء! ⚡ طاقتك ممتلئة الآن.");
-                    } 
-                    else if (type === 'skin_blue') {
-                        document.getElementById('coin-btn').style.background = 'radial-gradient(circle, #00f3ff, #2980b9)';
-                        alert("تم تغيير لون العملة إلى الأزرق! 🎨");
-                    }
-                    else if (type === 'usdt') {
-                        alert("✅ تم رفع طلب السحب! سيتم مراجعة نقاطك وإرسال الهدية خلال 24 ساعة.");
-                    }
-                    else {
-                        alert(`مبروك! حصلت على العنصر بنجاح. تم خصم ${price} نقطة.`);
-                    }
-                    
-                    closeModal('shop-modal');
-                }
+        // --- شراء المتابعين (المنطق) ---
+        function buyFollowers() {
+            const count = parseInt(document.getElementById('members-count').value);
+            const link = document.getElementById('channel-link').value;
+            
+            if (!count || count <= 0) {
+                alert("يرجى كتابة عدد صحيح!");
+                return;
+            }
+            if (!link || link.length < 3) {
+                alert("يرجى وضع رابط القناة!");
+                return;
+            }
+
+            const cost = count * 4;
+
+            if (score >= cost) {
+                // خصم النقاط
+                score -= cost;
+                saveData();
+                updateUI();
+                
+                // رسالة نجاح (وهمية حالياً - يمكنك ربطها بAPI لاحقاً)
+                alert(`✅ تم استلام طلبك بنجاح!\n\nسيتم إرسال ${count} متابع إلى القناة: ${link}\nتم خصم ${cost} نقطة.`);
+                closeModal('shop-modal');
+                
+                // تفريغ الحقول
+                document.getElementById('members-count').value = '';
+                document.getElementById('channel-link').value = '';
+                document.getElementById('total-price').innerText = '0 نقطة';
             } else {
-                // إذا لم يكن لديه رصيد
-                alert(`❌ رصيدك غير كافي! تحتاج إلى ${price - score} نقطة إضافية.`);
+                alert(`❌ رصيدك غير كافي! تحتاج إلى ${cost} نقطة.`);
             }
         }
 
-        // 3. دالة إضافة نقاط (للمهام)
-        function addPoints(amount) {
-            score += amount;
-            saveData();
-            updateUI();
-            alert(`حصلت على ${amount} نقطة!`);
+        // --- شراء الطاقة ---
+        function buyEnergy() {
+            if (score >= 50) {
+                score -= 50;
+                energy = maxEnergy;
+                saveData();
+                updateUI();
+                alert("تم شحن الطاقة بالكامل! ⚡");
+            } else {
+                alert("نقاطك لا تكفي!");
+            }
         }
 
-        // 4. تحديث الواجهة
+        // --- تحديث الواجهة ---
         function updateUI() {
             document.getElementById('score').innerText = score.toLocaleString();
             document.getElementById('energy-txt').innerText = `${energy}/${maxEnergy}`;
             document.getElementById('energy-bar').style.width = (energy/maxEnergy*100) + '%';
+            
+            // تحديث الرتبة
+            let rank = "مبتدئ";
+            if(score > 500) rank = "محترف";
+            if(score > 2000) rank = "خبير";
+            if(score > 5000) rank = "أسطورة";
+            document.getElementById('rank-name').innerText = rank;
         }
 
+        // --- حفظ البيانات ---
         function saveData() {
-            localStorage.setItem('score_v5', score);
+            localStorage.setItem('score_v6', score);
         }
 
-        // 5. تعبئة الطاقة كل 3 ثواني
+        // --- تعبئة الطاقة (سريع) ---
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy++;
                 updateUI();
             }
-        }, 3000);
+        }, 3000); // كل 3 ثواني
 
-        // نوافذ
-        function openModal(id) { document.getElementById(id).classList.add('open'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        // --- وظائف مساعدة ---
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        
+        function showFloat(x, y) {
+            const el = document.createElement('div');
+            el.innerText = '+1';
+            el.style.position = 'fixed'; el.style.left = x+'px'; el.style.top = y+'px';
+            el.style.color = '#fff'; el.style.fontWeight='900'; el.style.fontSize='1.5rem';
+            el.style.pointerEvents='none'; el.style.textShadow='0 0 10px var(--primary)';
+            el.style.animation = 'floatUp 0.8s forwards';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
 
+        function doTask() {
+            window.open('https://t.me/telegram', '_blank');
+            setTimeout(() => {
+                score += 100;
+                saveData();
+                updateUI();
+                alert("حصلت على 100 نقطة!");
+            }, 5000);
+        }
+
+        // CSS Injection for animation
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes floatUp { 0% {transform:translateY(0) scale(1); opacity:1} 100% {transform:translateY(-80px) scale(1.5); opacity:0} }
+            @keyframes float { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-10px)} }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
