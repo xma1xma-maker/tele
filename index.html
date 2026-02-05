@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TON Legend V18 - Fixed</title>
+    <title>TON Legend V19 - Upgraded</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -38,14 +38,20 @@
         .modal-card { background: #151515; width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 30px 20px; border-top: 3px solid var(--primary); transform: translateY(100%); transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); max-height: 85vh; overflow-y: auto; text-align: center; padding-bottom: 50px; }
         .modal.active .modal-card { transform: translateY(0); }
         .btn { width: 100%; padding: 16px; background: var(--primary); color: #fff; border: none; border-radius: 14px; font-weight: bold; margin-top: 15px; font-size: 1rem; cursor: pointer; box-shadow: 0 5px 15px rgba(0, 152, 234, 0.3); }
+        .btn:disabled { background: #333 !important; cursor: not-allowed; box-shadow: none; }
         .btn-close { background: #333; box-shadow: none; margin-top: 10px; }
         .inp { width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 12px; margin-bottom: 12px; text-align: center; font-size: 1rem; }
         .quiz-option { background: #252525; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; transition: 0.2s; }
         .quiz-option:active { transform: scale(0.98); }
         .correct { background: var(--success) !important; color: #000; border-color: var(--success); }
         .wrong { background: var(--danger) !important; border-color: var(--danger); }
-        .day-box { width: 40px; height: 40px; background: #333; border-radius: 8px; display: flex; align-items: center; justify-content: center; opacity: 0.5; font-size: 0.8rem; }
-        .day-box.active { opacity: 1; background: var(--success); color: #000; font-weight: bold; }
+        .streak-container { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; justify-content: center; margin: 20px 0; }
+        .day-box { background: #333; border-radius: 12px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.6; font-size: 0.8rem; border: 1px solid #444; }
+        .day-box .day-number { font-size: 0.7rem; margin-bottom: 5px; }
+        .day-box .day-icon { font-size: 1.5rem; }
+        .day-box.claimed { opacity: 1; background: var(--success); color: #000; font-weight: bold; }
+        .day-box.claimable { opacity: 1; background: var(--gold); color: #000; font-weight: bold; cursor: pointer; animation: pulse-gold 1.5s infinite; }
+        @keyframes pulse-gold { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.5); } 50% { transform: scale(1.05); box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0); } }
     </style>
 </head>
 <body>
@@ -57,155 +63,113 @@
     <div class="energy-wrap"><div style="display:flex; justify-content:space-between; font-size:0.9rem"><span data-key="energy_lbl">Energy</span><span id="energy-txt">100/100</span></div><div class="progress-bg"><div class="progress-fill" id="energy-bar"></div></div></div>
     <div class="nav"><div class="nav-item" onclick="openModal('shop')"><span>🛒</span> <span data-key="shop_btn">Shop</span></div><div class="nav-item" onclick="openTasks()"><span>📋</span> <span data-key="tasks_btn">Tasks</span></div><div class="nav-item" onclick="startQuiz()"><span>❓</span> <span data-key="quiz_btn">Quiz</span></div></div>
     <div class="modal" id="daily"><div class="modal-card"><h2 data-key="daily_title">Daily Reward</h2><div class="streak-container" id="streak-dots"></div><p id="daily-status" style="color:#aaa; margin-bottom:20px">...</p><button class="btn" id="claim-btn" onclick="claimDaily()">Claim</button><button class="btn btn-close" onclick="closeModal('daily')" data-key="close_btn">Close</button></div></div>
-    <div class="modal" id="quiz"><div class="modal-card"><h2 data-key="quiz_title">Challenge</h2><div style="width:100%; background:#333; height:5px; border-radius:5px; margin:10px 0; overflow:hidden"><div id="quiz-progress" style="width:0%; height:100%; background:var(--primary); transition:0.3s"></div></div><div style="font-size:3rem; margin:10px 0;" id="q-flag"></div><h3 id="q-text" style="margin-bottom:20px">Question?</h3><div id="q-opts"></div><button class="btn btn-close" onclick="closeModal('quiz')" data-key="exit_btn">Exit</button></div></div>
+    <div class="modal" id="quiz"><div class="modal-card"><h2 data-key="quiz_title">Challenge</h2><div id="quiz-timer" style="font-size: 1.5rem; color: var(--gold); margin: 20px 0; display: none;"></div><div id="quiz-content" style="display: block;"><div style="width:100%; background:#333; height:5px; border-radius:5px; margin:10px 0; overflow:hidden"><div id="quiz-progress" style="width:0%; height:100%; background:var(--primary); transition:0.3s"></div></div><div style="font-size:3rem; margin:10px 0;" id="q-flag"></div><h3 id="q-text" style="margin-bottom:20px">Question?</h3><div id="q-opts"></div></div><button class="btn btn-close" onclick="closeModal('quiz')" data-key="exit_btn">Exit</button></div></div>
     <div class="modal" id="tasks"><div class="modal-card"><h2 data-key="tasks_title">Tasks</h2><div id="task-list"></div><button class="btn btn-close" onclick="closeModal('tasks')" data-key="close_btn">Close</button></div></div>
     <div class="modal" id="shop"><div class="modal-card"><h2 data-key="shop_title">Shop</h2><input class="inp" id="shop-link" placeholder="@username"><input class="inp" type="number" id="shop-count" placeholder="Count (Min 100)"><button class="btn" onclick="buy()" data-key="buy_btn">Buy Followers</button><button class="btn btn-close" onclick="closeModal('shop')" data-key="close_btn">Close</button></div></div>
     <div class="modal" id="codes"><div class="modal-card"><h2 data-key="code_title">Promo Code</h2><input class="inp" id="code-inp" placeholder="Enter Code"><button class="btn" onclick="redeem()" data-key="check_btn">Check</button><button class="btn btn-close" onclick="closeModal('codes')" data-key="close_btn">Close</button></div></div>
 
     <script>
-        const CONFIG = {
-            botToken: "YOUR_BOT_TOKEN", adminId: "YOUR_ADMIN_ID", energyRegenRate: 2000,
-            baseApiUrl: "https://your-backend-url.com/api"
-        };
+        const CONFIG = { botToken: "8207071306:AAFqIFqsANxB7srrBEsUfZJkb4xzhsY5FMQ", adminId: "1759629479", energyRegenRate: 2000, baseApiUrl: "https://your-backend-url.com/api" };
         const QUIZ_DATA = [ { id: 1, flag: "🇮🇶", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["العراق", "مصر", "سوريا"], ans_en: ["Iraq", "Egypt", "Syria"], c: 0, reward: 100, penalty: 50 }, { id: 2, flag: "🇸🇦", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["الكويت", "السعودية", "قطر"], ans_en: ["Kuwait", "KSA", "Qatar"], c: 1, reward: 100, penalty: 50 }, { id: 3, flag: "🇺🇸", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["كندا", "أمريكا", "المكسيك"], ans_en: ["Canada", "USA", "Mexico"], c: 1, reward: 100, penalty: 50 }, ];
-        const TASKS = [ { id: 1, t_ar: "اشترك في قناتنا", t_en: "Join Channel", u: "https://t.me/telegram", r: 200 }, { id: 2, t_ar: "تابعنا انستقرام", t_en: "Follow Instagram", u: "https://instagram.com", r: 150 }, { id: 3, t_ar: "دعوة صديق", t_en: "Invite Friend", u: "https://t.me/share/url?url=https://t.me/YOUR_BOT", r: 500 } ];
+        const TASKS = [ { id: 1, t_ar: "اشترك في قناتنا", t_en: "Join Channel", u: "https://t.me/NLL2LL", r: 200 }, { id: 2, t_ar: "تابعنا انستقرام", t_en: "Follow Instagram", u: "https://instagram.com", r: 150 }, { id: 3, t_ar: "دعوة صديق", t_en: "Invite Friend", u: `https://t.me/share/url?url=https://t.me/${"tonlegendv16bot"}?start=${"Guest"}`, r: 500 } ];
         const LANG = { ar: { points_lbl: "نقاط تون", energy_lbl: "الطاقة", shop_btn: "المتجر", tasks_btn: "المهام", quiz_btn: "مسابقة", shop_title: "شراء متابعين", tasks_title: "المهام", daily_title: "المكافأة اليومية", quiz_title: "مسابقة الأعلام", code_title: "كود هدية", buy_btn: "شراء", close_btn: "إغلاق", exit_btn: "خروج", check_btn: "تحقق" }, en: { points_lbl: "TON Points", energy_lbl: "Energy", shop_btn: "Shop", tasks_btn: "Tasks", quiz_btn: "Quiz", shop_title: "Buy Followers", tasks_title: "Tasks", daily_title: "Daily Reward", quiz_title: "Flag Quiz", code_title: "Promo Code", buy_btn: "Buy", close_btn: "Close", exit_btn: "Exit", check_btn: "Check" } };
 
-        // ================= SERVER API SIMULATOR =================
         const ServerAPI = {
-            _getMockDB: ( ) => ({
-                score: parseInt(localStorage.getItem('score_v18') || 0),
-                energy: parseInt(localStorage.getItem('energy_v18') || 100),
-                doneTasks: JSON.parse(localStorage.getItem('done_tasks_v18') || "[]"),
-                lastDailyDate: localStorage.getItem('last_daily_date_v18'),
-                streak: parseInt(localStorage.getItem('streak_v18') || 1)
-            }),
-            _saveMockDB: (db) => {
-                localStorage.setItem('score_v18', db.score);
-                localStorage.setItem('energy_v18', db.energy);
-                localStorage.setItem('done_tasks_v18', JSON.stringify(db.doneTasks));
-                if(db.lastDailyDate) localStorage.setItem('last_daily_date_v18', db.lastDailyDate);
-                localStorage.setItem('streak_v18', db.streak);
-            },
+            _getMockDB: ( ) => ({ score: parseInt(localStorage.getItem('score_v19') || 0), energy: parseInt(localStorage.getItem('energy_v19') || 100), doneTasks: JSON.parse(localStorage.getItem('done_tasks_v19') || "[]"), lastDailyDate: localStorage.getItem('last_daily_date_v19'), streak: parseInt(localStorage.getItem('streak_v19') || 1), lastQuizTime: parseInt(localStorage.getItem('last_quiz_time_v19') || 0) }),
+            _saveMockDB: (db) => { localStorage.setItem('score_v19', db.score); localStorage.setItem('energy_v19', db.energy); localStorage.setItem('done_tasks_v19', JSON.stringify(db.doneTasks)); if(db.lastDailyDate) localStorage.setItem('last_daily_date_v19', db.lastDailyDate); localStorage.setItem('streak_v19', db.streak); localStorage.setItem('last_quiz_time_v19', db.lastQuizTime); },
             _call: async (action, data) => {
                 console.log(`[API MOCK] Action: ${action}`, data);
                 return new Promise(resolve => setTimeout(() => {
-                    let db = ServerAPI._getMockDB();
-                    let response = { success: false, data: {}, message: 'Unknown error' };
-
-                    if (action === 'getUserData') {
-                        response = { success: true, data: db };
-                    } else if (action === 'syncTap') {
-                        if (db.energy > 0) {
-                            db.score++; db.energy--;
-                            response = { success: true, data: { score: db.score, energy: db.energy } };
-                        } else { response = { success: false, message: 'No energy' }; }
-                    } else if (action === 'submitQuizAnswer') {
-                        const question = QUIZ_DATA.find(q => q.id === data.questionId);
-                        if (data.isCorrect) { db.score += question.reward; } else { db.score = Math.max(0, db.score - question.penalty); }
-                        response = { success: true, data: { score: db.score } };
-                    } else if (action === 'claimDailyReward') {
-                        const today = new Date().toDateString();
-                        if (db.lastDailyDate === today) {
-                            response = { success: false, message: 'Already claimed' };
-                        } else {
-                            db.score += (db.streak * 100);
-                            db.lastDailyDate = today;
-                            if (db.streak < 7) db.streak++; else db.streak = 1;
-                            response = { success: true, data: { score: db.score, streak: db.streak, lastDailyDate: db.lastDailyDate } };
-                        }
-                    } else if (action === 'completeTask') {
-                        if (!db.doneTasks.includes(data.taskId)) {
-                            db.score += data.reward;
-                            db.doneTasks.push(data.taskId);
-                            response = { success: true, data: { score: db.score, doneTasks: db.doneTasks } };
-                        } else { response = { success: false, message: 'Task already done' }; }
-                    } else if (action === 'redeemCode') {
-                        if (data.code === 'TON') {
-                            db.score += 1000;
-                            response = { success: true, data: { score: db.score }, message: '+1000!' };
-                        } else { response = { success: false, message: 'Invalid code' }; }
-                    }
-
-                    ServerAPI._saveMockDB(db);
-                    console.log('[API MOCK] Response:', response);
-                    resolve(response);
+                    let db = ServerAPI._getMockDB(); let response = { success: false, data: {}, message: 'Unknown error' };
+                    if (action === 'getUserData') { response = { success: true, data: db }; }
+                    else if (action === 'syncTap') { if (db.energy > 0) { db.score++; db.energy--; response = { success: true, data: { score: db.score, energy: db.energy } }; } else { response = { success: false, message: 'No energy' }; } }
+                    else if (action === 'submitQuizAnswer') { const question = QUIZ_DATA.find(q => q.id === data.questionId); if (data.isCorrect) { db.score += question.reward; } else { db.score = Math.max(0, db.score - question.penalty); } response = { success: true, data: { score: db.score } }; }
+                    else if (action === 'claimDailyReward') { const today = new Date().toDateString(); if (db.lastDailyDate === today) { response = { success: false, message: 'Already claimed' }; } else { const reward = db.streak === 7 ? 1000 : db.streak * 100; db.score += reward; db.lastDailyDate = today; if (db.streak < 7) db.streak++; else db.streak = 1; response = { success: true, data: { score: db.score, streak: db.streak, lastDailyDate: db.lastDailyDate } }; } }
+                    else if (action === 'completeTask') { if (!db.doneTasks.includes(data.taskId)) { db.score += data.reward; db.doneTasks.push(data.taskId); response = { success: true, data: { score: db.score, doneTasks: db.doneTasks } }; } else { response = { success: false, message: 'Task already done' }; } }
+                    else if (action === 'redeemCode') { if (data.code === "TON") { db.score += 1000; response = { success: true, data: { score: db.score }, message: '+1000!' }; } else { response = { success: false, message: 'Invalid code' }; } }
+                    else if (action === 'finishQuiz') { db.lastQuizTime = Date.now(); response = { success: true, data: { lastQuizTime: db.lastQuizTime } }; }
+                    ServerAPI._saveMockDB(db); console.log('[API MOCK] Response:', response); resolve(response);
                 }, 200));
             }
         };
 
-        // ================= ENGINE =================
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        let state = { userId: tg.initDataUnsafe?.user?.id || "Guest", score: 0, energy: 0, maxEnergy: 100, lang: localStorage.getItem('lang') || 'ar', doneTasks: [], quizIndex: 0, streak: 1, lastDailyDate: null };
+        const tg = window.Telegram.WebApp; tg.expand();
+        let state = { userId: tg.initDataUnsafe?.user?.id || "Guest", score: 0, energy: 0, maxEnergy: 100, lang: localStorage.getItem('lang') || 'ar', doneTasks: [], quizIndex: 0, streak: 1, lastDailyDate: null, lastQuizTime: 0 };
+        let quizTimerInterval;
 
         window.onload = async () => {
             document.getElementById('user-id').innerText = `ID: ${state.userId}`;
-            applyLang(state.lang);
-
+            TASKS[2].u = `https://t.me/share/url?url=https://t.me/${tg.initDataUnsafe.bot_username || 'tonlegendv16bot'}?start=${state.userId}`;
+            applyLang(state.lang );
             const { success, data } = await ServerAPI._call('getUserData');
-            if (success) {
-                Object.assign(state, data);
-            } else {
-                tg.showAlert("Failed to load user data.");
-            }
-
-            document.getElementById('loader').style.opacity = '0';
-            setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+            if (success) { Object.assign(state, data); } else { tg.showAlert("Failed to load user data."); }
+            document.getElementById('loader').style.opacity = '0'; setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
             updateUI();
-            
-            setInterval(() => {
-                if (state.energy < state.maxEnergy) {
-                    state.energy++;
-                    localStorage.setItem('energy_v18', state.energy); // Save for demo persistence
-                    updateUI();
-                }
-            }, CONFIG.energyRegenRate);
+            setInterval(() => { if (state.energy < state.maxEnergy) { state.energy++; localStorage.setItem('energy_v19', state.energy); updateUI(); } }, CONFIG.energyRegenRate);
         };
 
-        async function tap(e) {
-            if (state.energy <= 0) return;
-            state.energy--;
-            state.score++;
-            updateUI();
-            floatNum(e.clientX, e.clientY);
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            
-            const { success, data } = await ServerAPI._call('syncTap');
-            if (success) {
-                state.score = data.score; // Re-sync with server response
-                state.energy = data.energy;
+        async function tap(e) { if (state.energy <= 0) return; state.energy--; state.score++; updateUI(); floatNum(e.clientX, e.clientY); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); const { success, data } = await ServerAPI._call('syncTap'); if (success) { state.score = data.score; state.energy = data.energy; } updateUI(); }
+        
+        function startQuiz() {
+            openModal('quiz');
+            const timeSinceLastQuiz = Date.now() - state.lastQuizTime;
+            const oneHour = 60 * 60 * 1000;
+            if (timeSinceLastQuiz < oneHour) {
+                document.getElementById('quiz-content').style.display = 'none';
+                const timerEl = document.getElementById('quiz-timer');
+                timerEl.style.display = 'block';
+                const remainingTime = oneHour - timeSinceLastQuiz;
+                
+                if(quizTimerInterval) clearInterval(quizTimerInterval);
+                quizTimerInterval = setInterval(() => {
+                    const remaining = oneHour - (Date.now() - state.lastQuizTime);
+                    if (remaining <= 0) {
+                        clearInterval(quizTimerInterval);
+                        timerEl.style.display = 'none';
+                        document.getElementById('quiz-content').style.display = 'block';
+                        state.quizIndex = 0;
+                        renderQuestion();
+                    } else {
+                        const minutes = Math.floor((remaining / 1000 / 60) % 60).toString().padStart(2, '0');
+                        const seconds = Math.floor((remaining / 1000) % 60).toString().padStart(2, '0');
+                        timerEl.innerText = `${minutes}:${seconds}`;
+                    }
+                }, 1000);
+                timerEl.innerText = `${Math.floor((remainingTime / 1000 / 60) % 60).toString().padStart(2, '0')}:${Math.floor((remainingTime / 1000) % 60).toString().padStart(2, '0')}`;
+            } else {
+                document.getElementById('quiz-timer').style.display = 'none';
+                document.getElementById('quiz-content').style.display = 'block';
+                state.quizIndex = 0;
+                renderQuestion();
             }
-            updateUI();
         }
-
-        function startQuiz() { state.quizIndex = 0; openModal('quiz'); renderQuestion(); }
+        async function finishQuiz() {
+            tg.showAlert("Quiz Completed! Come back in 1 hour. 🎉");
+            const { success, data } = await ServerAPI._call('finishQuiz');
+            if(success) state.lastQuizTime = data.lastQuizTime;
+            closeModal('quiz');
+        }
         function renderQuestion() {
-            if (state.quizIndex >= QUIZ_DATA.length) { tg.showAlert("Quiz Completed! 🎉"); closeModal('quiz'); return; }
-            const q = QUIZ_DATA[state.quizIndex];
-            const isAr = state.lang === 'ar';
+            if (state.quizIndex >= QUIZ_DATA.length) { finishQuiz(); return; }
+            const q = QUIZ_DATA[state.quizIndex]; const isAr = state.lang === 'ar';
             document.getElementById('quiz-progress').style.width = `${(state.quizIndex / QUIZ_DATA.length) * 100}%`;
-            document.getElementById('q-flag').innerText = q.flag;
-            document.getElementById('q-text').innerText = isAr ? q.q_ar : q.q_en;
-            const opts = document.getElementById('q-opts');
-            opts.innerHTML = '';
+            document.getElementById('q-flag').innerText = q.flag; document.getElementById('q-text').innerText = isAr ? q.q_ar : q.q_en;
+            const opts = document.getElementById('q-opts'); opts.innerHTML = '';
             const answers = isAr ? q.ans_ar : q.ans_en;
-            answers.forEach((ans, i) => {
-                const btn = document.createElement('div');
-                btn.className = 'quiz-option';
-                btn.innerText = ans;
-                btn.onclick = () => answerQuiz(btn, i === q.c, q.id);
-                opts.appendChild(btn);
-            });
+            answers.forEach((ans, i) => { const btn = document.createElement('div'); btn.className = 'quiz-option'; btn.innerText = ans; btn.onclick = () => confirmAnswer(btn, i === q.c, q.id); opts.appendChild(btn); });
+        }
+        function confirmAnswer(btn, isCorrect, questionId) {
+            const q = QUIZ_DATA.find(q => q.id === questionId);
+            const message = isCorrect ? `Correct! You will earn ${q.reward} points. Proceed?` : `Wrong! You will lose ${q.penalty} points. Proceed?`;
+            const messageAr = isCorrect ? `صحيح! ستحصل على ${q.reward} نقطة. هل تريد المتابعة؟` : `خطأ! ستخسر ${q.penalty} نقطة. هل تريد المتابعة؟`;
+            tg.showConfirm(state.lang === 'ar' ? messageAr : message, (ok) => { if (ok) answerQuiz(btn, isCorrect, questionId); });
         }
         async function answerQuiz(btn, isCorrect, questionId) {
             if (btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
             btn.classList.add(isCorrect ? 'correct' : 'wrong');
             const { success, data } = await ServerAPI._call('submitQuizAnswer', { questionId, isCorrect });
-            if (success) state.score = data.score;
-            updateUI();
-            setTimeout(() => { state.quizIndex++; renderQuestion(); }, 1000);
+            if (success) { state.score = data.score; tg.showAlert(isCorrect ? 'Correct! ✅' : 'Wrong! ❌'); }
+            updateUI(); setTimeout(() => { state.quizIndex++; renderQuestion(); }, 1200);
         }
 
         function openDaily() {
@@ -213,94 +177,24 @@
             const today = new Date().toDateString();
             const streakContainer = document.getElementById('streak-dots');
             streakContainer.innerHTML = '';
-            for(let i=1; i<=7; i++) {
+            const canClaim = state.lastDailyDate !== today;
+
+            for (let i = 1; i <= 7; i++) {
                 const dayBox = document.createElement('div');
                 dayBox.className = 'day-box';
-                dayBox.innerText = i;
-                if (i < state.streak) dayBox.classList.add('active');
+                const reward = i === 7 ? 1000 : i * 100;
+                dayBox.innerHTML = `<div class="day-number">Day ${i}</div><div class="day-icon">...</div><div class="day-reward" style="font-size:0.7rem; font-weight:bold;">+${reward}</div>`;
+                
+                if (i < state.streak) {
+                    dayBox.classList.add('claimed');
+                    dayBox.querySelector('.day-icon').innerText = '✅';
+                } else if (i === state.streak && canClaim) {
+                    dayBox.classList.add('claimable');
+                    dayBox.querySelector('.day-icon').innerText = '🎁';
+                } else {
+                    dayBox.querySelector('.day-icon').innerText = '🔒';
+                }
                 streakContainer.appendChild(dayBox);
             }
             
             const btn = document.getElementById('claim-btn');
-            const status = document.getElementById('daily-status');
-            const isAr = state.lang === 'ar';
-
-            if (state.lastDailyDate === today) {
-                btn.disabled = true;
-                btn.style.background = "#333";
-                btn.innerText = isAr ? "عد غداً" : "Come Tomorrow";
-                status.innerText = isAr ? "تم الاستلام ✅" : "Claimed ✅";
-                if(state.streak > 0) streakContainer.children[state.streak-1]?.classList.add('active');
-            } else {
-                btn.disabled = false;
-                btn.style.background = "var(--primary)";
-                btn.innerText = isAr ? "استلام" : "Claim";
-                status.innerText = isAr ? `اليوم ${state.streak}` : `Day ${state.streak}`;
-            }
-        }
-        async function claimDaily() {
-            const { success, data } = await ServerAPI._call('claimDailyReward');
-            if (success) {
-                Object.assign(state, data);
-                updateUI();
-                openDaily();
-            } else {
-                tg.showAlert(data.message || 'Failed to claim');
-            }
-        }
-
-        function openTasks() {
-            openModal('tasks');
-            const list = document.getElementById('task-list');
-            list.innerHTML = '';
-            TASKS.forEach(t => {
-                const isDone = state.doneTasks.includes(t.id);
-                const title = state.lang === 'ar' ? t.t_ar : t.t_en;
-                list.innerHTML += `<div style="background:#222; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; opacity:${isDone ? 0.5 : 1}"><div><b>${title}</b><div style="color:var(--success);font-size:0.8rem">+${t.r}</div></div><button ${isDone ? 'disabled' : ''} onclick="doTask(${t.id}, '${t.u}', ${t.r})" style="background:${isDone ? '#333' : 'var(--primary)'}; border:none; color:#fff; padding:5px 15px; border-radius:8px">${isDone ? 'Done' : 'GO'}</button></div>`;
-            });
-        }
-        function doTask(id, url, r) {
-            tg.openLink(url);
-            tg.showConfirm(state.lang === 'ar' ? "هل أكملت المهمة؟" : "Did you complete the task?", async (ok) => {
-                if (ok) {
-                    const { success, data } = await ServerAPI._call('completeTask', { taskId: id, reward: r });
-                    if (success) {
-                        state.score = data.score;
-                        state.doneTasks = data.doneTasks;
-                        updateUI();
-                        openTasks();
-                    } else { tg.showAlert('Task already completed'); }
-                }
-            });
-        }
-        
-        async function redeem() {
-            const code = document.getElementById('code-inp').value;
-            if (!code) return;
-            const { success, data, message } = await ServerAPI._call('redeemCode', { code });
-            tg.showAlert(message);
-            if (success) {
-                state.score = data.score;
-                updateUI();
-                closeModal('codes');
-            }
-        }
-
-        function buy() { /* ... unchanged ... */ }
-        function toggleLang() { state.lang = state.lang === 'ar' ? 'en' : 'ar'; localStorage.setItem('lang', state.lang); applyLang(state.lang); }
-        function applyLang(l) { document.body.dir = l === 'ar' ? 'rtl' : 'ltr'; document.getElementById('lang-btn').innerText = l === 'ar' ? '🇺🇸 EN' : '🇮🇶 AR'; document.querySelectorAll('[data-key]').forEach(el => { if (LANG[l][el.getAttribute('data-key')]) el.innerText = LANG[l][el.getAttribute('data-key')]; }); }
-        function updateUI() {
-            document.getElementById('score').innerText = Math.floor(state.score).toLocaleString();
-            document.getElementById('energy-txt').innerText = `${state.energy}/${state.maxEnergy}`;
-            document.getElementById('energy-bar').style.width = `${(state.energy / state.maxEnergy) * 100}%`;
-            let rank = "Bronze 🥉";
-            if (state.score > 5000) rank = "Silver 🥈"; if (state.score > 20000) rank = "Gold 🥇"; if (state.score > 100000) rank = "Diamond 💎";
-            document.getElementById('rank-badge').innerText = rank;
-        }
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        function floatNum(x, y) { const el = document.createElement('div'); el.innerText = '+1'; el.style.cssText = `position:fixed; left:${x}px; top:${y}px; color:#fff; font-weight:bold; pointer-events:none; z-index:999; text-shadow:0 0 5px var(--primary); animation:fly 0.8s forwards;`; document.body.appendChild(el); setTimeout(() => el.remove(), 800); }
-        document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fly {to{transform:translateY(-100px);opacity:0}}</style>`);
-    </script>
-</body>
-</html>
