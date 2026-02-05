@@ -1,139 +1,290 @@
-'day-box ' + (i < state.streak ? 'claimed' : (i === state.streak && canClaim ? 'claimable' : ''));
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TON Legend V25 - Final</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #050505; --panel: #1a1a1a; --primary: #0098EA; --gold: #FFD700; --success: #2ecc71; --danger: #e74c3c; --text: #ffffff; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; background-image: radial-gradient(circle at 50% 10%, #1a2a3a, #000); padding-bottom: 90px; }
+        
+        /* Loader */
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* UI Elements */
+        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .user-info { display: flex; gap: 10px; align-items: center; }
+        .rank-badge { background: var(--gold); color: #000; padding: 3px 10px; border-radius: 10px; font-weight: bold; font-size: 0.8rem; }
+        .lang-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 5px 12px; border-radius: 15px; cursor: pointer; font-weight: bold; }
+        
+        .score-area { text-align: center; margin-top: 20px; animation: pulse 2s infinite alternate; }
+        .score-val { font-size: 3.5rem; font-weight: 900; text-shadow: 0 0 25px var(--primary); line-height: 1; }
+        .score-sub { font-size: 0.9rem; color: #aaa; margin-top: 5px; }
+        
+        .feat-bar { display: flex; justify-content: center; gap: 20px; margin: 20px 0; }
+        .feat-btn { background: rgba(255,255,255,0.05); width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.2s; }
+        .feat-btn:active { transform: scale(0.9); background: var(--primary); border-color: var(--primary); }
+        
+        .game-stage { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
+        .coin { width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #0098EA, #005580); border: 8px solid rgba(255,255,255,0.1); box-shadow: 0 0 60px rgba(0, 152, 234, 0.5); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.08s; position: relative; }
+        .coin:active { transform: scale(0.92); }
+        .coin-svg { width: 60%; fill: #fff; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3)); }
+        
+        .energy-wrap { margin: 0 20px; background: var(--panel); padding: 12px; border-radius: 15px; border: 1px solid #333; }
+        .progress-bg { background: #000; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #fff, var(--primary)); transition: width 0.3s; }
+        
+        .nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(15px); border-top: 1px solid #333; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px 15px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); z-index: 800; }
+        .nav-item { background: rgba(255,255,255,0.03); color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .nav-item:active { background: rgba(255,255,255,0.1); }
+        
+        /* Modals */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal-card { background: #151515; width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 30px 20px; border-top: 3px solid var(--primary); transform: translateY(100%); transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); max-height: 85vh; overflow-y: auto; text-align: center; padding-bottom: 50px; }
+        .modal.active .modal-card { transform: translateY(0); }
+        
+        .btn { width: 100%; padding: 16px; background: var(--primary); color: #fff; border: none; border-radius: 14px; font-weight: bold; margin-top: 15px; font-size: 1rem; cursor: pointer; box-shadow: 0 5px 15px rgba(0, 152, 234, 0.3); }
+        .btn:disabled { background: #333 !important; color: #888 !important; cursor: not-allowed; box-shadow: none; }
+        .btn-close { background: #333; box-shadow: none; margin-top: 10px; }
+        .inp { width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 12px; margin-bottom: 12px; text-align: center; font-size: 1rem; }
+        
+        /* Task & Daily Styles */
+        .task-row { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #333; }
+        .quiz-option { background: #252525; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; transition: 0.2s; }
+        .quiz-option:active { transform: scale(0.98); }
+        .correct { background: var(--success) !important; color: #000; } .wrong { background: var(--danger) !important; }
+        
+        .streak-container { display: flex; gap: 5px; justify-content: center; margin: 20px 0; }
+        .day-box { width: 45px; height: 60px; background: #2a2a2a; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.6; font-size: 0.8rem; border: 1px solid #444; }
+        .day-box.claimed { background: var(--success); opacity: 1; color: #000; }
+        .day-box.claimable { background: var(--gold); opacity: 1; color: #000; animation: pulse 1s infinite; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="loader"><div class="spinner"></div><h2 style="color:#fff">TON LEGEND</h2><p style="color:#666">Loading...</p></div>
+
+    <div class="header">
+        <div class="user-info">
+            <span class="rank-badge" id="rank-badge">Bronze 🥉</span>
+            <span style="font-size:0.8rem; opacity:0.7" id="user-id">ID: ...</span>
+        </div>
+        <button class="lang-btn" onclick="toggleLang()" id="lang-btn">🇺🇸 EN</button>
+    </div>
+
+    <div class="score-area">
+        <div class="score-val" id="score">0</div>
+        <div class="score-sub" data-key="points_lbl">TON Points</div>
+    </div>
+
+    <div class="feat-bar">
+        <div class="feat-btn" onclick="openDaily()">📅</div>
+        <div class="feat-btn" onclick="openModal('codes')">🎁</div>
+        <div class="feat-btn" onclick="openModal('shop')">💎</div>
+    </div>
+
+    <div class="game-stage">
+        <div class="coin" onclick="tap(event)">
+            <svg class="coin-svg" viewBox="0 0 24 24"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg>
+        </div>
+    </div>
+
+    <div class="energy-wrap">
+        <div style="display:flex; justify-content:space-between; font-size:0.9rem">
+            <span data-key="energy_lbl">Energy</span>
+            <span id="energy-txt">100/100</span>
+        </div>
+        <div class="progress-bg"><div class="progress-fill" id="energy-bar"></div></div>
+    </div>
+
+    <div class="nav">
+        <div class="nav-item" onclick="openModal('shop')"><span>🛒</span> <span data-key="shop_btn">Shop</span></div>
+        <div class="nav-item" onclick="openTasks()"><span>📋</span> <span data-key="tasks_btn">Tasks</span></div>
+        <div class="nav-item" onclick="startQuiz()"><span>❓</span> <span data-key="quiz_btn">Quiz</span></div>
+    </div>
+
+    <div class="modal" id="daily">
+        <div class="modal-card">
+            <h2 data-key="daily_title">Daily Reward</h2>
+            <div class="streak-container" id="streak-dots"></div>
+            <p id="daily-status" style="color:#aaa; margin-bottom:20px">...</p>
+            <button class="btn" id="claim-btn" onclick="claimDaily()">Claim</button>
+            <button class="btn btn-close" onclick="closeModal('daily')" data-key="close_btn">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="quiz">
+        <div class="modal-card">
+            <h2 data-key="quiz_title">Challenge</h2>
+            <div id="quiz-content">
+                <div style="font-size:3rem; margin:10px 0;" id="q-flag"></div>
+                <h3 id="q-text" style="margin-bottom:20px">Question?</h3>
+                <div id="q-opts"></div>
+            </div>
+            <button class="btn btn-close" onclick="closeModal('quiz')" data-key="exit_btn">Exit</button>
+        </div>
+    </div>
+
+    <div class="modal" id="tasks">
+        <div class="modal-card">
+            <h2 data-key="tasks_title">Tasks</h2>
+            <div id="task-list"></div>
+            <button class="btn btn-close" onclick="closeModal('tasks')" data-key="close_btn">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="shop">
+        <div class="modal-card">
+            <h2 data-key="shop_title">Shop</h2>
+            <input class="inp" id="shop-link" placeholder="@username">
+            <input class="inp" type="number" id="shop-count" placeholder="Count (Min 100)">
+            <button class="btn" onclick="buy()" data-key="buy_btn">Buy Followers</button>
+            <button class="btn btn-close" onclick="closeModal('shop')" data-key="close_btn">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="codes">
+        <div class="modal-card">
+            <h2 data-key="code_title">Promo Code</h2>
+            <input class="inp" id="code-inp" placeholder="Enter Code">
+            <button class="btn" onclick="redeem()" data-key="check_btn">Check</button>
+            <button class="btn btn-close" onclick="closeModal('codes')" data-key="close_btn">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // CONFIG
+        const BOT_TOKEN = "8207071306:AAFqIFqsANxB7srrBEsUfZJkb4xzhsY5FMQ";
+        const ADMIN_ID = "1759629479";
+        
+        // DATA
+        const QUIZ_DATA = [
+            { flag: "🇮🇶", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["العراق", "مصر", "سوريا"], ans_en: ["Iraq", "Egypt", "Syria"], c: 0 },
+            { flag: "🇸🇦", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["الكويت", "السعودية", "قطر"], ans_en: ["Kuwait", "KSA", "Qatar"], c: 1 },
+            { flag: "🇺🇸", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["كندا", "أمريكا", "المكسيك"], ans_en: ["Canada", "USA", "Mexico"], c: 1 },
+            { flag: "🇧🇷", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["البرازيل", "الأرجنتين", "بيرو"], ans_en: ["Brazil", "Argentina", "Peru"], c: 0 }
+        ];
+
+        const TASKS = [
+            { id: 1, t_ar: "اشترك في قناتنا", t_en: "Join Channel", u: "https://t.me/NLL2LL", r: 200 },
+            { id: 2, t_ar: "تابعنا انستقرام", t_en: "Follow Instagram", u: "https://instagram.com", r: 150 },
+            { id: 3, t_ar: "دعوة صديق", t_en: "Invite Friend", u: "SHARE", r: 500 }
+        ];
+
+        const LANG = {
+            ar: { points_lbl: "نقاط تون", energy_lbl: "الطاقة", shop_btn: "المتجر", tasks_btn: "المهام", quiz_btn: "مسابقة", shop_title: "شراء متابعين", tasks_title: "المهام", daily_title: "المكافأة اليومية", quiz_title: "مسابقة الأعلام", code_title: "كود هدية", buy_btn: "شراء", close_btn: "إغلاق", exit_btn: "خروج", check_btn: "تحقق" },
+            en: { points_lbl: "TON Points", energy_lbl: "Energy", shop_btn: "Shop", tasks_btn: "Tasks", quiz_btn: "Quiz", shop_title: "Buy Followers", tasks_title: "Tasks", daily_title: "Daily Reward", quiz_title: "Flag Quiz", code_title: "Promo Code", buy_btn: "Buy", close_btn: "Close", exit_btn: "Exit", check_btn: "Check" }
+        };
+
+        // ENGINE
+        const tg = window.Telegram.WebApp; 
+        tg.expand();
+
+        let state = {
+            score: parseInt(localStorage.getItem('score_v25') || 0),
+            energy: 100,
+            lang: localStorage.getItem('lang') || 'ar',
+            doneTasks: JSON.parse(localStorage.getItem('done_tasks_v25') || "[]"),
+            streak: parseInt(localStorage.getItem('streak_v25') || 1),
+            lastDailyDate: localStorage.getItem('last_daily_v25'),
+            quizIndex: 0
+        };
+
+        // INIT
+        window.onload = () => {
+            setTimeout(() => { document.getElementById('loader').style.opacity = '0'; setTimeout(()=>document.getElementById('loader').style.display='none', 500); }, 1500);
+            document.getElementById('user-id').innerText = "ID: " + (tg.initDataUnsafe?.user?.id || "Guest");
+            applyLang(state.lang);
+            updateUI();
+            setInterval(() => { if(state.energy<100) { state.energy++; updateUI(); } }, 2000);
+        };
+
+        function tap(e) {
+            if(state.energy > 0) {
+                state.score++; state.energy--;
+                save(); updateUI();
+                floatNum(e.clientX, e.clientY);
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            }
+        }
+
+        // DAILY REWARD
+        function openDaily() {
+            openModal('daily');
+            const today = new Date().toDateString();
+            const container = document.getElementById('streak-dots');
+            container.innerHTML = '';
+            
+            // Check streak reset
+            if(state.lastDailyDate !== today && state.lastDailyDate !== new Date(Date.now() - 86400000).toDateString()) {
+                // If not today and not yesterday (missed a day), keep streak visually but login logic handles reset if needed
+            }
+
+            for(let i=1; i<=7; i++) {
+                const box = document.createElement('div');
+                const reward = i===7 ? 1000 : i*100;
+                let className = 'day-box';
+                if(i < state.streak) className += ' claimed';
+                if(i === state.streak && state.lastDailyDate !== today) className += ' claimable';
                 
-                const reward = i === 7 ? 1000 : i * 100;
-                dayBox.innerHTML = `<span class="day-number">${state.lang === 'ar' ? 'يوم' : 'Day'} ${i}</span><span class="day-icon">🎁</span><span class="day-reward">+${reward}</span>`;
-                
-                // إضافة حدث النقر إذا كان اليوم متاحاً
-                if (i === state.streak && canClaim) {
-                    dayBox.onclick = claimDaily;
-                }
-                
-                streakContainer.appendChild(dayBox);
+                box.className = className;
+                box.innerHTML = `<div>Day ${i}</div><div style="font-weight:bold">+${reward}</div>`;
+                if(className.includes('claimable')) box.onclick = claimDaily;
+                container.appendChild(box);
             }
 
             const btn = document.getElementById('claim-btn');
             const status = document.getElementById('daily-status');
-
-            if (canClaim) {
-                btn.disabled = false;
-                btn.style.background = "var(--primary)";
-                btn.innerText = state.lang === 'ar' ? "استلام" : "Claim";
-                status.innerText = state.lang === 'ar' ? "مكافأتك جاهزة!" : "Reward Ready!";
-            } else {
+            
+            if(state.lastDailyDate === today) {
                 btn.disabled = true;
-                btn.style.background = "#333";
-                btn.innerText = state.lang === 'ar' ? "عد غداً" : "Come Tomorrow";
-                status.innerText = state.lang === 'ar' ? "تم الاستلام ✅" : "Claimed ✅";
-            }
-        }
-
-        async function claimDaily() {
-            const { success, data, message } = await ServerAPI._call('claimDailyReward');
-            if (success) {
-                state.score = data.score;
-                state.streak = data.streak;
-                state.lastDailyDate = data.lastDailyDate;
-                updateUI();
-                openDaily(); // تحديث الواجهة لغلق الزر
-                tg.showAlert(state.lang === 'ar' ? "تم استلام المكافأة!" : "Reward Claimed!");
+                btn.innerText = state.lang==='ar' ? "عد غداً" : "Come Tomorrow";
+                status.innerText = "✅ Claimed";
             } else {
-                tg.showAlert(message);
+                btn.disabled = false;
+                btn.innerText = state.lang==='ar' ? "استلام" : "Claim";
+                status.innerText = "🎁 Ready";
             }
         }
 
-        // --- TASKS SYSTEM ---
-        function openTasks() {
-            openModal('tasks');
-            const list = document.getElementById('task-list');
-            list.innerHTML = '';
+        function claimDaily() {
+            const today = new Date().toDateString();
+            if(state.lastDailyDate === today) return;
             
-            const activeTasks = TASKS.filter(t => !state.doneTasks.includes(t.id));
+            // Logic to check if missed day (reset streak)
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            if(state.lastDailyDate && state.lastDailyDate !== yesterday) state.streak = 1;
 
-            if (activeTasks.length === 0) {
-                list.innerHTML = `<div style="text-align:center; color:#555">${state.lang === 'ar' ? 'لا توجد مهام حالياً' : 'No tasks available'}</div>`;
-                return;
-            }
-
-            activeTasks.forEach(t => {
-                const title = state.lang === 'ar' ? t.t_ar : t.t_en;
-                list.innerHTML += `
-                <div class="task-row">
-                    <div>
-                        <div style="font-weight:bold">${title}</div>
-                        <div style="font-size:0.8rem; color:var(--success)">+${t.r}</div>
-                    </div>
-                    <button class="btn" style="width:auto; margin:0; padding:5px 15px; font-size:0.8rem;" onclick="doTask(${t.id}, '${t.u}', ${t.r})">GO</button>
-                </div>`;
-            });
-        }
-
-        async function doTask(id, url, reward) {
-            // فتح الرابط
-            if (url.startsWith('http')) {
-                tg.openLink(url);
-            } else {
-                window.open(url, '_blank');
-            }
-
-            // طلب التأكيد
-            const confirmMsg = state.lang === 'ar' ? "هل قمت بإتمام المهمة؟" : "Did you complete the task?";
-            tg.showConfirm(confirmMsg, async (ok) => {
-                if (ok) {
-                    const { success, data, message } = await ServerAPI._call('completeTask', { taskId: id, reward: reward });
-                    if (success) {
-                        state.score = data.score;
-                        state.doneTasks = data.doneTasks;
-                        updateUI();
-                        openTasks(); // تحديث القائمة لإزالة المهمة المكتملة
-                        tg.showAlert(state.lang === 'ar' ? "تمت المهمة!" : "Task Completed!");
-                    } else {
-                        tg.showAlert(message);
-                    }
-                }
-            });
-        }
-
-        // --- UTILITIES & UI ---
-        function toggleLang() {
-            state.lang = state.lang === 'ar' ? 'en' : 'ar';
-            localStorage.setItem('lang', state.lang);
-            applyLang(state.lang);
-        }
-
-        function applyLang(l) {
-            document.body.dir = l === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('lang-btn').innerText = l === 'ar' ? '🇺🇸 EN' : '🇮🇶 AR';
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const key = el.getAttribute('data-key');
-                if (LANG[l][key]) el.innerText = LANG[l][key];
-            });
-        }
-
-        function updateUI() {
-            document.getElementById('score').innerText = state.score.toLocaleString();
-            document.getElementById('energy-txt').innerText = `${state.energy}/${state.maxEnergy}`;
-            document.getElementById('energy-bar').style.width = `${(state.energy / state.maxEnergy) * 100}%`;
+            const reward = state.streak === 7 ? 1000 : state.streak * 100;
+            state.score += reward;
+            state.lastDailyDate = today;
             
-            // تحديث الرتبة
-            let rank = "Bronze 🥉";
-            if (state.score > 5000) rank = "Silver 🥈";
-            if (state.score > 20000) rank = "Gold 🥇";
-            if (state.score > 100000) rank = "Diamond 💎";
-            document.getElementById('rank-badge').innerText = rank;
+            if(state.streak < 7) state.streak++; else state.streak = 1;
+            
+            localStorage.setItem('streak_v25', state.streak);
+            localStorage.setItem('last_daily_v25', today);
+            
+            save(); updateUI(); openDaily();
+            tg.showAlert(`+${reward} Points!`);
         }
 
-        function openModal(id) { document.getElementById(id).classList.add('active'); if(id === 'tasks') openTasks(); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        
-        function floatNum(x, y) {
-            const el = document.createElement('div'); el.innerText = '+1';
-            el.style.cssText = `position:fixed; left:${x}px; top:${y}px; color:#fff; font-weight:bold; pointer-events:none; z-index:999; text-shadow:0 0 5px var(--primary); animation:fly 0.8s forwards;`;
-            document.body.appendChild(el); setTimeout(() => el.remove(), 800);
+        // QUIZ
+        function startQuiz() {
+            state.quizIndex = 0;
+            openModal('quiz');
+            renderQuestion();
         }
-        
-        // CSS Animation for float numbers
-        document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fly {to{transform:translateY(-100px);opacity:0}}</style>`);
 
-    </script>
-</body>
-</html>
+        function renderQuestion() {
+            if(state.quizIndex >= QUIZ_DATA.length) { tg.showAlert("Done!"); closeModal('quiz'); return; }
+            const q = QUIZ_DATA[state.quizIndex];
+            const isAr = state.lang === 'ar';
+            
+            document.getElementById('q-flag').innerText = q.flag;
+            document.getElementById('q-text').innerText = isAr ? q.q_ar : q.q_en;
