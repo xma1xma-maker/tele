@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clicker Store</title>
+    <title>Clicker Store V2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -135,6 +135,7 @@
         /* UI Elements */
         .inp { width: 100%; padding: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 12px; margin-bottom: 15px; text-align: center; }
         .btn-main { width: 100%; padding: 16px; background: var(--primary); color: #fff; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-sec { width: 100%; padding: 12px; background: #333; color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .list-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .countdown-box { font-size: 2rem; font-weight: 900; margin: 20px 0; font-variant-numeric: tabular-nums; }
     </style>
@@ -149,7 +150,7 @@
                 <span style="font-size:0.75rem; color:#888" id="user-id">ID: ...</span>
             </div>
         </div>
-        <button class="btn-main" style="width:auto; margin:0; padding:5px 15px; font-size:0.8rem; background:#333" onclick="openModal('code')">🎁 Code</button>
+        <button class="btn-main" style="width:auto; margin:0; padding:5px 15px; font-size:0.8rem; background:linear-gradient(45deg, #f39c12, #d35400)" onclick="openBoostModal()">🚀 ترقية</button>
     </div>
 
     <div class="score-container">
@@ -223,6 +224,22 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="boostModal">
+        <div class="modal-content" style="text-align:center">
+            <div class="modal-header"><h3>ترقية الضغط</h3><button class="close-btn" onclick="closeModal('boostModal')">✕</button></div>
+            <div style="font-size:4rem; margin:10px 0">👆</div>
+            <h3>النقرة المتعددة (Multitap)</h3>
+            <p style="color:#aaa; margin-bottom:20px">زيادة عدد النقاط التي تحصل عليها في كل ضغطة.</p>
+            
+            <div class="list-item">
+                <div>المستوى الحالي</div>
+                <div style="font-weight:bold; color:var(--primary)" id="boost-lvl">1</div>
+            </div>
+            
+            <button class="btn-main" onclick="buyBoost()" id="boost-btn">ترقية بـ 500 نقطة</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="tasks">
         <div class="modal-content">
             <div class="modal-header"><h3>المهام</h3><button class="close-btn" onclick="closeModal('tasks')">✕</button></div>
@@ -242,22 +259,17 @@
         <div class="modal-content" style="text-align:center">
             <div class="modal-header"><h3>يومي</h3><button class="close-btn" onclick="closeModal('daily')">✕</button></div>
             <div style="font-size:3rem">🎁</div>
-            <div id="daily-ready">
+            
+            <div id="daily-ready" style="display:none">
                 <p>استلم هديتك اليومية!</p>
                 <button class="btn-main" onclick="claimDaily()">استلام (+1000)</button>
             </div>
+            
             <div id="daily-timer" style="display:none">
                 <p>الهدية القادمة بعد:</p>
                 <div class="countdown-box" id="timer-txt">00:00:00</div>
+                <button class="btn-sec" onclick="closeModal('daily')">إغلاق</button>
             </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="code">
-        <div class="modal-content">
-            <div class="modal-header"><h3>كود</h3><button class="close-btn" onclick="closeModal('code')">✕</button></div>
-            <input type="text" class="inp" id="promo-code" placeholder="Code">
-            <button class="btn-main" onclick="redeemCode()">تحقق</button>
         </div>
     </div>
 
@@ -268,15 +280,16 @@
         // ⚠️ إعدادات الأدمن
         const CONFIG = {
             adminUsername: "YOUR_USERNAME", // ضع معرفك هنا بدون @
-            maxEnergy: 500
+            maxEnergy: 1000
         };
 
-        // الحالة (State)
+        // الحالة (State) مع إضافة Multitap
         let state = {
             score: parseInt(localStorage.getItem('cs_score') || 0),
-            energy: parseInt(localStorage.getItem('cs_energy') || 500),
+            energy: parseInt(localStorage.getItem('cs_energy') || 1000),
             lastDaily: parseInt(localStorage.getItem('cs_lastDaily') || 0),
-            completedTasks: JSON.parse(localStorage.getItem('cs_tasks') || "[]")
+            completedTasks: JSON.parse(localStorage.getItem('cs_tasks') || "[]"),
+            multitap: parseInt(localStorage.getItem('cs_multitap') || 1) // مستوى النقر
         };
 
         let currentOrder = {};
@@ -295,15 +308,15 @@
                 document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
                 document.getElementById('user-id').innerText = "ID: " + tg.initDataUnsafe.user.id;
             }
-            // إعادة تعبئة الطاقة كل ثانية
+            // إعادة تعبئة الطاقة
             setInterval(() => {
                 if(state.energy < CONFIG.maxEnergy) {
-                    state.energy++;
+                    state.energy += state.multitap; // شحن اسرع مع الترقية
+                    if(state.energy > CONFIG.maxEnergy) state.energy = CONFIG.maxEnergy;
                     updateEnergyUI();
                 }
             }, 1000);
             
-            // الحفظ التلقائي كل 5 ثواني
             setInterval(save, 5000);
         };
 
@@ -312,33 +325,28 @@
             localStorage.setItem('cs_energy', state.energy);
             localStorage.setItem('cs_lastDaily', state.lastDaily);
             localStorage.setItem('cs_tasks', JSON.stringify(state.completedTasks));
+            localStorage.setItem('cs_multitap', state.multitap);
         }
 
-        // --- نظام الضغط (Clicker) ---
+        // --- نظام الضغط (Clicker) المعدل ---
         function handleTap(e) {
-            // التحقق من الطاقة
-            if(state.energy > 0) {
-                // نقص الطاقة وزيادة النقاط
+            // نستهلك طاقة تساوي مستوى النقرة ليكون عادلاً، أو 1 ليكون سهلاً. سأجعله يستهلك 1 طاقة فقط.
+            if(state.energy >= 1) {
                 state.energy--;
-                state.score++;
+                state.score += state.multitap; // زيادة النقاط حسب المستوى
                 
-                // تحديث الواجهة
                 document.getElementById('score').innerText = state.score.toLocaleString();
                 updateEnergyUI();
 
-                // اهتزاز الهاتف
                 if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-                // تأثير الرقم العائم (+1)
-                showFloatNum(e.clientX, e.clientY);
+                showFloatNum(e.clientX, e.clientY, state.multitap);
             }
         }
 
-        function showFloatNum(x, y) {
+        function showFloatNum(x, y, val) {
             const el = document.createElement('div');
             el.className = 'float-num';
-            el.innerText = '+1';
-            // تحريك عشوائي بسيط للمكان
+            el.innerText = '+' + val;
             const rX = x + (Math.random() * 40 - 20);
             const rY = y - 20;
             el.style.left = rX + 'px';
@@ -354,6 +362,31 @@
         function updateUI() {
             document.getElementById('score').innerText = state.score.toLocaleString();
             updateEnergyUI();
+        }
+
+        // --- نظام ترقية الضغط (Boost) ---
+        function openBoostModal() {
+            openModal('boostModal');
+            document.getElementById('boost-lvl').innerText = state.multitap;
+            
+            // معادلة السعر: 500 * (2 ^ (المستوى - 1))
+            const cost = 500 * Math.pow(2, state.multitap - 1);
+            const btn = document.getElementById('boost-btn');
+            btn.innerText = `ترقية بـ ${cost.toLocaleString()} نقطة`;
+            btn.onclick = () => buyBoost(cost);
+        }
+
+        function buyBoost(cost) {
+            if(state.score >= cost) {
+                state.score -= cost;
+                state.multitap++;
+                save();
+                updateUI();
+                tg.showAlert(`تمت الترقية إلى المستوى ${state.multitap}!`);
+                openBoostModal(); // تحديث السعر الجديد
+            } else {
+                tg.showAlert("نقاطك غير كافية!");
+            }
         }
 
         // --- نظام المتجر ---
@@ -388,10 +421,54 @@
             }
         }
 
-        // --- باقي الأنظمة (مهام، مسابقة، يومي) ---
-        // (نفس الكود السابق لكن مدمج هنا للاختصار)
-        
-        // مهام
+        // --- نظام الهدية اليومية (المصلح) ---
+        let dailyTimerInt;
+
+        function openDailyModal() {
+            openModal('daily');
+            checkDailyReward();
+            // تحديث العداد كل ثانية أثناء فتح النافذة
+            if(dailyTimerInt) clearInterval(dailyTimerInt);
+            dailyTimerInt = setInterval(checkDailyReward, 1000);
+        }
+
+        function checkDailyReward() {
+            const now = Date.now();
+            const diff = now - state.lastDaily;
+            const cooldown = 86400000; // 24 ساعة
+
+            const readyDiv = document.getElementById('daily-ready');
+            const timerDiv = document.getElementById('daily-timer');
+            const timerTxt = document.getElementById('timer-txt');
+
+            if(diff >= cooldown) {
+                // الهدية جاهزة
+                readyDiv.style.display = 'block';
+                timerDiv.style.display = 'none';
+            } else {
+                // وقت الانتظار
+                readyDiv.style.display = 'none';
+                timerDiv.style.display = 'block';
+                
+                const remaining = cooldown - diff;
+                const h = Math.floor(remaining / (1000 * 60 * 60));
+                const m = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((remaining % (1000 * 60)) / 1000);
+                
+                timerTxt.innerText = `${h < 10 ? '0'+h : h}:${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+            }
+        }
+
+        function claimDaily() {
+            state.score += 1000;
+            state.lastDaily = Date.now();
+            save();
+            updateUI();
+            checkDailyReward(); // تحديث الواجهة فوراً
+            tg.showAlert("تم استلام 1000 نقطة!");
+        }
+
+        // --- مهام ومسابقة ---
         function openTasksModal() {
             openModal('tasks');
             const d = document.getElementById('tasks-list'); d.innerHTML = '';
@@ -408,7 +485,6 @@
             }, 2000);
         }
 
-        // مسابقة
         function startQuiz() {
             openModal('quiz');
             const q = QUIZ[Math.floor(Math.random()*QUIZ.length)];
@@ -421,31 +497,11 @@
             else tg.showAlert("خطأ");
         }
 
-        // يومي
-        function openDailyModal() {
-            openModal('daily');
-            const now = Date.now();
-            if(now - state.lastDaily >= 86400000) {
-                document.getElementById('daily-ready').style.display='block';
-                document.getElementById('daily-timer').style.display='none';
-            } else {
-                document.getElementById('daily-ready').style.display='none';
-                document.getElementById('daily-timer').style.display='block';
-            }
-        }
-        function claimDaily() {
-            state.score+=1000; state.lastDaily=Date.now(); save(); updateUI(); openDailyModal();
-        }
-
-        // كود
-        function redeemCode() {
-            if(document.getElementById('promo-code').value === "TON2025") {
-                state.score+=5000; save(); updateUI(); closeModal('code'); tg.showAlert("+5000");
-            } else tg.showAlert("خطأ");
-        }
-
         function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function closeModal(id) { 
+            document.getElementById(id).classList.remove('active');
+            if(id === 'daily' && dailyTimerInt) clearInterval(dailyTimerInt);
+        }
 
     </script>
 </body>
