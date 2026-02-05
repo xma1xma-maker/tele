@@ -1,387 +1,63 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TON Royal V14</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #050505;
-            --card: #1a1a1a;
-            --gold: #ffcc00;
-            --ton: #0088cc;
-            --text: #ffffff;
-            --red: #ff3b30;
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
-        
-        body {
-            font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text);
-            margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-            background-image: radial-gradient(circle at 50% 0%, #1f1f3d, #000);
-            /* مساحة للأزرار السفلية المثبتة */
-            padding-bottom: 90px; 
-        }
-
-        /* --- Header --- */
-        .header {
-            padding: 15px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .lang-btn {
-            background: transparent; border: 1px solid var(--gold); color: var(--gold);
-            padding: 5px 15px; border-radius: 20px; font-weight: bold; cursor: pointer;
-        }
-        .user-badge {
-            font-size: 0.8rem; color: #aaa; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 8px;
-        }
-
-        /* --- Score --- */
-        .score-box { text-align: center; margin-top: 10px; }
-        .score-val { font-size: 3.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--ton); }
-        .score-label { color: var(--ton); font-size: 0.9rem; font-weight: bold; }
-
-        /* --- Feature Icons --- */
-        .feat-bar { display: flex; justify-content: center; gap: 15px; margin: 10px 0; }
-        .feat-btn {
-            background: rgba(255,255,255,0.1); width: 50px; height: 50px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
-            cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* --- Game Area --- */
-        .game-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; }
-        .coin {
-            width: 230px; height: 230px; border-radius: 50%;
-            background: var(--ton); border: 6px solid rgba(255,255,255,0.2);
-            box-shadow: 0 0 50px rgba(0, 136, 204, 0.5);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.08s;
-        }
-        .coin:active { transform: scale(0.95); }
-        .coin svg { width: 60%; fill: white; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3)); }
-
-        /* --- Energy --- */
-        .energy-cont { margin: 0 20px; background: #111; padding: 10px 15px; border-radius: 12px; border: 1px solid #333; }
-        .bar-bg { background: #000; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 5px; }
-        .bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--gold), var(--ton)); transition: width 0.3s; }
-
-        /* --- Fixed Bottom Nav (تم الإصلاح: تثبيت بالأسفل) --- */
-        .nav {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
-            padding: 10px 15px;
-            padding-bottom: calc(15px + env(safe-area-inset-bottom)); /* للآيفون */
-            z-index: 900;
-        }
-        .nav-btn {
-            background: rgba(255,255,255,0.05); color: #fff; border: none;
-            padding: 10px; border-radius: 10px; font-weight: bold; font-size: 0.9rem;
-            display: flex; flex-direction: column; align-items: center; cursor: pointer;
-        }
-
-        /* --- Modals --- */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 1000;
-            display: flex; align-items: flex-end; justify-content: center;
-            opacity: 0; visibility: hidden; transition: 0.3s;
-        }
-        .modal.active { opacity: 1; visibility: visible; }
-        .modal-card {
-            background: #151515; width: 100%; max-width: 500px;
-            border-radius: 25px 25px 0 0; padding: 25px;
-            border-top: 2px solid var(--gold); transform: translateY(100%); transition: 0.3s;
-            max-height: 85vh; overflow-y: auto; text-align: center;
-            padding-bottom: 50px;
-        }
-        .modal.active .modal-card { transform: translateY(0); }
-
-        /* --- Quiz Flag Style (تم الإصلاح) --- */
-        .quiz-flag { font-size: 5rem; margin-bottom: 10px; display: block; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
-        .quiz-opt { width: 100%; padding: 15px; background: #2a2a2a; border: 1px solid #444; color: #fff; margin-bottom: 10px; border-radius: 10px; text-align: center; font-size: 1.1rem; }
-
-        /* --- Wheel --- */
-        .wheel-wrap { position: relative; width: 220px; height: 220px; margin: 20px auto; }
-        .wheel { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(#f00 0 60deg, #ff0 60deg 120deg, #0f0 120deg 180deg, #0ff 180deg 240deg, #00f 240deg 300deg, #f0f 300deg 360deg); border: 5px solid #fff; transition: 4s ease-out; }
-        .arrow { position: absolute; top: -15px; left: 50%; transform:translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #fff; z-index: 10; }
-
-        /* General */
-        .btn { width: 100%; padding: 15px; background: var(--ton); color: #fff; border: none; border-radius: 12px; font-weight: bold; margin-top: 10px; font-size: 1rem; }
-        .btn-close { background: #333; }
-        .inp { width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 10px; margin-bottom: 10px; text-align: center; }
-
-        /* Shake Effect for Wrong Answer */
-        .shake { animation: shake 0.5s; border: 1px solid var(--red); }
-        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
-
-    </style>
+  <meta charset="UTF-8">
+  <title>Telegram Mini App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+  <div class="app">
+    <h2>💎 TON Clicker</h2>
 
-    <div class="header">
-        <button class="lang-btn" onclick="toggleLang()" id="lang-btn">🇺🇸 EN</button>
-        <div class="user-badge" id="user-id">ID: Loading...</div>
+    <div class="card">
+      <p>👤 المستخدم:</p>
+      <strong id="username">---</strong>
     </div>
 
-    <div class="score-box">
-        <div class="score-val" id="score">0</div>
-        <div class="score-label" data-key="score_title">TON Points</div>
+    <div class="card">
+      <p>💰 النقاط</p>
+      <h1 id="points">0</h1>
+      <button onclick="addPoints()">➕ اضغط</button>
     </div>
 
-    <div class="feat-bar">
-        <div class="feat-btn" onclick="openDaily()">📅</div>
-        <div class="feat-btn" onclick="openModal('wheel')">🎡</div>
-        <div class="feat-btn" onclick="openModal('codes')">🎁</div>
+    <div class="menu">
+      <button onclick="openModal('tasks')">📋 مهام</button>
+      <button onclick="openModal('codes')">🎁 كود</button>
+      <button onclick="openModal('profile')">👤 حسابي</button>
     </div>
+  </div>
 
-    <div class="game-area">
-        <div class="coin" onclick="tap(event)">
-            <svg viewBox="0 0 24 24"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg>
-        </div>
+  <!-- Tasks -->
+  <div class="modal" id="tasks">
+    <div class="modal-card">
+      <h3>📋 المهام</h3>
+      <div id="tasks-list"></div>
+      <button onclick="closeModal('tasks')">إغلاق</button>
     </div>
+  </div>
 
-    <div class="energy-cont">
-        <div style="display:flex; justify-content:space-between; font-size:0.9rem">
-            <span data-key="energy">Energy</span>
-            <span id="energy-txt">100/100</span>
-        </div>
-        <div class="bar-bg"><div class="bar-fill" id="energy-bar"></div></div>
+  <!-- Codes -->
+  <div class="modal" id="codes">
+    <div class="modal-card">
+      <h3>🎁 إدخال كود</h3>
+      <input id="codeInput" placeholder="اكتب الكود">
+      <button onclick="redeemCode()">استلام</button>
+      <button onclick="closeModal('codes')">إغلاق</button>
     </div>
+  </div>
 
-    <div class="nav">
-        <button class="nav-btn" onclick="openModal('shop')">🛒 <span data-key="shop">Shop</span></button>
-        <button class="nav-btn" onclick="openModal('tasks')">📋 <span data-key="tasks">Tasks</span></button>
-        <button class="nav-btn" onclick="openQuiz()">❓ <span data-key="quiz">Quiz</span></button>
+  <!-- Profile -->
+  <div class="modal" id="profile">
+    <div class="modal-card">
+      <h3>👤 حسابي</h3>
+      <p id="profile-info"></p>
+      <button onclick="closeModal('profile')">إغلاق</button>
     </div>
+  </div>
 
-    <div class="modal" id="quiz">
-        <div class="modal-card">
-            <h2 data-key="quiz_title">Flag Quiz</h2>
-            <div style="margin: 20px 0;">
-                <span id="q-flag" class="quiz-flag"></span>
-                <h3 id="q-text" style="color:var(--gold)"></h3>
-            </div>
-            <div id="q-opts"></div>
-            <button class="btn btn-close" onclick="closeModal('quiz')" data-key="close">Close</button>
-        </div>
-    </div>
-
-    <div class="modal" id="wheel">
-        <div class="modal-card">
-            <h2 data-key="wheel_title">Spin & Win</h2>
-            <div class="wheel-wrap">
-                <div class="arrow"></div>
-                <div class="wheel" id="wheel-el"></div>
-            </div>
-            <button class="btn" id="spin-btn" onclick="spin()">SPIN (-100)</button>
-            <button class="btn btn-close" onclick="closeModal('wheel')" data-key="close">Close</button>
-        </div>
-    </div>
-
-    <div class="modal" id="daily">
-        <div class="modal-card">
-            <h2 data-key="daily_title">Daily Reward</h2>
-            <div style="font-size:3rem; margin:20px">🎁</div>
-            <button class="btn" id="daily-btn" onclick="claimDaily()">Claim</button>
-            <button class="btn btn-close" onclick="closeModal('daily')" data-key="close">Close</button>
-        </div>
-    </div>
-
-    <div class="modal" id="shop">
-        <div class="modal-card">
-            <h2 data-key="shop_title">Shop</h2>
-            <input class="inp" id="shop-link" placeholder="@username">
-            <input class="inp" type="number" id="shop-count" placeholder="100">
-            <button class="btn" onclick="buy()" data-key="buy">Buy</button>
-            <button class="btn btn-close" onclick="closeModal('shop')" data-key="close">Close</button>
-        </div>
-    </div>
-
-    <div class="modal" id="tasks">
-        <div class="modal-card">
-            <h2 data-key="tasks_title">Tasks</h2>
-            <div id="task-list" style="text-align:right"></div>
-            <button class="btn btn-close" onclick="closeModal('tasks')" data-key="close">Close</button>
-        </div>
-    </div>
-
-    <div class="modal" id="codes">
-        <div class="modal-card">
-            <h2>Code 🎁</h2>
-            <input class="inp" id="code-inp">
-            <button class="btn" onclick="redeem()">Check</button>
-            <button class="btn btn-close" onclick="closeModal('codes')" data-key="close">Close</button>
-        </div>
-    </div>
-
-    <script>
-        // === Config ===
-        const BOT_TOKEN = "8207071306:AAFqIFqsANxB7srrBEsUfZJkb4xzhsY5FMQ";
-        const ADMIN_ID = "1759629479";
-
-        // === Quiz Data (With Flags!) ===
-        const QUIZ = [
-            { flag: "🇮🇶", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["العراق", "مصر", "سوريا"], ans_en: ["Iraq", "Egypt", "Syria"], c: 0 },
-            { flag: "🇸🇦", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["قطر", "السعودية", "الكويت"], ans_en: ["Qatar", "KSA", "Kuwait"], c: 1 },
-            { flag: "🇪🇬", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["السودان", "اليمن", "مصر"], ans_en: ["Sudan", "Yemen", "Egypt"], c: 2 },
-            { flag: "🇺🇸", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["كندا", "أمريكا", "بريطانيا"], ans_en: ["Canada", "USA", "UK"], c: 1 },
-            { flag: "🇹🇷", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["تركيا", "تونس", "ليبيا"], ans_en: ["Turkey", "Tunisia", "Libya"], c: 0 }
-        ];
-
-        // === Translations ===
-        const txt = {
-            ar: {
-                score_title: "نقاط تون", energy: "الطاقة", shop: "المتجر", tasks: "المهام", quiz: "مسابقة",
-                shop_title: "شراء متابعين", daily_title: "هدية يومية", wheel_title: "عجلة الحظ", quiz_title: "مسابقة الأعلام",
-                buy: "شراء", close: "إغلاق", tasks_title: "المهام"
-            },
-            en: {
-                score_title: "TON Points", energy: "Energy", shop: "Shop", tasks: "Tasks", quiz: "Quiz",
-                shop_title: "Buy Followers", daily_title: "Daily Reward", wheel_title: "Lucky Wheel", quiz_title: "Flag Quiz",
-                buy: "Buy", close: "Close", tasks_title: "Tasks"
-            }
-        };
-
-        // === Core ===
-        const tg = window.Telegram.WebApp; tg.expand();
-        let score = parseInt(localStorage.getItem('score_v14') || 0);
-        let energy = 100;
-        let lang = localStorage.getItem('lang') || 'ar';
-        let doneTasks = JSON.parse(localStorage.getItem('done') || "[]");
-
-        // --- 1. إصلاح الآيدي ---
-        // يحاول جلب الآيدي من تيليجرام، إذا فشل يكتب "ضيف"
-        const userId = tg.initDataUnsafe?.user?.id || "Guest";
-        document.getElementById('user-id').innerText = `ID: ${userId}`;
-
-        init();
-
-        function init() {
-            applyLang(lang);
-            updateUI();
-            setInterval(() => { if(energy<100) { energy++; updateUI(); } }, 2000);
-        }
-
-        function tap(e) {
-            if(energy>0) { 
-                score++; energy--; save(); updateUI(); 
-                floatNum(e.clientX, e.clientY); 
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); 
-            }
-        }
-
-        // --- 2. إصلاح المسابقة مع الأعلام ---
-        function openQuiz() {
-            openModal('quiz');
-            const q = QUIZ[Math.floor(Math.random() * QUIZ.length)];
-            
-            // وضع العلم
-            document.getElementById('q-flag').innerText = q.flag;
-            // وضع السؤال
-            document.getElementById('q-text').innerText = lang === 'ar' ? q.q_ar : q.q_en;
-            
-            const opts = document.getElementById('q-opts');
-            opts.innerHTML = '';
-            
-            const answers = lang === 'ar' ? q.ans_ar : q.ans_en;
-            
-            answers.forEach((ans, i) => {
-                const btn = document.createElement('button');
-                btn.className = 'quiz-opt';
-                btn.innerText = ans;
-                btn.onclick = () => {
-                    if(i === q.c) {
-                        score += 100; tg.showAlert("Correct! +100"); closeModal('quiz');
-                    } else {
-                        if(score>=50) score-=50; 
-                        document.querySelector('.modal-card').classList.add('shake');
-                        setTimeout(()=>document.querySelector('.modal-card').classList.remove('shake'), 500);
-                        tg.showAlert("Wrong! -50");
-                    }
-                    save(); updateUI();
-                };
-                opts.appendChild(btn);
-            });
-        }
-
-        // --- 3. إصلاح اللغة ---
-        function toggleLang() {
-            lang = lang === 'ar' ? 'en' : 'ar';
-            localStorage.setItem('lang', lang);
-            applyLang(lang);
-        }
-
-        function applyLang(l) {
-            document.body.dir = l === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('lang-btn').innerText = l === 'ar' ? '🇺🇸 EN' : '🇮🇶 AR';
-            
-            // تحديث النصوص
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const k = el.getAttribute('data-key');
-                if(txt[l][k]) el.innerText = txt[l][k];
-            });
-            renderTasks();
-        }
-
-        // --- Wheel & Daily & Shop ---
-        function spin() {
-            if(score<100) return tg.showAlert("Need 100 Pts");
-            score-=100; save(); updateUI();
-            const w = document.getElementById('wheel-el');
-            w.style.transform = `rotate(${Math.floor(3000+Math.random()*3000)}deg)`;
-            setTimeout(()=>{ score+=200; save(); updateUI(); tg.showAlert("Win 200!"); }, 4000);
-        }
-
-        function openDaily() {
-            openModal('daily');
-            const last = localStorage.getItem('last_daily');
-            const today = new Date().toDateString();
-            const btn = document.getElementById('daily-btn');
-            if(last === today) { btn.disabled = true; btn.innerText = "Come tomorrow"; }
-            else { btn.disabled = false; btn.innerText = "Claim"; }
-        }
-
-        function claimDailyReward() {
-            score+=500; localStorage.setItem('last_daily', new Date().toDateString());
-            save(); updateUI(); closeModal('daily'); tg.showAlert("+500!");
-        }
-
-        function buy() {
-            const l=document.getElementById('shop-link').value;
-            const c=document.getElementById('shop-count').value;
-            if(score < c*4) return tg.showAlert("No Points");
-            score -= c*4; save(); updateUI();
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=NewOrder%0A${l}%0A${c}`);
-            tg.showAlert("Sent!"); closeModal('shop');
-        }
-
-        function renderTasks() {
-            const list = document.getElementById('tasks-list');
-            list.innerHTML = "";
-            const ts = [
-                {id:1, t:"Join Channel", u:"https://t.me/telegram", r:100},
-                {id:2, t:"Follow Insta", u:"https://instagram.com", r:100}
-            ];
-            ts.filter(t=>!doneTasks.includes(t.id)).forEach(t=>{
-                list.innerHTML += `<div style="background:#222;padding:10px;margin-bottom:5px;border-radius:10px;display:flex;justify-content:space-between"><span>${t.t}</span><button onclick="doTask(${t.id},'${t.u}',${t.r})" style="background:var(--ton);border:none;border-radius:5px;padding:5px 10px;color:#fff">Go +${t.r}</button></div>`;
-            });
-        }
-        function doTask(id, u, r) { window.open(u); tg.showConfirm("Done?", ok=>{ if(ok){score+=r;doneTasks.push(id);localStorage.setItem('done',JSON.stringify(doneTasks));save();updateUI();renderTasks();} }); }
-        function redeem() { if(document.getElementById('code-inp').value=="TON"){score+=1000;save();updateUI();closeModal('codes');tg.showAlert("+1000");} }
-
-        // --- Helpers ---
-        function save() { localStorage.setItem('score_v14', score); }
-        function updateUI() { document.getElementById('score').innerText = score.toLocaleString(); document.getElementById('energy-txt').innerText = energy+"/100"; document.getElementById('energy-bar').style.width = energy+"%"; }
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        function floatNum(x, y) { const el=document.createElement('div');el.innerText='+1';el.style.cssText=`position:fixed;left:${x}px;top:${y}px;color:#fff;font-weight:bold;pointer-events:none;z-index:999;animation:fly 0.8s forwards;`;document.body.appendChild(el);setTimeout(()=>el.remove(),800); }
-        document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fly {to{transform:translateY(-80px);opacity:0}}</style>`);
-    </script>
+  <script src="app.js"></script>
 </body>
 </html>
