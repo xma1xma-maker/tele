@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clicker Store Ultimate</title>
+    <title>Clicker Pro V3</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -41,9 +41,8 @@
             z-index: 10;
         }
         .user-badge { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 35px; height: 35px; background: linear-gradient(45deg, var(--primary), #00d2ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
-        .rank-info { display: flex; flex-direction: column; line-height: 1.2; }
         .lang-btn { background: transparent; border: 1px solid var(--border); color: #fff; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; }
+        .rank-display { font-size: 0.9rem; font-weight: bold; color: var(--secondary); background: rgba(243, 156, 18, 0.1); padding: 5px 10px; border-radius: 10px; border: 1px solid rgba(243, 156, 18, 0.3); }
 
         /* --- Score --- */
         .score-container { text-align: center; margin-top: 15px; }
@@ -56,18 +55,33 @@
             align-items: center; justify-content: center;
             position: relative; margin: 20px 0;
         }
+        
+        /* Coin Skins Styles */
         .coin {
-            width: 240px; height: 240px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe);
+            width: 240px; height: 240px; border-radius: 50%;
             border: 8px solid rgba(255,255,255,0.1);
             box-shadow: 0 0 50px rgba(0, 152, 234, 0.4), inset 0 0 20px rgba(0,0,0,0.2);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: transform 0.1s;
             position: relative; z-index: 5;
+            background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe); /* Default */
         }
+        /* Skins */
+        .coin.skin-gold { background: radial-gradient(circle at 30% 30%, #ffd700, #f39c12); box-shadow: 0 0 50px rgba(243, 156, 18, 0.5); border-color: #ffeaa7; }
+        .coin.skin-iraq { background: linear-gradient(135deg, #ce1126, #fff, #000); border-color: #007a3d; }
+        .coin.skin-matrix { background: #000; border-color: #0f0; box-shadow: 0 0 30px #0f0; }
+        
         .coin:active { transform: scale(0.95); }
         .coin svg { width: 60%; fill: #fff; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3)); }
+
+        /* Lucky Coin */
+        .lucky-coin {
+            position: absolute; width: 60px; height: 60px; background: gold; border-radius: 50%;
+            border: 3px solid #fff; box-shadow: 0 0 20px gold; z-index: 20;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+            animation: popIn 0.3s forwards; cursor: pointer;
+        }
+        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 
         .float-num {
             position: absolute; color: #fff; font-weight: 900; font-size: 2rem;
@@ -82,22 +96,9 @@
         .energy-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; }
         .energy-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #f1c40f); width: 100%; transition: width 0.2s; }
 
-        /* --- Store --- */
-        .section-title { padding: 0 20px; margin: 10px 0 5px 0; font-size: 1.1rem; color: #aaa; }
-        .store-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-            padding: 0 15px 20px 15px;
-        }
-        .store-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 15px; padding: 15px;
-            text-align: center; cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .store-card:active { transform: scale(0.95); background: rgba(255,255,255,0.12); }
-        .card-icon { font-size: 2rem; margin-bottom: 5px; }
-        .card-title { font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; }
-        .card-price { color: var(--secondary); font-weight: bold; font-size: 0.8rem; background: rgba(243, 156, 18, 0.15); padding: 2px 8px; border-radius: 8px; }
+        /* --- Menus Grid --- */
+        .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 15px; }
+        .menu-btn { background: var(--surface); border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 
         /* --- Nav --- */
         .nav-bar {
@@ -133,12 +134,16 @@
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .close-btn { background: #333; border: none; width: 30px; height: 30px; border-radius: 50%; color: #fff; cursor: pointer; }
 
-        /* UI Elements */
+        /* General UI */
         .inp { width: 100%; padding: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 12px; margin-bottom: 15px; text-align: center; }
         .btn-main { width: 100%; padding: 16px; background: var(--primary); color: #fff; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-sec { width: 100%; padding: 12px; background: #333; color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .list-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .countdown-box { font-size: 2rem; font-weight: 900; margin: 20px 0; font-variant-numeric: tabular-nums; }
+        .store-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 20px; }
+        .store-card { background: var(--surface); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid var(--border); cursor: pointer; }
+        
+        /* Mining Animation */
+        .mining-active { animation: pulse 2s infinite; color: var(--success); }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -146,12 +151,14 @@
     <div class="header">
         <div class="user-badge">
             <button class="lang-btn" onclick="toggleLang()" id="lang-btn">🇺🇸</button>
-            <div class="rank-info" style="margin: 0 10px">
-                <span class="rank-name" id="user-name">Guest</span>
-                <span style="font-size:0.75rem; color:#888" id="user-id">ID: ...</span>
+            <div style="margin: 0 10px">
+                <span class="rank-display" id="rank-display">🥉 Bronze</span>
             </div>
         </div>
-        <button class="btn-main" style="width:auto; margin:0; padding:5px 15px; font-size:0.8rem; background:linear-gradient(45deg, #f39c12, #d35400)" onclick="openBoostModal()" data-key="boost_btn">🚀 ترقية</button>
+        <div style="text-align: right">
+            <div id="user-name" style="font-weight:bold; font-size:0.9rem">Guest</div>
+            <div id="mining-status" style="font-size:0.7rem; color:#aaa">💤 Idle</div>
+        </div>
     </div>
 
     <div class="score-container">
@@ -159,8 +166,23 @@
         <div class="score-label" data-key="balance">الرصيد الحالي</div>
     </div>
 
-    <div class="game-area">
-        <div class="coin" onpointerdown="handleTap(event)">
+    <div class="menu-grid">
+        <div class="menu-btn" onclick="openModal('minerModal')">
+            <span>⛏️</span> <span data-key="miner">تعدين</span>
+        </div>
+        <div class="menu-btn" onclick="openModal('skinsModal')">
+            <span>🎨</span> <span data-key="skins">سكنات</span>
+        </div>
+        <div class="menu-btn" onclick="openModal('friendsModal')">
+            <span>👥</span> <span data-key="friends">أصدقاء</span>
+        </div>
+        <div class="menu-btn" onclick="openModal('boostModal')">
+            <span>🚀</span> <span data-key="boost">ترقية</span>
+        </div>
+    </div>
+
+    <div class="game-area" id="game-area">
+        <div class="coin" id="main-coin" onpointerdown="handleTap(event)">
             <svg viewBox="0 0 24 24"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg>
         </div>
     </div>
@@ -168,386 +190,390 @@
     <div class="energy-container">
         <div class="energy-info">
             <span data-key="energy">⚡ الطاقة</span>
-            <span id="energy-txt">500/500</span>
+            <span id="energy-txt">1000/1000</span>
         </div>
         <div class="energy-bg"><div class="energy-fill" id="energy-bar"></div></div>
     </div>
 
-    <h3 class="section-title" data-key="store_title">اصرف نقاطك 👇</h3>
-    <div class="store-grid">
-        <div class="store-card" onclick="openOrderModal('insta', 'item_insta', 5000)">
-            <div class="card-icon">📸</div>
-            <div class="card-title" data-key="item_insta">متابعين انستقرام</div>
-            <div class="card-price">5,000 P</div>
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="closeAllModals()">
+            <span style="font-size:1.4rem">🏠</span> <span data-key="nav_home">الرئيسية</span>
         </div>
-        <div class="store-card" onclick="openOrderModal('tele', 'item_tele', 5000)">
-            <div class="card-icon">✈️</div>
-            <div class="card-title" data-key="item_tele">أعضاء تليجرام</div>
-            <div class="card-price">5,000 P</div>
+        <div class="nav-item" onclick="openModal('storeModal')">
+            <span style="font-size:1.4rem">🛒</span> <span data-key="nav_store">المتجر</span>
         </div>
-        <div class="store-card" onclick="openOrderModal('tiktok', 'item_tiktok', 6000)">
-            <div class="card-icon">🎵</div>
-            <div class="card-title" data-key="item_tiktok">تيك توك</div>
-            <div class="card-price">6,000 P</div>
+        <div class="nav-item" onclick="openModal('tasksModal')">
+            <span style="font-size:1.4rem">📋</span> <span data-key="nav_tasks">مهام</span>
         </div>
-        <div class="store-card" onclick="openOrderModal('cash', 'item_cash', 50000)">
-            <div class="card-icon">💵</div>
-            <div class="card-title" data-key="item_cash">رصيد $5</div>
-            <div class="card-price">50,000 P</div>
+        <div class="nav-item" onclick="openModal('quizModal')">
+            <span style="font-size:1.4rem">🧠</span> <span data-key="nav_quiz">مسابقة</span>
         </div>
     </div>
 
-    <div class="nav-bar">
-        <div class="nav-item active">
-            <span style="font-size:1.4rem">🏠</span> <span data-key="nav_home">الرئيسية</span>
+    <div class="modal-overlay" id="minerModal">
+        <div class="modal-content" style="text-align:center">
+            <div class="modal-header"><h3 data-key="miner_title">روبوت التعدين</h3><button class="close-btn" onclick="closeModal('minerModal')">✕</button></div>
+            <div style="font-size:4rem">🤖</div>
+            <p data-key="miner_desc">يقوم بجمع النقاط تلقائياً حتى وأنت نائم!</p>
+            <div class="list-item">
+                <div data-key="miner_speed">السرعة الحالية</div>
+                <div style="color:var(--success); font-weight:bold"><span id="miner-speed">0</span> P/Sec</div>
+            </div>
+            <button class="btn-main" onclick="upgradeMiner()" id="miner-btn">Buy (20,000)</button>
         </div>
-        <div class="nav-item" onclick="openTasksModal()">
-            <span style="font-size:1.4rem">📋</span> <span data-key="nav_tasks">مهام</span>
+    </div>
+
+    <div class="modal-overlay" id="skinsModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 data-key="skins_title">المظاهر (Skins)</h3><button class="close-btn" onclick="closeModal('skinsModal')">✕</button></div>
+            <div id="skins-list"></div>
         </div>
-        <div class="nav-item" onclick="startQuiz()">
-            <span style="font-size:1.4rem">🧠</span> <span data-key="nav_quiz">مسابقة</span>
+    </div>
+
+    <div class="modal-overlay" id="friendsModal">
+        <div class="modal-content" style="text-align:center">
+            <div class="modal-header"><h3 data-key="friends_title">دعوة الأصدقاء</h3><button class="close-btn" onclick="closeModal('friendsModal')">✕</button></div>
+            <div style="font-size:4rem">📨</div>
+            <h3 style="color:var(--secondary)">+5,000 Points</h3>
+            <p style="color:#aaa; margin-bottom:20px" data-key="friends_desc">لكل صديق تقوم بدعوته.</p>
+            <input type="text" class="inp" id="ref-link" readonly value="https://t.me/YOUR_BOT?start=123">
+            <button class="btn-main" onclick="copyRef()" data-key="copy_link">نسخ الرابط</button>
         </div>
-        <div class="nav-item" onclick="openDailyModal()">
-            <span style="font-size:1.4rem">📅</span> <span data-key="nav_daily">يومي</span>
+    </div>
+
+    <div class="modal-overlay" id="storeModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 data-key="nav_store">المتجر</h3><button class="close-btn" onclick="closeModal('storeModal')">✕</button></div>
+            <div class="store-grid">
+                <div class="store-card" onclick="openOrderModal('insta', 'متابعين انستقرام', 5000)">
+                    <div style="font-size:2rem">📸</div><div>Instagram</div><div style="color:var(--secondary)">5,000 P</div>
+                </div>
+                <div class="store-card" onclick="openOrderModal('tele', 'أعضاء تليجرام', 5000)">
+                    <div style="font-size:2rem">✈️</div><div>Telegram</div><div style="color:var(--secondary)">5,000 P</div>
+                </div>
+                <div class="store-card" onclick="openOrderModal('tiktok', 'تيك توك', 6000)">
+                    <div style="font-size:2rem">🎵</div><div>TikTok</div><div style="color:var(--secondary)">6,000 P</div>
+                </div>
+                <div class="store-card" onclick="openOrderModal('cash', 'رصيد $5', 50000)">
+                    <div style="font-size:2rem">💵</div><div>Cash $5</div><div style="color:var(--secondary)">50,000 P</div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="orderModal">
         <div class="modal-content">
-            <div class="modal-header"><h3 id="order-title" data-key="order_title">طلب</h3><button class="close-btn" onclick="closeModal('orderModal')">✕</button></div>
+            <div class="modal-header"><h3 id="order-title">Order</h3><button class="close-btn" onclick="closeModal('orderModal')">✕</button></div>
             <div style="text-align:center; margin-bottom:20px">
-                <div style="font-size:3rem" id="order-icon">📦</div>
-                <p style="color:#aaa" data-key="order_desc">أدخل الرابط للتنفيذ</p>
+                <p style="color:#aaa" data-key="order_desc">أدخل الرابط</p>
                 <h3 style="color:var(--secondary)" id="order-price-lbl">0</h3>
             </div>
             <input type="text" class="inp" id="order-link" placeholder="Link / ID">
-            <button class="btn-main" onclick="submitOrder()" data-key="confirm">تأكيد ✅</button>
+            <button class="btn-main" onclick="submitOrder()" data-key="confirm">تأكيد</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="boostModal">
         <div class="modal-content" style="text-align:center">
-            <div class="modal-header"><h3 data-key="boost_title">ترقية الضغط</h3><button class="close-btn" onclick="closeModal('boostModal')">✕</button></div>
-            <div style="font-size:4rem; margin:10px 0">👆</div>
-            <h3 data-key="boost_multitap">النقرة المتعددة</h3>
-            <p style="color:#aaa; margin-bottom:20px" data-key="boost_desc">زيادة عدد النقاط لكل ضغطة</p>
-            
+            <div class="modal-header"><h3 data-key="boost">ترقية</h3><button class="close-btn" onclick="closeModal('boostModal')">✕</button></div>
+            <h3>Multitap</h3>
             <div class="list-item">
-                <div data-key="level">المستوى الحالي</div>
-                <div style="font-weight:bold; color:var(--primary)" id="boost-lvl">1</div>
+                <div data-key="level">المستوى</div><div id="boost-lvl" style="color:var(--primary)">1</div>
             </div>
-            
-            <button class="btn-main" onclick="buyBoost()" id="boost-btn">Upgrade</button>
+            <button class="btn-main" id="boost-btn" onclick="buyBoost()">Upgrade</button>
         </div>
     </div>
 
-    <div class="modal-overlay" id="tasks">
-        <div class="modal-content">
-            <div class="modal-header"><h3 data-key="nav_tasks">المهام</h3><button class="close-btn" onclick="closeModal('tasks')">✕</button></div>
-            <div id="tasks-list"></div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="quiz">
+    <div class="modal-overlay" id="offlineModal">
         <div class="modal-content" style="text-align:center">
-            <div class="modal-header"><h3 data-key="nav_quiz">مسابقة</h3><button class="close-btn" onclick="closeModal('quiz')">✕</button></div>
-            <h3 id="q-txt">?</h3>
-            <div id="q-opts" style="margin-top:20px"></div>
+            <div class="modal-header"><h3>Welcome Back!</h3><button class="close-btn" onclick="closeModal('offlineModal')">✕</button></div>
+            <div style="font-size:3rem">💤💰</div>
+            <p>قام الروبوت بجمع نقاط لك أثناء غيابك:</p>
+            <h2 style="color:var(--success); font-size:2.5rem" id="offline-amount">+0</h2>
+            <button class="btn-main" onclick="closeModal('offlineModal')">Collect</button>
         </div>
     </div>
 
-    <div class="modal-overlay" id="daily">
-        <div class="modal-content" style="text-align:center">
-            <div class="modal-header"><h3 data-key="daily_title">يومي</h3><button class="close-btn" onclick="closeModal('daily')">✕</button></div>
-            <div style="font-size:3rem">🎁</div>
-            
-            <div id="daily-ready" style="display:none">
-                <p data-key="daily_msg">استلم هديتك اليومية!</p>
-                <button class="btn-main" onclick="claimDaily()" data-key="daily_claim">استلام (+1000)</button>
-            </div>
-            
-            <div id="daily-timer" style="display:none">
-                <p data-key="daily_wait">الهدية القادمة بعد:</p>
-                <div class="countdown-box" id="timer-txt">00:00:00</div>
-                <button class="btn-sec" onclick="closeModal('daily')" data-key="close">إغلاق</button>
-            </div>
-        </div>
-    </div>
+    <div class="modal-overlay" id="tasksModal"><div class="modal-content"><div class="modal-header"><h3>Tasks</h3><button class="close-btn" onclick="closeModal('tasksModal')">✕</button></div><div id="tasks-list"></div></div></div>
+    <div class="modal-overlay" id="quizModal"><div class="modal-content" style="text-align:center"><div class="modal-header"><h3>Quiz</h3><button class="close-btn" onclick="closeModal('quizModal')">✕</button></div><h3 id="q-txt">?</h3><div id="q-opts" style="margin-top:20px"></div></div></div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ⚠️ Admin Settings
+        // ⚠️ ADMIN CONFIG
         const CONFIG = {
-            adminUsername: "YOUR_USERNAME", // Put your username here without @
+            adminUsername: "YOUR_USERNAME", // Put your username
+            botLink: "https://t.me/YOUR_BOT_USERNAME", // For referral link
             maxEnergy: 1000
         };
 
-        // --- Localization Data ---
+        // --- Localization ---
         const LANG = {
             ar: {
-                balance: "الرصيد الحالي", energy: "⚡ الطاقة", store_title: "اصرف نقاطك 👇",
-                nav_home: "الرئيسية", nav_tasks: "مهام", nav_quiz: "مسابقة", nav_daily: "يومي",
-                boost_btn: "🚀 ترقية", boost_title: "ترقية الضغط", boost_multitap: "النقرة المتعددة",
-                boost_desc: "زيادة عدد النقاط لكل ضغطة", level: "المستوى الحالي", upgrade: "ترقية بـ",
-                item_insta: "متابعين انستقرام", item_tele: "أعضاء تليجرام", item_tiktok: "تيك توك", item_cash: "رصيد $5",
-                order_title: "طلب", order_desc: "أدخل الرابط للتنفيذ", confirm: "تأكيد ✅",
-                daily_title: "يومي", daily_msg: "استلم هديتك اليومية!", daily_claim: "استلام", daily_wait: "الهدية القادمة بعد:",
-                close: "إغلاق", done: "تم", do: "نفذ", correct: "إجابة صحيحة", wrong: "خطأ",
-                insufficient: "نقاطك غير كافية!", link_err: "الرابط غير صحيح"
+                balance: "الرصيد", energy: "الطاقة",
+                nav_home: "الرئيسية", nav_store: "المتجر", nav_tasks: "مهام", nav_quiz: "مسابقة",
+                miner: "تعدين", skins: "سكنات", friends: "أصدقاء", boost: "ترقية",
+                miner_title: "روبوت التعدين", miner_desc: "يجمع النقاط تلقائياً", miner_speed: "السرعة",
+                skins_title: "متجر المظاهر", friends_title: "دعوة صديق", friends_desc: "احصل على 5000 نقطة لكل دعوة", copy_link: "نسخ الرابط",
+                order_desc: "أدخل الرابط للتنفيذ", confirm: "تأكيد", level: "المستوى", insufficient: "رصيد غير كافي"
             },
             en: {
-                balance: "Current Balance", energy: "⚡ Energy", store_title: "Spend Points 👇",
-                nav_home: "Home", nav_tasks: "Tasks", nav_quiz: "Quiz", nav_daily: "Daily",
-                boost_btn: "🚀 Boost", boost_title: "Click Boost", boost_multitap: "Multitap",
-                boost_desc: "Increase points per tap", level: "Current Level", upgrade: "Upgrade for",
-                item_insta: "Insta Followers", item_tele: "TG Members", item_tiktok: "TikTok", item_cash: "Cash $5",
-                order_title: "Order", order_desc: "Enter Link to Process", confirm: "Confirm ✅",
-                daily_title: "Daily Reward", daily_msg: "Claim your daily reward!", daily_claim: "Claim", daily_wait: "Next reward in:",
-                close: "Close", done: "Done", do: "Go", correct: "Correct!", wrong: "Wrong!",
-                insufficient: "Insufficient Points!", link_err: "Invalid Link"
+                balance: "Balance", energy: "Energy",
+                nav_home: "Home", nav_store: "Store", nav_tasks: "Tasks", nav_quiz: "Quiz",
+                miner: "Miner", skins: "Skins", friends: "Friends", boost: "Boost",
+                miner_title: "Auto Miner", miner_desc: "Collects points automatically", miner_speed: "Speed",
+                skins_title: "Skins Shop", friends_title: "Invite Friends", friends_desc: "Get 5000 points per invite", copy_link: "Copy Link",
+                order_desc: "Enter Link", confirm: "Confirm", level: "Level", insufficient: "Insufficient Funds"
             }
         };
 
-        // --- Data & State ---
+        // --- State ---
         let state = {
-            score: parseInt(localStorage.getItem('cs_score') || 0),
-            energy: parseInt(localStorage.getItem('cs_energy') || 1000),
-            lastDaily: parseInt(localStorage.getItem('cs_lastDaily') || 0),
-            completedTasks: JSON.parse(localStorage.getItem('cs_tasks') || "[]"),
-            multitap: parseInt(localStorage.getItem('cs_multitap') || 1),
-            lang: localStorage.getItem('cs_lang') || 'ar'
+            score: parseInt(localStorage.getItem('cp_score') || 0),
+            energy: parseInt(localStorage.getItem('cp_energy') || 1000),
+            multitap: parseInt(localStorage.getItem('cp_multitap') || 1),
+            minerLvl: parseInt(localStorage.getItem('cp_minerLvl') || 0), // 0 = not bought
+            lastLogin: parseInt(localStorage.getItem('cp_lastTime') || Date.now()),
+            skin: localStorage.getItem('cp_skin') || 'default',
+            ownedSkins: JSON.parse(localStorage.getItem('cp_skinsOwned') || '["default"]'),
+            lang: localStorage.getItem('cp_lang') || 'ar'
         };
 
-        let currentOrder = {};
-        
-        // Bilingual Content Arrays
-        const TASKS = [
-            {id:1, txt_ar:"اشترك بالقناة", txt_en:"Join Channel", r:500, url:"https://t.me/telegram"},
-            {id:2, txt_ar:"تابعنا انستقرام", txt_en:"Follow Instagram", r:300, url:"https://instagram.com"}
-        ];
-        const QUIZ = [
-            {q_ar:"عاصمة مصر؟", q_en:"Capital of Egypt?", a_ar:["القاهرة","الاسكندرية"], a_en:["Cairo","Alexandria"], c:0},
-            {q_ar:"لون السماء؟", q_en:"Color of Sky?", a_ar:["أحمر","أزرق"], a_en:["Red","Blue"], c:1}
+        // Skins Data
+        const SKINS = [
+            {id: 'default', name: 'Original', price: 0, icon: '🔵'},
+            {id: 'skin-gold', name: 'Golden Coin', price: 50000, icon: '🟡'},
+            {id: 'skin-iraq', name: 'Iraq Flag', price: 100000, icon: '🇮🇶'},
+            {id: 'skin-matrix', name: 'Matrix', price: 200000, icon: '👾'}
         ];
 
         window.onload = () => {
             applyLang(state.lang);
             updateUI();
-            if(tg.initDataUnsafe?.user) {
-                document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
-                document.getElementById('user-id').innerText = "ID: " + tg.initDataUnsafe.user.id;
+            updateRank();
+            applySkin(state.skin);
+            
+            // Offline Earnings Logic
+            const now = Date.now();
+            if(state.minerLvl > 0) {
+                const secondsPassed = Math.floor((now - state.lastLogin) / 1000);
+                if(secondsPassed > 60) {
+                    const earned = secondsPassed * state.minerLvl; // 1 point per sec per level
+                    state.score += earned;
+                    document.getElementById('offline-amount').innerText = "+" + earned.toLocaleString();
+                    openModal('offlineModal');
+                }
+                // Start live mining UI effect
+                document.getElementById('mining-status').innerText = "⛏️ Mining...";
+                document.getElementById('mining-status').classList.add('mining-active');
             }
-            // Energy Regen
-            setInterval(() => {
+
+            // Loops
+            setInterval(() => { // Energy & Mining
                 if(state.energy < CONFIG.maxEnergy) {
-                    state.energy += state.multitap;
+                    state.energy += state.multitap; 
                     if(state.energy > CONFIG.maxEnergy) state.energy = CONFIG.maxEnergy;
                     updateEnergyUI();
                 }
+                if(state.minerLvl > 0) {
+                    state.score += state.minerLvl; // Add miner points live
+                    updateUI();
+                }
             }, 1000);
             
-            setInterval(save, 5000);
+            setInterval(save, 5000); // Auto Save
         };
 
         function save() {
-            localStorage.setItem('cs_score', state.score);
-            localStorage.setItem('cs_energy', state.energy);
-            localStorage.setItem('cs_lastDaily', state.lastDaily);
-            localStorage.setItem('cs_tasks', JSON.stringify(state.completedTasks));
-            localStorage.setItem('cs_multitap', state.multitap);
-            localStorage.setItem('cs_lang', state.lang);
+            localStorage.setItem('cp_score', state.score);
+            localStorage.setItem('cp_energy', state.energy);
+            localStorage.setItem('cp_multitap', state.multitap);
+            localStorage.setItem('cp_minerLvl', state.minerLvl);
+            localStorage.setItem('cp_skin', state.skin);
+            localStorage.setItem('cp_skinsOwned', JSON.stringify(state.ownedSkins));
+            localStorage.setItem('cp_lastTime', Date.now());
+            localStorage.setItem('cp_lang', state.lang);
         }
 
-        // --- Localization Logic ---
-        function toggleLang() {
-            state.lang = state.lang === 'ar' ? 'en' : 'ar';
-            applyLang(state.lang);
-            save();
-        }
+        // --- Core Mechanics ---
 
-        function applyLang(l) {
-            const data = LANG[l];
-            document.body.dir = l === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('lang-btn').innerText = l === 'ar' ? '🇺🇸' : '🇮🇶';
-            
-            // Apply text to all elements with data-key
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const key = el.getAttribute('data-key');
-                if(data[key]) el.innerText = data[key];
-            });
-        }
-
-        function t(key) { return LANG[state.lang][key]; } // Helper to get string in JS
-
-        // --- Clicker ---
         function handleTap(e) {
             if(state.energy >= 1) {
                 state.energy--;
                 state.score += state.multitap;
-                document.getElementById('score').innerText = state.score.toLocaleString();
-                updateEnergyUI();
+                updateUI(); updateEnergyUI(); updateRank();
                 if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                showFloatNum(e.clientX, e.clientY, state.multitap);
+                showFloatNum(e.clientX, e.clientY, '+' + state.multitap);
+                
+                // 🌟 Tap to Luck (5% Chance)
+                if(Math.random() < 0.05) spawnLuckyCoin();
             }
         }
 
-        function showFloatNum(x, y, val) {
-            const el = document.createElement('div');
-            el.className = 'float-num';
-            el.innerText = '+' + val;
-            el.style.left = (x + (Math.random() * 40 - 20)) + 'px';
-            el.style.top = (y - 20) + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 800);
+        function spawnLuckyCoin() {
+            const coin = document.createElement('div');
+            coin.className = 'lucky-coin';
+            coin.innerText = '🍀';
+            // Random Pos inside game area
+            const area = document.getElementById('game-area');
+            const rect = area.getBoundingClientRect();
+            coin.style.left = (Math.random() * (rect.width - 60)) + 'px';
+            coin.style.top = (Math.random() * (rect.height - 60)) + 'px';
+            
+            coin.onpointerdown = (e) => {
+                e.stopPropagation();
+                state.score += 500;
+                tg.HapticFeedback.notificationOccurred('success');
+                showFloatNum(e.clientX, e.clientY, '+500!');
+                coin.remove();
+            };
+            
+            area.appendChild(coin);
+            setTimeout(() => coin.remove(), 800); // Disappear fast
         }
 
-        function updateEnergyUI() {
-            document.getElementById('energy-txt').innerText = `${state.energy}/${CONFIG.maxEnergy}`;
-            document.getElementById('energy-bar').style.width = (state.energy / CONFIG.maxEnergy * 100) + "%";
+        function updateRank() {
+            let r = "🥉 Bronze";
+            let c = "#cd7f32";
+            if(state.score > 5000) { r = "🥈 Silver"; c = "#bdc3c7"; }
+            if(state.score > 50000) { r = "🥇 Gold"; c = "#f1c40f"; }
+            if(state.score > 1000000) { r = "💎 Diamond"; c = "#3498db"; }
+            const el = document.getElementById('rank-display');
+            el.innerText = r;
+            el.style.color = c;
+            el.style.borderColor = c;
         }
-        function updateUI() {
-            document.getElementById('score').innerText = state.score.toLocaleString();
-            updateEnergyUI();
+
+        // --- Miner System ---
+        function upgradeMiner() {
+            // Cost formula: 20000 * (level + 1)
+            const cost = 20000 * (state.minerLvl + 1);
+            if(state.score >= cost) {
+                state.score -= cost;
+                state.minerLvl++;
+                save(); updateUI();
+                openModal('minerModal'); // Refresh UI
+                tg.showAlert(`Miner Upgraded to Lvl ${state.minerLvl}`);
+            } else tg.showAlert(LANG[state.lang].insufficient);
+        }
+
+        // --- Skins System ---
+        function renderSkins() {
+            const div = document.getElementById('skins-list');
+            div.innerHTML = '';
+            SKINS.forEach(s => {
+                const owned = state.ownedSkins.includes(s.id);
+                const active = state.skin === s.id;
+                let btnHtml = '';
+                
+                if(active) btnHtml = `<button class="btn-sec" disabled>Equipped</button>`;
+                else if(owned) btnHtml = `<button class="btn-main" onclick="equipSkin('${s.id}')" style="padding:5px 10px;margin:0">Equip</button>`;
+                else btnHtml = `<button class="btn-main" onclick="buySkin('${s.id}', ${s.price})" style="padding:5px 10px;margin:0;background:var(--secondary)">Buy ${s.price/1000}k</button>`;
+
+                div.innerHTML += `
+                <div class="list-item">
+                    <div style="display:flex;align-items:center;gap:10px;font-size:1.5rem">${s.icon} <span style="font-size:1rem;font-weight:bold">${s.name}</span></div>
+                    ${btnHtml}
+                </div>`;
+            });
+        }
+        function buySkin(id, price) {
+            if(state.score >= price) {
+                state.score -= price;
+                state.ownedSkins.push(id);
+                save(); renderSkins();
+            } else tg.showAlert(LANG[state.lang].insufficient);
+        }
+        function equipSkin(id) {
+            state.skin = id;
+            save(); renderSkins(); applySkin(id);
+        }
+        function applySkin(id) {
+            const c = document.getElementById('main-coin');
+            c.className = 'coin ' + id; // e.g. "coin skin-iraq"
+        }
+
+        // --- Referral ---
+        function copyRef() {
+            const uid = tg.initDataUnsafe?.user?.id || '123';
+            const link = `${CONFIG.botLink}?start=ref_${uid}`;
+            navigator.clipboard.writeText(link);
+            tg.showAlert("Link Copied! Send it to friends.");
         }
 
         // --- Boost ---
-        function openBoostModal() {
-            openModal('boostModal');
-            document.getElementById('boost-lvl').innerText = state.multitap;
+        function buyBoost() {
             const cost = 500 * Math.pow(2, state.multitap - 1);
-            document.getElementById('boost-btn').innerText = `${t('upgrade')} ${cost.toLocaleString()}`;
-            document.getElementById('boost-btn').onclick = () => buyBoost(cost);
-        }
-
-        function buyBoost(cost) {
             if(state.score >= cost) {
                 state.score -= cost;
                 state.multitap++;
-                save();
-                updateUI();
-                tg.showAlert(`Upgraded to Level ${state.multitap}!`);
-                openBoostModal();
-            } else {
-                tg.showAlert(t('insufficient'));
-            }
+                save(); updateUI();
+                document.getElementById('boost-lvl').innerText = state.multitap;
+                document.getElementById('boost-btn').innerText = "Upgrade " + (500 * Math.pow(2, state.multitap - 1));
+            } else tg.showAlert(LANG[state.lang].insufficient);
         }
 
-        // --- Store ---
-        function openOrderModal(type, keyName, price) {
-            // Translate the name based on the key passed
-            const name = t(keyName);
-            currentOrder = { type, name, price };
-            document.getElementById('order-title').innerText = name;
-            document.getElementById('order-price-lbl').innerText = price.toLocaleString();
-            let icon = type==='insta'?'📸': type==='tele'?'✈️': type==='tiktok'?'🎵':'💵';
-            document.getElementById('order-icon').innerText = icon;
-            openModal('orderModal');
+        // --- UI & Utils ---
+        function updateUI() {
+            document.getElementById('score').innerText = Math.floor(state.score).toLocaleString();
+            document.getElementById('energy-txt').innerText = `${state.energy}/${CONFIG.maxEnergy}`;
+            document.getElementById('energy-bar').style.width = (state.energy / CONFIG.maxEnergy * 100) + "%";
+            
+            // Miner Modal Update
+            const nextMinerCost = 20000 * (state.minerLvl + 1);
+            document.getElementById('miner-speed').innerText = state.minerLvl;
+            document.getElementById('miner-btn').innerText = `Upgrade (${nextMinerCost.toLocaleString()})`;
+            
+            // Boost Modal Update
+            document.getElementById('boost-lvl').innerText = state.multitap;
+            document.getElementById('boost-btn').innerText = `Upgrade (${(500 * Math.pow(2, state.multitap - 1)).toLocaleString()})`;
         }
 
-        function submitOrder() {
-            const link = document.getElementById('order-link').value;
-            if(!link || link.length < 3) return tg.showAlert(t('link_err'));
-            if(state.score < currentOrder.price) return tg.showAlert(t('insufficient'));
-
-            state.score -= currentOrder.price;
-            save();
-            updateUI();
-
-            const user = tg.initDataUnsafe.user;
-            const uname = user ? `@${user.username || 'NoUser'} (${user.id})` : "Guest";
-            const msg = `🛒 NEW ORDER:\n👤: ${uname}\n📦: ${currentOrder.name}\n🔗: ${link}\n💰: ${currentOrder.price}`;
-
-            if(CONFIG.adminUsername !== "YOUR_USERNAME") {
-                tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
-                closeModal('orderModal');
-                document.getElementById('order-link').value = "";
-            } else {
-                tg.showAlert("Done (Please set Admin Username)");
-            }
+        function showFloatNum(x, y, txt) {
+            const el = document.createElement('div');
+            el.className = 'float-num'; el.innerText = txt;
+            el.style.left = x + 'px'; el.style.top = (y-30) + 'px';
+            document.body.appendChild(el);
+            setTimeout(()=>el.remove(), 800);
         }
 
-        // --- Daily Reward ---
-        let dailyTimerInt;
-        function openDailyModal() {
-            openModal('daily');
-            checkDailyReward();
-            if(dailyTimerInt) clearInterval(dailyTimerInt);
-            dailyTimerInt = setInterval(checkDailyReward, 1000);
+        function toggleLang() {
+            state.lang = state.lang==='ar'?'en':'ar';
+            applyLang(state.lang); save();
         }
-
-        function checkDailyReward() {
-            const now = Date.now();
-            const diff = now - state.lastDaily;
-            const cooldown = 86400000;
-            const readyDiv = document.getElementById('daily-ready');
-            const timerDiv = document.getElementById('daily-timer');
-
-            if(diff >= cooldown) {
-                readyDiv.style.display = 'block';
-                timerDiv.style.display = 'none';
-            } else {
-                readyDiv.style.display = 'none';
-                timerDiv.style.display = 'block';
-                const remaining = cooldown - diff;
-                const h = Math.floor(remaining / (1000 * 60 * 60));
-                const m = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((remaining % (1000 * 60)) / 1000);
-                document.getElementById('timer-txt').innerText = `${h < 10 ? '0'+h : h}:${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
-            }
-        }
-
-        function claimDaily() {
-            state.score += 1000;
-            state.lastDaily = Date.now();
-            save();
-            updateUI();
-            checkDailyReward();
-            tg.showAlert("+1000!");
-        }
-
-        // --- Tasks & Quiz ---
-        function openTasksModal() {
-            openModal('tasks');
-            const d = document.getElementById('tasks-list'); d.innerHTML = '';
-            TASKS.forEach(task => {
-                const done = state.completedTasks.includes(task.id);
-                // Select text based on language
-                const txt = state.lang === 'ar' ? task.txt_ar : task.txt_en;
-                d.innerHTML += `<div class="list-item"><div><b>${txt}</b><br><small style="color:var(--success)">+${task.r}</small></div>
-                ${done ? `<small>${t('done')}</small>` : `<button onclick="doTask(${task.id},'${task.url}',${task.r})" style="background:var(--primary);border:none;color:#fff;padding:5px 10px;border-radius:5px">${t('do')}</button>`}</div>`;
+        function applyLang(l) {
+            const d = LANG[l];
+            document.body.dir = l==='ar'?'rtl':'ltr';
+            document.getElementById('lang-btn').innerText = l==='ar'?'🇺🇸':'🇮🇶';
+            document.querySelectorAll('[data-key]').forEach(el => {
+                if(d[el.getAttribute('data-key')]) el.innerText = d[el.getAttribute('data-key')];
             });
         }
-        function doTask(id, url, r) {
-            window.open(url);
-            setTimeout(() => { 
-                state.score += r; state.completedTasks.push(id); save(); updateUI(); openTasksModal();
-            }, 2000);
-        }
 
-        function startQuiz() {
-            openModal('quiz');
-            const q = QUIZ[Math.floor(Math.random()*QUIZ.length)];
-            const qText = state.lang === 'ar' ? q.q_ar : q.q_en;
-            const answers = state.lang === 'ar' ? q.a_ar : q.a_en;
-            
-            document.getElementById('q-txt').innerText = qText;
-            const d = document.getElementById('q-opts'); d.innerHTML = '';
-            answers.forEach((ans, i) => d.innerHTML += `<button class="btn-main" style="margin-top:5px;background:#333" onclick="ansQuiz(${i},${q.c})">${ans}</button>`);
+        function openModal(id) { 
+            document.getElementById(id).classList.add('active'); 
+            if(id === 'skinsModal') renderSkins();
         }
-        function ansQuiz(s, c) {
-            if(s===c) { 
-                state.score+=100; tg.showAlert(t('correct') + " +100"); closeModal('quiz'); updateUI(); save(); 
-            } else {
-                tg.showAlert(t('wrong'));
-            }
-        }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function closeAllModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
 
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { 
-            document.getElementById(id).classList.remove('active');
-            if(id === 'daily' && dailyTimerInt) clearInterval(dailyTimerInt);
+        // --- Store Order ---
+        let currentOrder = {};
+        function openOrderModal(type, name, price) {
+            currentOrder = {type, name, price};
+            document.getElementById('order-title').innerText = name;
+            document.getElementById('order-price-lbl').innerText = price.toLocaleString();
+            openModal('orderModal');
+        }
+        function submitOrder() {
+            const val = document.getElementById('order-link').value;
+            if(!val) return tg.showAlert("Error");
+            if(state.score < currentOrder.price) return tg.showAlert(LANG[state.lang].insufficient);
+            state.score -= currentOrder.price; save(); updateUI();
+            const msg = `ORDER: ${currentOrder.name} - Link: ${val} - User: ${tg.initDataUnsafe?.user?.id}`;
+            tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
+            closeModal('orderModal');
         }
 
     </script>
