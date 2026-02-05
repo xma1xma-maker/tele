@@ -1,210 +1,139 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TON Legend V24 - Complete & Final</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root { --bg: #050505; --panel: #1a1a1a; --primary: #0098EA; --gold: #FFD700; --success: #2ecc71; --danger: #e74c3c; --text: #ffffff; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
-        body { font-family: 'Cairo', sans-serif; background-color: var(--bg ); color: var(--text); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; background-image: radial-gradient(circle at 50% 10%, #1a2a3a, #000); padding-bottom: 90px; }
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .user-info { display: flex; gap: 10px; align-items: center; }
-        .rank-badge { background: var(--gold); color: #000; padding: 3px 10px; border-radius: 10px; font-weight: bold; font-size: 0.8rem; }
-        .lang-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 5px 12px; border-radius: 15px; cursor: pointer; font-weight: bold; }
-        .score-area { text-align: center; margin-top: 20px; animation: pulse 2s infinite alternate; }
-        .score-val { font-size: 3.5rem; font-weight: 900; text-shadow: 0 0 25px var(--primary); line-height: 1; }
-        .score-sub { font-size: 0.9rem; color: #aaa; margin-top: 5px; }
-        .feat-bar { display: flex; justify-content: center; gap: 20px; margin: 20px 0; }
-        .feat-btn { background: rgba(255,255,255,0.05); width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.2s; }
-        .feat-btn:active { transform: scale(0.9); background: var(--primary); border-color: var(--primary); }
-        .game-stage { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
-        .coin { width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #0098EA, #005580); border: 8px solid rgba(255,255,255,0.1); box-shadow: 0 0 60px rgba(0, 152, 234, 0.5); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.08s; position: relative; }
-        .coin:active { transform: scale(0.92); }
-        .coin-svg { width: 60%; fill: #fff; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3)); }
-        .energy-wrap { margin: 0 20px; background: var(--panel); padding: 12px; border-radius: 15px; border: 1px solid #333; }
-        .progress-bg { background: #000; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 8px; }
-        .progress-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #fff, var(--primary)); transition: width 0.3s; }
-        .nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(15px); border-top: 1px solid #333; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px 15px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); z-index: 800; }
-        .nav-item { background: rgba(255,255,255,0.03); color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .nav-item:active { background: rgba(255,255,255,0.1); }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s; }
-        .modal.active { opacity: 1; visibility: visible; }
-        .modal-card { background: #151515; width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 30px 20px; border-top: 3px solid var(--primary); transform: translateY(100%); transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); max-height: 85vh; overflow-y: auto; text-align: center; padding-bottom: 50px; }
-        .modal.active .modal-card { transform: translateY(0); }
-        .btn { width: 100%; padding: 16px; background: var(--primary); color: #fff; border: none; border-radius: 14px; font-weight: bold; margin-top: 15px; font-size: 1rem; cursor: pointer; box-shadow: 0 5px 15px rgba(0, 152, 234, 0.3); }
-        .btn:disabled { background: #333 !important; color: #888 !important; cursor: not-allowed; box-shadow: none; }
-        .btn-close { background: #333; box-shadow: none; margin-top: 10px; }
-        .inp { width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 12px; margin-bottom: 12px; text-align: center; font-size: 1rem; }
-        .quiz-option { background: #252525; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid #333; font-size: 1.1rem; transition: 0.2s; }
-        .quiz-option:active { transform: scale(0.98); }
-        .correct { background: var(--success) !important; color: #000; border-color: var(--success); }
-        .wrong { background: var(--danger) !important; border-color: var(--danger); }
-        .streak-container { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; justify-content: center; margin: 20px 0; }
-        .day-box { background: #2a2a2a; border-radius: 12px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.6; font-size: 0.8rem; border: 1px solid #444; }
-        .day-box .day-number { font-size: 0.7rem; margin-bottom: 5px; color: #aaa; }
-        .day-box .day-icon { font-size: 1.5rem; }
-        .day-box .day-reward { font-size: 0.7rem; font-weight: bold; color: #ccc; }
-        .day-box.claimed { opacity: 1; background: var(--success); color: #000; }
-        .day-box.claimed .day-number, .day-box.claimed .day-reward { color: #000; }
-        .day-box.claimable { opacity: 1; background: var(--gold); color: #000; cursor: pointer; animation: pulse-gold 1.5s infinite; }
-        .day-box.claimable .day-number, .day-box.claimable .day-reward { color: #000; }
-        @keyframes pulse-gold { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.5); } 50% { transform: scale(1.05); box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0); } }
-    </style>
-</head>
-<body>
-    <div id="loader"><div class="spinner"></div><h2 style="color:#fff">TON LEGEND</h2><p style="color:#666">جاري تحميل البيانات...</p></div>
-    <div class="header"><div class="user-info"><span class="rank-badge" id="rank-badge">Bronze 🥉</span><span style="font-size:0.8rem; opacity:0.7" id="user-id">ID: ...</span></div><button class="lang-btn" onclick="toggleLang()" id="lang-btn">🇺🇸 EN</button></div>
-    <div class="score-area"><div class="score-val" id="score">0</div><div class="score-sub" data-key="points_lbl">TON Points</div></div>
-    <div class="feat-bar"><div class="feat-btn" onclick="openDaily()">📅</div><div class="feat-btn" onclick="openModal('codes')">🎁</div><div class="feat-btn" onclick="openModal('shop')">💎</div></div>
-    <div class="game-stage"><div class="coin" onclick="tap(event)"><svg class="coin-svg" viewBox="0 0 24 24"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg></div></div>
-    <div class="energy-wrap"><div style="display:flex; justify-content:space-between; font-size:0.9rem"><span data-key="energy_lbl">Energy</span><span id="energy-txt">100/100</span></div><div class="progress-bg"><div class="progress-fill" id="energy-bar"></div></div></div>
-    <div class="nav"><div class="nav-item" onclick="openModal('shop')"><span>🛒</span> <span data-key="shop_btn">Shop</span></div><div class="nav-item" onclick="openTasks()"><span>📋</span> <span data-key="tasks_btn">Tasks</span></div><div class="nav-item" onclick="startQuiz()"><span>❓</span> <span data-key="quiz_btn">Quiz</span></div></div>
-    <div class="modal" id="daily"><div class="modal-card"><h2 data-key="daily_title">Daily Reward</h2><div class="streak-container" id="streak-dots"></div><p id="daily-status" style="color:#aaa; margin-bottom:20px">...</p><button class="btn" id="claim-btn" onclick="claimDaily()">Claim</button><button class="btn btn-close" onclick="closeModal('daily')" data-key="close_btn">Close</button></div></div>
-    <div class="modal" id="quiz"><div class="modal-card"><h2 data-key="quiz_title">Challenge</h2><div id="quiz-timer" style="font-size: 1.5rem; color: var(--gold); margin: 20px 0; display: none;"></div><div id="quiz-content" style="display: block;"><div style="width:100%; background:#333; height:5px; border-radius:5px; margin:10px 0; overflow:hidden"><div id="quiz-progress" style="width:0%; height:100%; background:var(--primary); transition:0.3s"></div></div><div style="font-size:3rem; margin:10px 0;" id="q-flag"></div><h3 id="q-text" style="margin-bottom:20px">Question?</h3><div id="q-opts"></div></div><button class="btn btn-close" onclick="closeModal('quiz')" data-key="exit_btn">Exit</button></div></div>
-    <div class="modal" id="tasks"><div class="modal-card"><h2 data-key="tasks_title">Tasks</h2><div id="task-list"></div><button class="btn btn-close" onclick="closeModal('tasks')" data-key="close_btn">Close</button></div></div>
-    <div class="modal" id="shop"><div class="modal-card"><h2 data-key="shop_title">Shop</h2><input class="inp" id="shop-link" placeholder="@username"><input class="inp" type="number" id="shop-count" placeholder="Count (Min 100)"><button class="btn" onclick="buy()" data-key="buy_btn">Buy Followers</button><button class="btn btn-close" onclick="closeModal('shop')" data-key="close_btn">Close</button></div></div>
-    <div class="modal" id="codes"><div class="modal-card"><h2 data-key="code_title">Promo Code</h2><input class="inp" id="code-inp" placeholder="Enter Code"><button class="btn" onclick="redeem()" data-key="check_btn">Check</button><button class="btn btn-close" onclick="closeModal('codes')" data-key="close_btn">Close</button></div></div>
-
-    <script>
-        // ================= CONFIG & DATA =================
-        const CONFIG = { botToken: "8207071306:AAFqIFqsANxB7srrBEsUfZJkb4xzhsY5FMQ", adminId: "1759629479", energyRegenRate: 2000 };
-        const QUIZ_DATA = [ { id: 1, flag: "🇮🇶", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["العراق", "مصر", "سوريا"], ans_en: ["Iraq", "Egypt", "Syria"], c: 0, reward: 100, penalty: 50 }, { id: 2, flag: "🇸🇦", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["الكويت", "السعودية", "قطر"], ans_en: ["Kuwait", "KSA", "Qatar"], c: 1, reward: 100, penalty: 50 }, { id: 3, flag: "🇺🇸", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["كندا", "أمريكا", "المكسيك"], ans_en: ["Canada", "USA", "Mexico"], c: 1, reward: 100, penalty: 50 }, ];
-        const TASKS = [ { id: 1, t_ar: "اشترك في قناتنا", t_en: "Join Channel", u: "https://t.me/NLL2LL", r: 200 }, { id: 2, t_ar: "تابعنا انستقرام", t_en: "Follow Instagram", u: "https://instagram.com", r: 150 }, { id: 3, t_ar: "دعوة صديق", t_en: "Invite Friend", u: `https://t.me/share/url?url=https://t.me/tonlegendv16bot?start=Guest`, r: 500 } ];
-        const LANG = { ar: { points_lbl: "نقاط تون", energy_lbl: "الطاقة", shop_btn: "المتجر", tasks_btn: "المهام", quiz_btn: "مسابقة", shop_title: "شراء متابعين", tasks_title: "المهام", daily_title: "المكافأة اليومية", quiz_title: "مسابقة الأعلام", code_title: "كود هدية", buy_btn: "شراء", close_btn: "إغلاق", exit_btn: "خروج", check_btn: "تحقق" }, en: { points_lbl: "TON Points", energy_lbl: "Energy", shop_btn: "Shop", tasks_btn: "Tasks", quiz_btn: "Quiz", shop_title: "Buy Followers", tasks_title: "Tasks", daily_title: "Daily Reward", quiz_title: "Flag Quiz", code_title: "Promo Code", buy_btn: "Buy", close_btn: "Close", exit_btn: "Exit", check_btn: "Check" } };
-
-        // ================= SERVER API SIMULATOR =================
-        const ServerAPI = {
-            _getMockDB: ( ) => ({ score: parseInt(localStorage.getItem('score_v24') || 0), energy: parseInt(localStorage.getItem('energy_v24') || 100), doneTasks: JSON.parse(localStorage.getItem('done_tasks_v24') || "[]"), lastDailyDate: localStorage.getItem('last_daily_date_v24'), streak: parseInt(localStorage.getItem('streak_v24') || 1), lastQuizTime: parseInt(localStorage.getItem('last_quiz_time_v24') || 0) }),
-            _saveMockDB: (db) => { localStorage.setItem('score_v24', db.score); localStorage.setItem('energy_v24', db.energy); localStorage.setItem('done_tasks_v24', JSON.stringify(db.doneTasks)); if(db.lastDailyDate) localStorage.setItem('last_daily_date_v24', db.lastDailyDate); localStorage.setItem('streak_v24', db.streak); localStorage.setItem('last_quiz_time_v24', db.lastQuizTime); },
-            _call: async (action, data) => {
-                console.log(`[API MOCK] Action: ${action}`, data);
-                return new Promise(resolve => setTimeout(() => {
-                    let db = ServerAPI._getMockDB(); let response = { success: false, data: {}, message: 'Unknown error' };
-                    if (action === 'getUserData') { response = { success: true, data: db }; }
-                    else if (action === 'syncTap') { if (db.energy > 0) { db.score++; db.energy--; response = { success: true, data: { score: db.score, energy: db.energy } }; } else { response = { success: false, message: 'No energy' }; } }
-                    else if (action === 'submitQuizAnswer') { const question = QUIZ_DATA.find(q => q.id === data.questionId); if (data.isCorrect) { db.score += question.reward; } else { db.score = Math.max(0, db.score - question.penalty); } response = { success: true, data: { score: db.score } }; }
-                    else if (action === 'claimDailyReward') { const today = new Date().toDateString(); if (db.lastDailyDate === today) { response = { success: false, message: 'Already claimed' }; } else { const reward = db.streak === 7 ? 1000 : db.streak * 100; db.score += reward; db.lastDailyDate = today; if (db.streak < 7) db.streak++; else db.streak = 1; response = { success: true, data: { score: db.score, streak: db.streak, lastDailyDate: db.lastDailyDate } }; } }
-                    else if (action === 'completeTask') { if (!db.doneTasks.includes(data.taskId)) { db.score += data.reward; db.doneTasks.push(data.taskId); response = { success: true, data: { score: db.score, doneTasks: db.doneTasks } }; } else { response = { success: false, message: 'Task already done' }; } }
-                    else if (action === 'redeemCode') { if (data.code === "TON") { db.score += 1000; response = { success: true, data: { score: db.score }, message: '+1000!' }; } else { response = { success: false, message: 'Invalid code' }; } }
-                    else if (action === 'finishQuiz') { db.lastQuizTime = Date.now(); response = { success: true, data: { lastQuizTime: db.lastQuizTime } }; }
-                    else if (action === 'buyFollowers') { const price = data.count * 4; if (db.score >= price) { db.score -= price; response = { success: true, data: { score: db.score } }; } else { response = { success: false, message: 'Not enough points' }; } }
-                    ServerAPI._saveMockDB(db); console.log('[API MOCK] Response:', response); resolve(response);
-                }, 200));
+'day-box ' + (i < state.streak ? 'claimed' : (i === state.streak && canClaim ? 'claimable' : ''));
+                
+                const reward = i === 7 ? 1000 : i * 100;
+                dayBox.innerHTML = `<span class="day-number">${state.lang === 'ar' ? 'يوم' : 'Day'} ${i}</span><span class="day-icon">🎁</span><span class="day-reward">+${reward}</span>`;
+                
+                // إضافة حدث النقر إذا كان اليوم متاحاً
+                if (i === state.streak && canClaim) {
+                    dayBox.onclick = claimDaily;
+                }
+                
+                streakContainer.appendChild(dayBox);
             }
-        };
 
-        // ================= ENGINE =================
-        const tg = window.Telegram.WebApp; tg.expand();
-        let state = { userId: tg.initDataUnsafe?.user?.id || "Guest", score: 0, energy: 0, maxEnergy: 100, lang: localStorage.getItem('lang') || 'ar', doneTasks: [], quizIndex: 0, streak: 1, lastDailyDate: null, lastQuizTime: 0 };
-        let quizTimerInterval;
+            const btn = document.getElementById('claim-btn');
+            const status = document.getElementById('daily-status');
 
-        window.onload = async () => {
-            document.getElementById('user-id').innerText = `ID: ${state.userId}`;
-            TASKS[2].u = `https://t.me/share/url?url=https://t.me/${tg.initDataUnsafe.bot_username || 'tonlegendv16bot'}?start=${state.userId}`;
-            applyLang(state.lang );
-            const { success, data } = await ServerAPI._call('getUserData');
-            if (success) { Object.assign(state, data); } else { tg.showAlert("Failed to load user data."); }
-            document.getElementById('loader').style.opacity = '0'; setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
-            updateUI();
-            setInterval(() => { if (state.energy < state.maxEnergy) { state.energy++; localStorage.setItem('energy_v24', state.energy); updateUI(); } }, CONFIG.energyRegenRate);
-        };
+            if (canClaim) {
+                btn.disabled = false;
+                btn.style.background = "var(--primary)";
+                btn.innerText = state.lang === 'ar' ? "استلام" : "Claim";
+                status.innerText = state.lang === 'ar' ? "مكافأتك جاهزة!" : "Reward Ready!";
+            } else {
+                btn.disabled = true;
+                btn.style.background = "#333";
+                btn.innerText = state.lang === 'ar' ? "عد غداً" : "Come Tomorrow";
+                status.innerText = state.lang === 'ar' ? "تم الاستلام ✅" : "Claimed ✅";
+            }
+        }
 
-        // --- CORE ACTIONS ---
-        async function tap(e) { if (state.energy <= 0) return; state.energy--; state.score++; updateUI(); floatNum(e.clientX, e.clientY); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); const { success, data } = await ServerAPI._call('syncTap'); if (success) { state.score = data.score; state.energy = data.energy; } updateUI(); }
-        async function redeem() { const code = document.getElementById('code-inp').value; if (!code) return; const { success, data, message } = await ServerAPI._call('redeemCode', { code }); tg.showAlert(message); if (success) { state.score = data.score; updateUI(); closeModal('codes'); } }
-        async function buy() {
-            const link = document.getElementById('shop-link').value;
-            const count = parseInt(document.getElementById('shop-count').value);
-            if (!link || !count || count < 100) { tg.showAlert(state.lang === 'ar' ? 'الرجاء إدخال اسم مستخدم وعدد لا يقل عن 100.' : 'Please enter a username and a count of at least 100.'); return; }
-            const price = count * 4;
-            if (state.score < price) { tg.showAlert(state.lang === 'ar' ? 'ليس لديك نقاط كافية.' : 'You do not have enough points.'); return; }
+        async function claimDaily() {
+            const { success, data, message } = await ServerAPI._call('claimDailyReward');
+            if (success) {
+                state.score = data.score;
+                state.streak = data.streak;
+                state.lastDailyDate = data.lastDailyDate;
+                updateUI();
+                openDaily(); // تحديث الواجهة لغلق الزر
+                tg.showAlert(state.lang === 'ar' ? "تم استلام المكافأة!" : "Reward Claimed!");
+            } else {
+                tg.showAlert(message);
+            }
+        }
+
+        // --- TASKS SYSTEM ---
+        function openTasks() {
+            openModal('tasks');
+            const list = document.getElementById('task-list');
+            list.innerHTML = '';
             
-            tg.showConfirm(`${state.lang === 'ar' ? 'سيتم خصم' : 'This will cost'} ${price} ${state.lang === 'ar' ? 'نقطة. متابعة؟' : 'points. Proceed?'}`, async (ok) => {
+            const activeTasks = TASKS.filter(t => !state.doneTasks.includes(t.id));
+
+            if (activeTasks.length === 0) {
+                list.innerHTML = `<div style="text-align:center; color:#555">${state.lang === 'ar' ? 'لا توجد مهام حالياً' : 'No tasks available'}</div>`;
+                return;
+            }
+
+            activeTasks.forEach(t => {
+                const title = state.lang === 'ar' ? t.t_ar : t.t_en;
+                list.innerHTML += `
+                <div class="task-row">
+                    <div>
+                        <div style="font-weight:bold">${title}</div>
+                        <div style="font-size:0.8rem; color:var(--success)">+${t.r}</div>
+                    </div>
+                    <button class="btn" style="width:auto; margin:0; padding:5px 15px; font-size:0.8rem;" onclick="doTask(${t.id}, '${t.u}', ${t.r})">GO</button>
+                </div>`;
+            });
+        }
+
+        async function doTask(id, url, reward) {
+            // فتح الرابط
+            if (url.startsWith('http')) {
+                tg.openLink(url);
+            } else {
+                window.open(url, '_blank');
+            }
+
+            // طلب التأكيد
+            const confirmMsg = state.lang === 'ar' ? "هل قمت بإتمام المهمة؟" : "Did you complete the task?";
+            tg.showConfirm(confirmMsg, async (ok) => {
                 if (ok) {
-                    const { success, data } = await ServerAPI._call('buyFollowers', { count });
+                    const { success, data, message } = await ServerAPI._call('completeTask', { taskId: id, reward: reward });
                     if (success) {
                         state.score = data.score;
+                        state.doneTasks = data.doneTasks;
                         updateUI();
-                        fetch(`https://api.telegram.org/bot${CONFIG.botToken}/sendMessage?chat_id=${CONFIG.adminId}&text=NewOrder%0AUser: ${state.userId}%0ALink: ${link}%0ACount: ${count}` );
-                        tg.showAlert(state.lang === 'ar' ? 'تم إرسال طلبك بنجاح!' : 'Your order has been sent successfully!');
-                        closeModal('shop');
+                        openTasks(); // تحديث القائمة لإزالة المهمة المكتملة
+                        tg.showAlert(state.lang === 'ar' ? "تمت المهمة!" : "Task Completed!");
                     } else {
-                        tg.showAlert(state.lang === 'ar' ? 'حدث خطأ ما.' : 'Something went wrong.');
+                        tg.showAlert(message);
                     }
                 }
             });
         }
 
-        // --- QUIZ ---
-        function startQuiz() {
-            openModal('quiz');
-            const timeSinceLastQuiz = Date.now() - state.lastQuizTime;
-            const oneHour = 60 * 60 * 1000;
-            if (timeSinceLastQuiz < oneHour) {
-                document.getElementById('quiz-content').style.display = 'none';
-                const timerEl = document.getElementById('quiz-timer');
-                timerEl.style.display = 'block';
-                const remainingTime = oneHour - timeSinceLastQuiz;
-                if(quizTimerInterval) clearInterval(quizTimerInterval);
-                quizTimerInterval = setInterval(() => {
-                    const remaining = oneHour - (Date.now() - state.lastQuizTime);
-                    if (remaining <= 0) {
-                        clearInterval(quizTimerInterval);
-                        timerEl.style.display = 'none';
-                        document.getElementById('quiz-content').style.display = 'block';
-                        state.quizIndex = 0; renderQuestion();
-                    } else {
-                        const minutes = Math.floor((remaining / 1000 / 60) % 60).toString().padStart(2, '0');
-                        const seconds = Math.floor((remaining / 1000) % 60).toString().padStart(2, '0');
-                        timerEl.innerText = `${minutes}:${seconds}`;
-                    }
-                }, 1000);
-                timerEl.innerText = `${Math.floor((remainingTime / 1000 / 60) % 60).toString().padStart(2, '0')}:${Math.floor((remainingTime / 1000) % 60).toString().padStart(2, '0')}`;
-            } else {
-                document.getElementById('quiz-timer').style.display = 'none'; document.getElementById('quiz-content').style.display = 'block';
-                state.quizIndex = 0; renderQuestion();
-            }
+        // --- UTILITIES & UI ---
+        function toggleLang() {
+            state.lang = state.lang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('lang', state.lang);
+            applyLang(state.lang);
         }
-        async function finishQuiz() { tg.showAlert("Quiz Completed! Come back in 1 hour. 🎉"); const { success, data } = await ServerAPI._call('finishQuiz'); if(success) state.lastQuizTime = data.lastQuizTime; closeModal('quiz'); }
-        function renderQuestion() {
-            if (state.quizIndex >= QUIZ_DATA.length) { finishQuiz(); return; }
-            const q = QUIZ_DATA[state.quizIndex]; const isAr = state.lang === 'ar';
-            document.getElementById('quiz-progress').style.width = `${(state.quizIndex / QUIZ_DATA.length) * 100}%`;
-            document.getElementById('q-flag').innerText = q.flag; document.getElementById('q-text').innerText = isAr ? q.q_ar : q.q_en;
-            const opts = document.getElementById('q-opts'); opts.innerHTML = '';
-            const answers = isAr ? q.ans_ar : q.ans_en;
-            answers.forEach((ans, i) => { const btn = document.createElement('div'); btn.className = 'quiz-option'; btn.innerText = ans; btn.onclick = () => confirmAnswer(btn, i === q.c, q.id); opts.appendChild(btn); });
-        }
-        function confirmAnswer(btn, isCorrect, questionId) {
-            const q = QUIZ_DATA.find(q => q.id === questionId);
-            const message = isCorrect ? `Correct! You will earn ${q.reward} points. Proceed?` : `Wrong! You will lose ${q.penalty} points. Proceed?`;
-            const messageAr = isCorrect ? `صحيح! ستحصل على ${q.reward} نقطة. هل تريد المتابعة؟` : `خطأ! ستخسر ${q.penalty} نقطة. هل تريد المتابعة؟`;
-            tg.showConfirm(state.lang === 'ar' ? messageAr : message, async (ok) => { 
-                if (ok) {
-                    if (btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
-                    btn.classList.add(isCorrect ? 'correct' : 'wrong');
-                    const { success, data } = await ServerAPI._call('submitQuizAnswer', { questionId, isCorrect });
-                    if (success) { state.score = data.score; tg.showAlert(isCorrect ? 'Correct! ✅' : 'Wrong! ❌'); }
-                    updateUI(); 
-                    setTimeout(() => { state.quizIndex++; renderQuestion(); }, 1200);
-                }
+
+        function applyLang(l) {
+            document.body.dir = l === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('lang-btn').innerText = l === 'ar' ? '🇺🇸 EN' : '🇮🇶 AR';
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if (LANG[l][key]) el.innerText = LANG[l][key];
             });
         }
 
-        // --- DAILY REWARD ---
-        function openDaily() {
-            openModal('daily');
-            const today = new Date().toDateString();
-            const streakContainer = document.getElementById('streak-dots');
-            streakContainer.innerHTML = '';
-            const canClaim = state.lastDailyDate !== today;
+        function updateUI() {
+            document.getElementById('score').innerText = state.score.toLocaleString();
+            document.getElementById('energy-txt').innerText = `${state.energy}/${state.maxEnergy}`;
+            document.getElementById('energy-bar').style.width = `${(state.energy / state.maxEnergy) * 100}%`;
+            
+            // تحديث الرتبة
+            let rank = "Bronze 🥉";
+            if (state.score > 5000) rank = "Silver 🥈";
+            if (state.score > 20000) rank = "Gold 🥇";
+            if (state.score > 100000) rank = "Diamond 💎";
+            document.getElementById('rank-badge').innerText = rank;
+        }
 
-            for (let i = 1; i <= 7; i++) {
-                const dayBox = document.createElement('div');
-                dayBox.className =
+        function openModal(id) { document.getElementById(id).classList.add('active'); if(id === 'tasks') openTasks(); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        
+        function floatNum(x, y) {
+            const el = document.createElement('div'); el.innerText = '+1';
+            el.style.cssText = `position:fixed; left:${x}px; top:${y}px; color:#fff; font-weight:bold; pointer-events:none; z-index:999; text-shadow:0 0 5px var(--primary); animation:fly 0.8s forwards;`;
+            document.body.appendChild(el); setTimeout(() => el.remove(), 800);
+        }
+        
+        // CSS Animation for float numbers
+        document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fly {to{transform:translateY(-100px);opacity:0}}</style>`);
+
+    </script>
+</body>
+</html>
