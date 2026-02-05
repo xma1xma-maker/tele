@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TON Legend V22 - Working Version</title>
+    <title>TON Legend V23 - Complete Code</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -80,8 +80,8 @@
 
         // ================= SERVER API SIMULATOR =================
         const ServerAPI = {
-            _getMockDB: ( ) => ({ score: parseInt(localStorage.getItem('score_v22') || 0), energy: parseInt(localStorage.getItem('energy_v22') || 100), doneTasks: JSON.parse(localStorage.getItem('done_tasks_v22') || "[]"), lastDailyDate: localStorage.getItem('last_daily_date_v22'), streak: parseInt(localStorage.getItem('streak_v22') || 1), lastQuizTime: parseInt(localStorage.getItem('last_quiz_time_v22') || 0) }),
-            _saveMockDB: (db) => { localStorage.setItem('score_v22', db.score); localStorage.setItem('energy_v22', db.energy); localStorage.setItem('done_tasks_v22', JSON.stringify(db.doneTasks)); if(db.lastDailyDate) localStorage.setItem('last_daily_date_v22', db.lastDailyDate); localStorage.setItem('streak_v22', db.streak); localStorage.setItem('last_quiz_time_v22', db.lastQuizTime); },
+            _getMockDB: ( ) => ({ score: parseInt(localStorage.getItem('score_v23') || 0), energy: parseInt(localStorage.getItem('energy_v23') || 100), doneTasks: JSON.parse(localStorage.getItem('done_tasks_v23') || "[]"), lastDailyDate: localStorage.getItem('last_daily_date_v23'), streak: parseInt(localStorage.getItem('streak_v23') || 1), lastQuizTime: parseInt(localStorage.getItem('last_quiz_time_v23') || 0) }),
+            _saveMockDB: (db) => { localStorage.setItem('score_v23', db.score); localStorage.setItem('energy_v23', db.energy); localStorage.setItem('done_tasks_v23', JSON.stringify(db.doneTasks)); if(db.lastDailyDate) localStorage.setItem('last_daily_date_v23', db.lastDailyDate); localStorage.setItem('streak_v23', db.streak); localStorage.setItem('last_quiz_time_v23', db.lastQuizTime); },
             _call: async (action, data) => {
                 console.log(`[API MOCK] Action: ${action}`, data);
                 return new Promise(resolve => setTimeout(() => {
@@ -112,7 +112,7 @@
             if (success) { Object.assign(state, data); } else { tg.showAlert("Failed to load user data."); }
             document.getElementById('loader').style.opacity = '0'; setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
             updateUI();
-            setInterval(() => { if (state.energy < state.maxEnergy) { state.energy++; localStorage.setItem('energy_v22', state.energy); updateUI(); } }, CONFIG.energyRegenRate);
+            setInterval(() => { if (state.energy < state.maxEnergy) { state.energy++; localStorage.setItem('energy_v23', state.energy); updateUI(); } }, CONFIG.energyRegenRate);
         };
 
         // --- CORE ACTIONS ---
@@ -198,3 +198,9 @@
         }
 
         // --- DAILY REWARD ---
+        function openDaily() {
+            openModal('daily');
+            const today = new Date().toDateString();
+            const streakContainer = document.getElementById('streak-dots');
+            streakContainer.innerHTML = '';
+            const canClaim = state.last
