@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TON Legend Ultimate</title>
+    <title>TON Legend Ultimate V2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -35,7 +35,6 @@
 
         /* --- Animations --- */
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-80px) scale(1.5); } }
-        @keyframes pulseGlow { 0% { box-shadow: 0 0 20px var(--primary-glow); } 100% { box-shadow: 0 0 40px var(--primary-glow); } }
 
         /* --- Header --- */
         .header {
@@ -52,16 +51,15 @@
         .rank-bar-bg { width: 80px; height: 4px; background: #333; border-radius: 2px; margin-top: 3px; overflow: hidden; }
         .rank-bar-fill { height: 100%; background: var(--secondary); width: 0%; transition: width 0.5s; }
 
-        /* --- Score Display --- */
-        .score-container { text-align: center; margin-top: 30px; position: relative; }
-        .score-val { font-size: 3.8rem; font-weight: 900; background: -webkit-linear-gradient(#fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 15px rgba(255,255,255,0.3)); }
-        .score-label { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: -5px; }
+        /* --- Score --- */
+        .score-container { text-align: center; margin-top: 20px; position: relative; }
+        .score-val { font-size: 3.5rem; font-weight: 900; background: -webkit-linear-gradient(#fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 15px rgba(255,255,255,0.3)); }
+        .score-label { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- The Coin Area (3D Effect) --- */
+        /* --- Coin --- */
         .game-stage { flex-grow: 1; display: flex; justify-content: center; align-items: center; perspective: 1000px; position: relative; }
-        
         .coin-wrapper {
-            width: 280px; height: 280px;
+            width: 260px; height: 260px;
             border-radius: 50%;
             position: relative;
             transform-style: preserve-3d;
@@ -69,46 +67,34 @@
             cursor: pointer;
             box-shadow: 0 0 80px rgba(0, 152, 234, 0.2);
         }
-        
         .coin-wrapper:active { transform: scale(0.95) !important; }
-
         .coin-inner {
             width: 100%; height: 100%; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe);
             border: 10px solid rgba(255,255,255,0.1);
             display: flex; align-items: center; justify-content: center;
             box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.3);
-            position: relative;
             overflow: hidden;
         }
-        
-        /* Coin Glare */
-        .coin-inner::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(to bottom right, rgba(255,255,255,0.4) 0%, transparent 40%, transparent 100%);
-            pointer-events: none; transform: rotate(45deg);
-        }
-
         .coin-logo { width: 65%; fill: #fff; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4)); z-index: 2; }
-
-        /* --- Floating Numbers --- */
+        
         .float-num {
             position: absolute; color: #fff; font-weight: 900; font-size: 2rem;
             pointer-events: none; z-index: 100; text-shadow: 0 0 10px var(--primary);
             animation: floatUp 0.8s forwards;
         }
 
-        /* --- Controls & Stats --- */
+        /* --- Controls --- */
         .controls-row { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
         .mini-btn {
             background: var(--surface); border: 1px solid var(--border);
             padding: 10px 20px; border-radius: 20px; color: #fff;
             display: flex; align-items: center; gap: 8px; font-weight: bold;
-            font-size: 0.9rem; transition: 0.2s;
+            font-size: 0.9rem; transition: 0.2s; cursor: pointer;
         }
         .mini-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
 
-        /* --- Energy Bar --- */
+        /* --- Energy --- */
         .energy-container {
             margin: 0 25px 20px 25px;
             background: rgba(0,0,0,0.3); padding: 10px 15px;
@@ -116,13 +102,13 @@
             backdrop-filter: blur(5px);
         }
         .energy-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; }
-        .energy-track { height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; position: relative; }
-        .energy-fill { height: 100%; background: linear-gradient(90deg, #ffd700, #f39c12); width: 100%; transition: width 0.2s linear; box-shadow: 0 0 10px rgba(243, 156, 18, 0.5); }
+        .energy-track { height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; }
+        .energy-fill { height: 100%; background: linear-gradient(90deg, #ffd700, #f39c12); width: 100%; transition: width 0.2s linear; }
 
         /* --- Bottom Nav --- */
         .nav-bar {
             position: fixed; bottom: 15px; left: 15px; right: 15px;
-            background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(20px);
+            background: rgba(30, 30, 30, 0.9); backdrop-filter: blur(20px);
             border-radius: 25px; border: 1px solid rgba(255,255,255,0.08);
             display: flex; justify-content: space-around;
             padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
@@ -131,23 +117,22 @@
         .nav-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             color: #888; font-size: 0.75rem; gap: 4px; padding: 5px 10px;
-            border-radius: 15px; transition: 0.2s; width: 60px;
+            border-radius: 15px; transition: 0.2s; width: 60px; cursor: pointer;
         }
         .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; transform: translateY(-5px); }
         .nav-icon { font-size: 1.4rem; }
 
-        /* --- Modals (Glassmorphism) --- */
+        /* --- Modals --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 900;
             opacity: 0; visibility: hidden; transition: 0.3s;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: flex-end;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         
         .modal-content {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            background: #1a1a1a;
+            background: #1a1a1a; width: 100%; max-width: 600px;
             border-radius: 30px 30px 0 0;
             padding: 25px;
             transform: translateY(100%); transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -159,22 +144,41 @@
 
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-title { font-size: 1.4rem; font-weight: 800; color: #fff; }
-        .close-btn { background: #333; border: none; width: 30px; height: 30px; border-radius: 50%; color: #fff; font-weight: bold; }
+        .close-btn { background: #333; border: none; width: 30px; height: 30px; border-radius: 50%; color: #fff; font-weight: bold; cursor: pointer; }
 
-        /* --- Shop Items --- */
-        .shop-item {
+        /* --- Common List Item Style --- */
+        .list-item {
             background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;
             margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
             border: 1px solid transparent; transition: 0.2s;
         }
-        .shop-item:active { background: rgba(255,255,255,0.1); transform: scale(0.98); }
-        .shop-icon { font-size: 1.8rem; margin-left: 15px; background: rgba(0,0,0,0.3); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-        .shop-details h4 { margin: 0; font-size: 1rem; color: #fff; }
-        .shop-details p { margin: 5px 0 0; font-size: 0.8rem; color: #aaa; }
-        .shop-price { background: var(--primary); color: #fff; padding: 8px 15px; border-radius: 10px; font-weight: bold; font-size: 0.9rem; min-width: 80px; text-align: center; }
-        .shop-price.disabled { background: #444; color: #888; }
+        .list-item:active { background: rgba(255,255,255,0.1); transform: scale(0.98); }
+        .list-icon { font-size: 1.5rem; width: 45px; height: 45px; background: rgba(0,0,0,0.3); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-left: 10px; } /* Margin left for RTL */
+        
+        /* Task Button */
+        .action-btn {
+            padding: 8px 15px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-size: 0.9rem; color: #fff;
+        }
+        .btn-go { background: var(--primary); }
+        .btn-claim { background: var(--success); animation: pulse 1s infinite; }
+        .btn-done { background: #333; color: #888; cursor: default; }
 
-        /* Loader */
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        /* Quiz Styles */
+        .quiz-opt {
+            background: #252525; padding: 15px; border-radius: 12px; margin-bottom: 10px;
+            cursor: pointer; border: 1px solid #333; text-align: center; font-size: 1.1rem;
+        }
+        .quiz-opt.correct { background: var(--success); color: #000; border-color: var(--success); }
+        .quiz-opt.wrong { background: var(--danger); border-color: var(--danger); }
+
+        /* Countdown */
+        .countdown-box {
+            font-size: 2.5rem; font-weight: 900; color: var(--text-main); font-variant-numeric: tabular-nums;
+            margin: 20px 0; text-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
         #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.5s; }
         .loader-ring { width: 50px; height: 50px; border: 4px solid #333; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 15px; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -185,7 +189,7 @@
 
     <div id="loader">
         <div class="loader-ring"></div>
-        <h3 style="color:#fff; letter-spacing:2px">TON LEGEND</h3>
+        <h3 style="color:#fff;">TON LEGEND</h3>
     </div>
 
     <div class="header">
@@ -207,7 +211,7 @@
     </div>
 
     <div class="controls-row" style="margin-top: 20px;">
-        <div class="mini-btn" onclick="openModal('daily')">
+        <div class="mini-btn" onclick="openDailyModal()">
             <span>📅</span> <span data-key="daily">Daily</span>
         </div>
         <div class="mini-btn" onclick="openModal('code')">
@@ -233,20 +237,16 @@
 
     <div class="nav-bar">
         <div class="nav-item active" onclick="switchTab('game')">
-            <span class="nav-icon">🎮</span>
-            <span data-key="game_tab">Game</span>
+            <span class="nav-icon">🎮</span> <span data-key="game_tab">Game</span>
         </div>
         <div class="nav-item" onclick="openModal('boost')">
-            <span class="nav-icon">🚀</span>
-            <span data-key="boost_tab">Boost</span>
+            <span class="nav-icon">🚀</span> <span data-key="boost_tab">Boost</span>
         </div>
-        <div class="nav-item" onclick="openModal('tasks')">
-            <span class="nav-icon">📋</span>
-            <span data-key="tasks_tab">Tasks</span>
+        <div class="nav-item" onclick="openTasksModal()">
+            <span class="nav-icon">📋</span> <span data-key="tasks_tab">Tasks</span>
         </div>
-        <div class="nav-item" onclick="openModal('quiz')">
-            <span class="nav-icon">🧠</span>
-            <span data-key="quiz_tab">Quiz</span>
+        <div class="nav-item" onclick="startQuiz()">
+            <span class="nav-icon">🧠</span> <span data-key="quiz_tab">Quiz</span>
         </div>
     </div>
 
@@ -256,44 +256,26 @@
                 <span class="modal-title" data-key="boost_title">Boosters</span>
                 <button class="close-btn" onclick="closeModal('boost')">✕</button>
             </div>
-            
-            <div class="shop-item" onclick="upgrade('multitap')">
-                <div class="shop-icon">👆</div>
-                <div class="shop-details">
-                    <h4 data-key="multitap">Multitap</h4>
-                    <p id="multitap-lvl">Level 1</p>
+            <div class="list-item" onclick="upgrade('multitap')">
+                <div style="display:flex;align-items:center">
+                    <div class="list-icon">👆</div>
+                    <div style="margin-right:10px">
+                        <h4 style="margin:0" data-key="multitap">Multitap</h4>
+                        <p style="margin:5px 0 0;color:#aaa;font-size:0.8rem" id="multitap-lvl">Lvl 1</p>
+                    </div>
                 </div>
-                <div class="shop-price" id="multitap-price">500</div>
+                <div class="action-btn btn-go" id="multitap-price">500</div>
             </div>
-
-            <div class="shop-item" onclick="upgrade('limit')">
-                <div class="shop-icon">🔋</div>
-                <div class="shop-details">
-                    <h4 data-key="energy_limit">Energy Limit</h4>
-                    <p id="limit-lvl">Level 1</p>
+            <div class="list-item" onclick="upgrade('limit')">
+                <div style="display:flex;align-items:center">
+                    <div class="list-icon">🔋</div>
+                    <div style="margin-right:10px">
+                        <h4 style="margin:0" data-key="energy_limit">Limit</h4>
+                        <p style="margin:5px 0 0;color:#aaa;font-size:0.8rem" id="limit-lvl">Lvl 1</p>
+                    </div>
                 </div>
-                <div class="shop-price" id="limit-price">1000</div>
+                <div class="action-btn btn-go" id="limit-price">1000</div>
             </div>
-
-            <div class="shop-item" onclick="upgrade('speed')">
-                <div class="shop-icon">⚡</div>
-                <div class="shop-details">
-                    <h4 data-key="recharge">Recharging Speed</h4>
-                    <p id="speed-lvl">Level 1</p>
-                </div>
-                <div class="shop-price" id="speed-price">2000</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="tasks">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-title" data-key="tasks_title">Earn Tasks</span>
-                <button class="close-btn" onclick="closeModal('tasks')">✕</button>
-            </div>
-            <div id="tasks-list">
-                </div>
         </div>
     </div>
 
@@ -301,21 +283,56 @@
         <div class="modal-content" style="text-align:center">
             <h2 data-key="daily_reward">Daily Reward</h2>
             <div style="font-size:3rem; margin:20px 0">🎁</div>
-            <p id="daily-msg" style="color:#aaa; margin-bottom:20px">Come back every day for rewards!</p>
-            <button class="mini-btn" style="width:100%; justify-content:center; background:var(--primary); padding:15px;" onclick="claimDaily()" id="daily-btn">Claim</button>
+            
+            <div id="daily-ready-area">
+                <p style="color:#aaa; margin-bottom:20px" data-key="daily_desc">Claim your free points now!</p>
+                <button class="mini-btn" style="width:100%; justify-content:center; background:var(--success); padding:15px; font-size:1.1rem" onclick="claimDaily()">
+                    <span data-key="claim">Claim</span> (+1000)
+                </button>
+            </div>
+
+            <div id="daily-timer-area" style="display:none;">
+                <p style="color:#aaa;" data-key="next_reward">Next reward in:</p>
+                <div class="countdown-box" id="daily-countdown">00:00:00</div>
+                <button class="mini-btn" style="width:100%; justify-content:center; background:#333; padding:15px; cursor:default">
+                    <span data-key="wait">Please Wait</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="tasks">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" data-key="tasks_title">Tasks</span>
+                <button class="close-btn" onclick="closeModal('tasks')">✕</button>
+            </div>
+            <div id="tasks-list-container">
+                </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="quiz">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title">Quiz Challenge</span>
+                <span class="modal-title" data-key="quiz_title">Quiz</span>
                 <button class="close-btn" onclick="closeModal('quiz')">✕</button>
             </div>
-            <div id="quiz-container" style="text-align:center">
-                <h1 id="q-icon" style="font-size:4rem; margin:10px 0">🌍</h1>
-                <h3 id="q-txt">Question Text</h3>
-                <div id="q-opts" style="display:grid; gap:10px; margin-top:20px"></div>
+            
+            <div style="background:#333; height:6px; border-radius:3px; margin-bottom:15px; overflow:hidden">
+                <div id="quiz-bar" style="width:0%; height:100%; background:var(--primary); transition:0.3s"></div>
+            </div>
+
+            <div id="quiz-game-area" style="text-align:center">
+                <h2 id="q-txt" style="margin-bottom:25px; line-height:1.4">Question?</h2>
+                <div id="q-opts"></div>
+            </div>
+
+            <div id="quiz-done-area" style="text-align:center; display:none;">
+                <h1>🎉</h1>
+                <h2 data-key="quiz_done">Complete!</h2>
+                <p style="color:#aaa" id="quiz-score-res">Score: 0</p>
+                <button class="mini-btn" style="width:100%; justify-content:center; background:var(--primary); margin-top:20px" onclick="closeModal('quiz')">OK</button>
             </div>
         </div>
     </div>
@@ -326,7 +343,7 @@
                 <span class="modal-title">Promo Code</span>
                 <button class="close-btn" onclick="closeModal('code')">✕</button>
             </div>
-            <input type="text" id="promo-input" placeholder="Enter Code..." style="width:100%; padding:15px; background:#222; border:1px solid #444; color:#fff; border-radius:12px; margin-bottom:15px;">
+            <input type="text" id="promo-input" placeholder="Code..." style="width:100%; padding:15px; background:#222; border:1px solid #444; color:#fff; border-radius:12px; margin-bottom:15px; text-align:center">
             <button class="mini-btn" style="width:100%; justify-content:center; background:var(--success)" onclick="redeemCode()">Submit</button>
         </div>
     </div>
@@ -334,37 +351,62 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#1a3a5a');
+
+        // --- Data ---
+        const QUESTIONS = [
+            { q_ar: "ما هي عاصمة العراق؟", q_en: "Capital of Iraq?", opts_ar: ["بغداد", "البصرة", "أربيل"], opts_en: ["Baghdad", "Basra", "Erbil"], c: 0 },
+            { q_ar: "كم عدد ألوان قوس قزح؟", q_en: "Colors in a rainbow?", opts_ar: ["5", "7", "10"], opts_en: ["5", "7", "10"], c: 1 },
+            { q_ar: "أسرع حيوان بري؟", q_en: "Fastest land animal?", opts_ar: ["الأسد", "النمر", "الفهد"], opts_en: ["Lion", "Tiger", "Cheetah"], c: 2 },
+            { q_ar: "عملة البيتكوين رقمية؟", q_en: "Is Bitcoin digital?", opts_ar: ["نعم", "لا"], opts_en: ["Yes", "No"], c: 0 },
+            { q_ar: "من هو مؤسس تليجرام؟", q_en: "Founder of Telegram?", opts_ar: ["ايلون ماسك", "بافل دوروف", "زوكربيرغ"], opts_en: ["Elon", "Pavel Durov", "Zuck"], c: 1 }
+        ];
+
+        const TASKS_DATA = [
+            { id: "t_tg_join", icon: "📢", ar: "اشترك في القناة", en: "Join Channel", r: 500, url: "https://t.me/telegram" },
+            { id: "t_inst_follow", icon: "📸", ar: "تابعنا على انستقرام", en: "Follow Instagram", r: 300, url: "https://instagram.com" },
+            { id: "t_x_follow", icon: "🐦", ar: "تابعنا على X", en: "Follow on X", r: 300, url: "https://twitter.com" },
+            { id: "t_yt_sub", icon: "📺", ar: "اشترك في يوتيوب", en: "Subscribe YouTube", r: 400, url: "https://youtube.com" }
+        ];
 
         // --- Config & State ---
         const CONFIG = {
             baseEnergy: 1000,
-            baseCost: { multitap: 500, limit: 1000, speed: 2000 }
+            baseCost: { multitap: 500, limit: 1000, speed: 2000 },
+            dailyCooldown: 24 * 60 * 60 * 1000 // 24 Hours in ms
         };
 
         let state = {
             score: parseInt(localStorage.getItem('tl_score') || 0),
             energy: parseInt(localStorage.getItem('tl_energy') || 1000),
             upgrades: JSON.parse(localStorage.getItem('tl_upgrades') || '{"multitap":1, "limit":1, "speed":1}'),
-            lastLogin: localStorage.getItem('tl_lastLogin'),
+            lastDaily: parseInt(localStorage.getItem('tl_lastDaily') || 0), // Timestamp
             lang: localStorage.getItem('tl_lang') || 'ar',
-            completedTasks: JSON.parse(localStorage.getItem('tl_tasks') || "[]")
+            completedTasks: JSON.parse(localStorage.getItem('tl_tasks') || "[]"),
+            quizIdx: 0 // Local session only
         };
 
         const LANG = {
             ar: { 
                 balance: "الرصيد الكلي", energy: "الطاقة", 
                 game_tab: "اللعب", boost_tab: "تعزيز", tasks_tab: "مهام", quiz_tab: "مسابقة",
-                boost_title: "مركز التعزيز", multitap: "نقرة متعددة", energy_limit: "سعة الطاقة", recharge: "سرعة الشحن",
-                tasks_title: "قائمة المهام", daily_reward: "المكافأة اليومية", gift: "كود", daily: "يومي"
+                boost_title: "مركز التعزيز", multitap: "نقرة متعددة", energy_limit: "سعة الطاقة",
+                tasks_title: "قائمة المهام", daily_reward: "المكافأة اليومية", gift: "كود", daily: "يومي",
+                claim: "استلام", wait: "انتظر", next_reward: "المكافأة التالية بعد:", daily_desc: "احصل على نقاط مجانية كل 24 ساعة!",
+                quiz_title: "مسابقة ثقافية", quiz_done: "انتهت المسابقة!",
+                btn_go: "نفذ", btn_claim: "تحقق", btn_done: "تم"
             },
             en: {
                 balance: "Total Balance", energy: "Energy",
                 game_tab: "Game", boost_tab: "Boost", tasks_tab: "Tasks", quiz_tab: "Quiz",
-                boost_title: "Boost Center", multitap: "Multitap", energy_limit: "Energy Limit", recharge: "Recharge Speed",
-                tasks_title: "Task List", daily_reward: "Daily Reward", gift: "Code", daily: "Daily"
+                boost_title: "Boost Center", multitap: "Multitap", energy_limit: "Energy Limit",
+                tasks_title: "Task List", daily_reward: "Daily Reward", gift: "Code", daily: "Daily",
+                claim: "Claim", wait: "Wait", next_reward: "Next reward in:", daily_desc: "Get free points every 24h!",
+                quiz_title: "Trivia Quiz", quiz_done: "Quiz Completed!",
+                btn_go: "Go", btn_claim: "Check", btn_done: "Done"
             }
         };
+
+        let dailyInterval;
 
         // --- Core Functions ---
         function init() {
@@ -373,7 +415,7 @@
             applyLang(state.lang);
             animateCoinTilt();
             
-            // Auto Recovery
+            // Energy Regen
             setInterval(() => {
                 const max = CONFIG.baseEnergy * state.upgrades.limit;
                 const rec = state.upgrades.speed;
@@ -383,7 +425,6 @@
                 }
             }, 1000);
 
-            // Hide Loader
             setTimeout(() => document.getElementById('loader').style.opacity = 0, 1000);
             setTimeout(() => document.getElementById('loader').style.display = 'none', 1500);
         }
@@ -392,95 +433,232 @@
             localStorage.setItem('tl_score', state.score);
             localStorage.setItem('tl_upgrades', JSON.stringify(state.upgrades));
             localStorage.setItem('tl_tasks', JSON.stringify(state.completedTasks));
+            localStorage.setItem('tl_lastDaily', state.lastDaily);
         }
 
-        // --- Tap Logic ---
-        function handleTap(e) {
-            const tapPower = state.upgrades.multitap;
-            
-            if(state.energy >= tapPower) {
-                // Logic
-                state.score += tapPower;
-                state.energy -= tapPower;
-                save();
-                updateUI();
-                updateEnergyUI();
-                
-                // Haptic
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        // --- Daily Reward Logic (With Timer) ---
+        function openDailyModal() {
+            openModal('daily');
+            checkDailyStatus();
+            // Update timer every second while modal is open
+            if(dailyInterval) clearInterval(dailyInterval);
+            dailyInterval = setInterval(checkDailyStatus, 1000);
+        }
 
-                // Float Number Effect
-                spawnFloatText(e, `+${tapPower}`);
+        function checkDailyStatus() {
+            const now = Date.now();
+            const diff = now - state.lastDaily;
+            const readyArea = document.getElementById('daily-ready-area');
+            const timerArea = document.getElementById('daily-timer-area');
+
+            if(diff >= CONFIG.dailyCooldown) {
+                // Ready to claim
+                readyArea.style.display = 'block';
+                timerArea.style.display = 'none';
+            } else {
+                // Cooldown
+                readyArea.style.display = 'none';
+                timerArea.style.display = 'block';
+                
+                const remaining = CONFIG.dailyCooldown - diff;
+                const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+                
+                document.getElementById('daily-countdown').innerText = 
+                    `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
             }
         }
 
-        // --- 3D Coin Effect ---
-        function animateCoinTilt() {
-            const coin = document.getElementById('coin');
-            const container = document.querySelector('.game-stage');
+        function pad(n) { return n < 10 ? '0'+n : n; }
 
-            container.addEventListener('pointermove', (e) => {
-                const rect = container.getBoundingClientRect();
-                const x = e.clientX - rect.left - rect.width / 2;
-                const y = e.clientY - rect.top - rect.height / 2;
+        function claimDaily() {
+            state.score += 1000;
+            state.lastDaily = Date.now();
+            save(); updateUI();
+            checkDailyStatus();
+            tg.showAlert("+1000 Points!");
+        }
+
+        // --- Multiple Tasks Logic ---
+        function openTasksModal() {
+            openModal('tasks');
+            const list = document.getElementById('tasks-list-container');
+            list.innerHTML = '';
+
+            const isAr = state.lang === 'ar';
+            const txt_go = isAr ? LANG.ar.btn_go : LANG.en.btn_go;
+            const txt_done = isAr ? LANG.ar.btn_done : LANG.en.btn_done;
+
+            TASKS_DATA.forEach(task => {
+                const isDone = state.completedTasks.includes(task.id);
+                const title = isAr ? task.ar : task.en;
                 
-                // Limit rotation
-                const rotateX = -y / 10;
-                const rotateY = x / 10;
+                let btnHtml = '';
+                if(isDone) {
+                    btnHtml = `<button class="action-btn btn-done">${txt_done}</button>`;
+                } else {
+                    btnHtml = `<button class="action-btn btn-go" id="btn-${task.id}" onclick="clickTask('${task.id}', '${task.url}', ${task.r})">${txt_go}</button>`;
+                }
 
-                coin.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                list.innerHTML += `
+                    <div class="list-item">
+                        <div style="display:flex; align-items:center;">
+                            <div class="list-icon">${task.icon}</div>
+                            <div style="margin: 0 15px;">
+                                <h4 style="margin:0; font-size:0.95rem">${title}</h4>
+                                <span style="font-size:0.75rem; color:var(--success)">+${task.r}</span>
+                            </div>
+                        </div>
+                        ${btnHtml}
+                    </div>
+                `;
             });
+        }
 
-            container.addEventListener('pointerleave', () => {
-                coin.style.transform = `rotateX(0) rotateY(0)`;
+        function clickTask(id, url, reward) {
+            const btn = document.getElementById(`btn-${id}`);
+            const isAr = state.lang === 'ar';
+            
+            if(btn.classList.contains('btn-go')) {
+                // First click: Open Link
+                window.open(url, '_blank');
+                btn.classList.remove('btn-go');
+                btn.classList.add('btn-claim');
+                btn.innerText = isAr ? LANG.ar.btn_claim : LANG.en.btn_claim;
+            } else if (btn.classList.contains('btn-claim')) {
+                // Second click: Claim Reward
+                state.score += reward;
+                state.completedTasks.push(id);
+                save(); updateUI();
+                
+                btn.classList.remove('btn-claim');
+                btn.classList.add('btn-done');
+                btn.innerText = isAr ? LANG.ar.btn_done : LANG.en.btn_done;
+                btn.onclick = null;
+                tg.showAlert(`+${reward}`);
+            }
+        }
+
+        // --- Multiple Quiz Logic ---
+        function startQuiz() {
+            openModal('quiz');
+            state.quizIdx = 0;
+            document.getElementById('quiz-game-area').style.display = 'block';
+            document.getElementById('quiz-done-area').style.display = 'none';
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            if(state.quizIdx >= QUESTIONS.length) {
+                // Quiz Finished
+                document.getElementById('quiz-game-area').style.display = 'none';
+                document.getElementById('quiz-done-area').style.display = 'block';
+                return;
+            }
+
+            const q = QUESTIONS[state.quizIdx];
+            const isAr = state.lang === 'ar';
+            
+            // Update Bar
+            const pct = ((state.quizIdx) / QUESTIONS.length) * 100;
+            document.getElementById('quiz-bar').style.width = pct + "%";
+
+            // Text
+            document.getElementById('q-txt').innerText = isAr ? q.q_ar : q.q_en;
+            
+            // Options
+            const optsDiv = document.getElementById('q-opts');
+            optsDiv.innerHTML = '';
+            const answers = isAr ? q.opts_ar : q.opts_en;
+            
+            answers.forEach((ans, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-opt';
+                btn.innerText = ans;
+                btn.onclick = () => handleQuizAnswer(btn, i, q.c);
+                optsDiv.appendChild(btn);
             });
+        }
+
+        function handleQuizAnswer(btn, selected, correct) {
+            if(btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
+
+            const allOpts = document.querySelectorAll('.quiz-opt');
+            
+            if(selected === correct) {
+                btn.classList.add('correct');
+                state.score += 100; // Reward per question
+                tg.HapticFeedback.impactOccurred('light');
+            } else {
+                btn.classList.add('wrong');
+                // Highlight the correct one
+                allOpts[correct].classList.add('correct');
+                tg.HapticFeedback.notificationOccurred('error');
+            }
+            save(); updateUI();
+
+            // Next Question Delay
+            setTimeout(() => {
+                state.quizIdx++;
+                renderQuizQuestion();
+            }, 1000);
+        }
+
+
+        // --- Base Game Logic ---
+        function handleTap(e) {
+            const tapPower = state.upgrades.multitap;
+            if(state.energy >= tapPower) {
+                state.score += tapPower;
+                state.energy -= tapPower;
+                updateUI(); updateEnergyUI();
+                tg.HapticFeedback.impactOccurred('medium');
+                spawnFloatText(e, `+${tapPower}`);
+            }
         }
 
         function spawnFloatText(e, text) {
             const el = document.createElement('div');
             el.className = 'float-num';
             el.innerText = text;
-            
-            // Randomize position slightly
-            const x = e.clientX + (Math.random() * 40 - 20);
+            const x = e.clientX + (Math.random()*40-20);
             const y = e.clientY - 20;
-            
-            el.style.left = `${x}px`;
-            el.style.top = `${y}px`;
-            
+            el.style.left = `${x}px`; el.style.top = `${y}px`;
             document.body.appendChild(el);
             setTimeout(() => el.remove(), 800);
         }
 
-        // --- Upgrade System ---
         function upgrade(type) {
             const level = state.upgrades[type];
             const cost = CONFIG.baseCost[type] * (2 ** (level - 1));
-
             if(state.score >= cost) {
                 state.score -= cost;
                 state.upgrades[type]++;
-                save();
-                updateUI();
-                updateUpgradesUI();
-                tg.showAlert("Upgrade Successful! 🚀");
+                save(); updateUI(); updateUpgradesUI();
+                tg.showAlert("Upgrade Successful!");
             } else {
-                tg.showAlert("Not enough points! 💸");
+                tg.showAlert("Not enough points!");
             }
+        }
+
+        function redeemCode() {
+            const code = document.getElementById('promo-input').value;
+            if(code.toUpperCase() === "TON2024") {
+                state.score += 5000;
+                save(); updateUI(); closeModal('code');
+                tg.showAlert("+5000 Bonus!");
+            } else tg.showAlert("Invalid Code");
         }
 
         // --- UI Updates ---
         function updateUI() {
             document.getElementById('score').innerText = state.score.toLocaleString();
-            
-            // Rank Logic
             let rank = "Bronze";
             let progress = 0;
             if(state.score < 5000) { progress = (state.score/5000)*100; }
             else if(state.score < 25000) { rank = "Silver"; progress = ((state.score-5000)/20000)*100; }
-            else if(state.score < 100000) { rank = "Gold"; progress = ((state.score-25000)/75000)*100; }
-            else { rank = "Diamond"; progress = 100; }
-            
+            else { rank = "Gold"; progress = 100; }
             document.getElementById('rank-name').innerText = rank;
             document.getElementById('rank-bar').style.width = `${progress}%`;
         }
@@ -493,52 +671,33 @@
 
         function updateUpgradesUI() {
             const u = state.upgrades;
-            // Multitap
-            document.getElementById('multitap-lvl').innerText = `Lvl ${u.multitap} (+${u.multitap} tap)`;
+            document.getElementById('multitap-lvl').innerText = `Lvl ${u.multitap}`;
             document.getElementById('multitap-price').innerText = (CONFIG.baseCost.multitap * (2**(u.multitap-1))).toLocaleString();
-            
-            // Limit
-            document.getElementById('limit-lvl').innerText = `Lvl ${u.limit} (${1000*u.limit} energy)`;
+            document.getElementById('limit-lvl').innerText = `Lvl ${u.limit}`;
             document.getElementById('limit-price').innerText = (CONFIG.baseCost.limit * (2**(u.limit-1))).toLocaleString();
-
-            // Speed
-            document.getElementById('speed-lvl').innerText = `Lvl ${u.speed} (+${u.speed}/sec)`;
-            document.getElementById('speed-price').innerText = (CONFIG.baseCost.speed * (2**(u.speed-1))).toLocaleString();
         }
 
-        // --- Features (Daily, Tasks, Quiz) ---
-        function claimDaily() {
-            const today = new Date().toDateString();
-            if(state.lastLogin !== today) {
-                state.score += 1000;
-                state.lastLogin = today;
-                localStorage.setItem('tl_lastLogin', today);
-                save(); updateUI();
-                closeModal('daily');
-                tg.showAlert("+1000 Points!");
-            } else {
-                tg.showAlert("Come back tomorrow!");
-            }
+        function animateCoinTilt() {
+            const coin = document.getElementById('coin');
+            const container = document.querySelector('.game-stage');
+            container.addEventListener('pointermove', (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                coin.style.transform = `rotateX(${-y/10}deg) rotateY(${x/10}deg)`;
+            });
+            container.addEventListener('pointerleave', () => coin.style.transform = `rotateX(0) rotateY(0)`);
         }
 
-        function redeemCode() {
-            const code = document.getElementById('promo-input').value;
-            if(code.toUpperCase() === "TON2024") {
-                state.score += 5000;
-                save(); updateUI();
-                closeModal('code');
-                tg.showAlert("+5000 Bonus!");
-            } else {
-                tg.showAlert("Invalid Code");
-            }
-        }
-
-        // Language & Utils
+        // Lang & Utils
         function toggleLang() {
             state.lang = state.lang === 'ar' ? 'en' : 'ar';
             localStorage.setItem('tl_lang', state.lang);
             applyLang(state.lang);
-            location.reload(); // Simple reload to refresh text directions
+            // Re-render lists if open
+            if(document.getElementById('tasks').classList.contains('active')) openTasksModal();
+            if(document.getElementById('daily').classList.contains('active')) openDailyModal();
+            location.reload();
         }
 
         function applyLang(l) {
@@ -551,12 +710,13 @@
         }
 
         function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        function switchTab(t) { /* Just for visual tab switching if needed later */ }
+        function closeModal(id) { 
+            document.getElementById(id).classList.remove('active'); 
+            if(id === 'daily' && dailyInterval) clearInterval(dailyInterval);
+        }
+        function switchTab(t) {}
 
-        // Start
         window.onload = init;
-
     </script>
 </body>
 </html>
