@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clicker Store V2</title>
+    <title>Clicker Store Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -29,6 +29,7 @@
             display: flex; flex-direction: column;
             padding-bottom: 95px;
             overflow-x: hidden;
+            transition: all 0.3s ease;
         }
 
         /* --- Header --- */
@@ -42,13 +43,14 @@
         .user-badge { display: flex; align-items: center; gap: 10px; }
         .avatar { width: 35px; height: 35px; background: linear-gradient(45deg, var(--primary), #00d2ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
         .rank-info { display: flex; flex-direction: column; line-height: 1.2; }
+        .lang-btn { background: transparent; border: 1px solid var(--border); color: #fff; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; }
 
         /* --- Score --- */
         .score-container { text-align: center; margin-top: 15px; }
         .score-val { font-size: 2.8rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(0, 152, 234, 0.5); }
         .score-label { font-size: 0.9rem; color: #aaa; margin-top: -5px; }
 
-        /* --- GAME AREA (COIN) --- */
+        /* --- GAME AREA --- */
         .game-area {
             flex-grow: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
@@ -67,7 +69,6 @@
         .coin:active { transform: scale(0.95); }
         .coin svg { width: 60%; fill: #fff; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3)); }
 
-        /* Floating Number Animation */
         .float-num {
             position: absolute; color: #fff; font-weight: 900; font-size: 2rem;
             pointer-events: none; z-index: 100; text-shadow: 0 0 5px var(--primary);
@@ -75,13 +76,13 @@
         }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
 
-        /* Energy Bar */
+        /* Energy */
         .energy-container { width: 80%; margin: 10px auto; }
         .energy-info { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; color: #ddd; }
         .energy-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; }
         .energy-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #f1c40f); width: 100%; transition: width 0.2s; }
 
-        /* --- Store Grid --- */
+        /* --- Store --- */
         .section-title { padding: 0 20px; margin: 10px 0 5px 0; font-size: 1.1rem; color: #aaa; }
         .store-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
@@ -98,7 +99,7 @@
         .card-title { font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; }
         .card-price { color: var(--secondary); font-weight: bold; font-size: 0.8rem; background: rgba(243, 156, 18, 0.15); padding: 2px 8px; border-radius: 8px; }
 
-        /* --- Bottom Nav --- */
+        /* --- Nav --- */
         .nav-bar {
             position: fixed; bottom: 15px; left: 15px; right: 15px;
             background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(20px);
@@ -144,18 +145,18 @@
 
     <div class="header">
         <div class="user-badge">
-            <div class="avatar">👤</div>
-            <div class="rank-info">
+            <button class="lang-btn" onclick="toggleLang()" id="lang-btn">🇺🇸</button>
+            <div class="rank-info" style="margin: 0 10px">
                 <span class="rank-name" id="user-name">Guest</span>
                 <span style="font-size:0.75rem; color:#888" id="user-id">ID: ...</span>
             </div>
         </div>
-        <button class="btn-main" style="width:auto; margin:0; padding:5px 15px; font-size:0.8rem; background:linear-gradient(45deg, #f39c12, #d35400)" onclick="openBoostModal()">🚀 ترقية</button>
+        <button class="btn-main" style="width:auto; margin:0; padding:5px 15px; font-size:0.8rem; background:linear-gradient(45deg, #f39c12, #d35400)" onclick="openBoostModal()" data-key="boost_btn">🚀 ترقية</button>
     </div>
 
     <div class="score-container">
         <div class="score-val" id="score">0</div>
-        <div class="score-label">الرصيد الحالي</div>
+        <div class="score-label" data-key="balance">الرصيد الحالي</div>
     </div>
 
     <div class="game-area">
@@ -166,90 +167,90 @@
 
     <div class="energy-container">
         <div class="energy-info">
-            <span>⚡ الطاقة</span>
+            <span data-key="energy">⚡ الطاقة</span>
             <span id="energy-txt">500/500</span>
         </div>
         <div class="energy-bg"><div class="energy-fill" id="energy-bar"></div></div>
     </div>
 
-    <h3 class="section-title">اصرف نقاطك 👇</h3>
+    <h3 class="section-title" data-key="store_title">اصرف نقاطك 👇</h3>
     <div class="store-grid">
-        <div class="store-card" onclick="openOrderModal('insta', 'متابعين انستقرام', 5000)">
+        <div class="store-card" onclick="openOrderModal('insta', 'item_insta', 5000)">
             <div class="card-icon">📸</div>
-            <div class="card-title">انستقرام</div>
+            <div class="card-title" data-key="item_insta">متابعين انستقرام</div>
             <div class="card-price">5,000 P</div>
         </div>
-        <div class="store-card" onclick="openOrderModal('tele', 'أعضاء تليجرام', 5000)">
+        <div class="store-card" onclick="openOrderModal('tele', 'item_tele', 5000)">
             <div class="card-icon">✈️</div>
-            <div class="card-title">تليجرام</div>
+            <div class="card-title" data-key="item_tele">أعضاء تليجرام</div>
             <div class="card-price">5,000 P</div>
         </div>
-        <div class="store-card" onclick="openOrderModal('tiktok', 'متابعين تيك توك', 6000)">
+        <div class="store-card" onclick="openOrderModal('tiktok', 'item_tiktok', 6000)">
             <div class="card-icon">🎵</div>
-            <div class="card-title">تيك توك</div>
+            <div class="card-title" data-key="item_tiktok">تيك توك</div>
             <div class="card-price">6,000 P</div>
         </div>
-        <div class="store-card" onclick="openOrderModal('cash', 'رصيد $5', 50000)">
+        <div class="store-card" onclick="openOrderModal('cash', 'item_cash', 50000)">
             <div class="card-icon">💵</div>
-            <div class="card-title">كاش $5</div>
+            <div class="card-title" data-key="item_cash">رصيد $5</div>
             <div class="card-price">50,000 P</div>
         </div>
     </div>
 
     <div class="nav-bar">
         <div class="nav-item active">
-            <span style="font-size:1.4rem">🏠</span> <span>الرئيسية</span>
+            <span style="font-size:1.4rem">🏠</span> <span data-key="nav_home">الرئيسية</span>
         </div>
         <div class="nav-item" onclick="openTasksModal()">
-            <span style="font-size:1.4rem">📋</span> <span>مهام</span>
+            <span style="font-size:1.4rem">📋</span> <span data-key="nav_tasks">مهام</span>
         </div>
         <div class="nav-item" onclick="startQuiz()">
-            <span style="font-size:1.4rem">🧠</span> <span>مسابقة</span>
+            <span style="font-size:1.4rem">🧠</span> <span data-key="nav_quiz">مسابقة</span>
         </div>
         <div class="nav-item" onclick="openDailyModal()">
-            <span style="font-size:1.4rem">📅</span> <span>يومي</span>
+            <span style="font-size:1.4rem">📅</span> <span data-key="nav_daily">يومي</span>
         </div>
     </div>
 
     <div class="modal-overlay" id="orderModal">
         <div class="modal-content">
-            <div class="modal-header"><h3 id="order-title">طلب</h3><button class="close-btn" onclick="closeModal('orderModal')">✕</button></div>
+            <div class="modal-header"><h3 id="order-title" data-key="order_title">طلب</h3><button class="close-btn" onclick="closeModal('orderModal')">✕</button></div>
             <div style="text-align:center; margin-bottom:20px">
                 <div style="font-size:3rem" id="order-icon">📦</div>
-                <p style="color:#aaa">أدخل الرابط للتنفيذ</p>
+                <p style="color:#aaa" data-key="order_desc">أدخل الرابط للتنفيذ</p>
                 <h3 style="color:var(--secondary)" id="order-price-lbl">0</h3>
             </div>
-            <input type="text" class="inp" id="order-link" placeholder="الرابط / المعرف">
-            <button class="btn-main" onclick="submitOrder()">تأكيد ✅</button>
+            <input type="text" class="inp" id="order-link" placeholder="Link / ID">
+            <button class="btn-main" onclick="submitOrder()" data-key="confirm">تأكيد ✅</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="boostModal">
         <div class="modal-content" style="text-align:center">
-            <div class="modal-header"><h3>ترقية الضغط</h3><button class="close-btn" onclick="closeModal('boostModal')">✕</button></div>
+            <div class="modal-header"><h3 data-key="boost_title">ترقية الضغط</h3><button class="close-btn" onclick="closeModal('boostModal')">✕</button></div>
             <div style="font-size:4rem; margin:10px 0">👆</div>
-            <h3>النقرة المتعددة (Multitap)</h3>
-            <p style="color:#aaa; margin-bottom:20px">زيادة عدد النقاط التي تحصل عليها في كل ضغطة.</p>
+            <h3 data-key="boost_multitap">النقرة المتعددة</h3>
+            <p style="color:#aaa; margin-bottom:20px" data-key="boost_desc">زيادة عدد النقاط لكل ضغطة</p>
             
             <div class="list-item">
-                <div>المستوى الحالي</div>
+                <div data-key="level">المستوى الحالي</div>
                 <div style="font-weight:bold; color:var(--primary)" id="boost-lvl">1</div>
             </div>
             
-            <button class="btn-main" onclick="buyBoost()" id="boost-btn">ترقية بـ 500 نقطة</button>
+            <button class="btn-main" onclick="buyBoost()" id="boost-btn">Upgrade</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="tasks">
         <div class="modal-content">
-            <div class="modal-header"><h3>المهام</h3><button class="close-btn" onclick="closeModal('tasks')">✕</button></div>
+            <div class="modal-header"><h3 data-key="nav_tasks">المهام</h3><button class="close-btn" onclick="closeModal('tasks')">✕</button></div>
             <div id="tasks-list"></div>
         </div>
     </div>
 
     <div class="modal-overlay" id="quiz">
         <div class="modal-content" style="text-align:center">
-            <div class="modal-header"><h3>مسابقة</h3><button class="close-btn" onclick="closeModal('quiz')">✕</button></div>
+            <div class="modal-header"><h3 data-key="nav_quiz">مسابقة</h3><button class="close-btn" onclick="closeModal('quiz')">✕</button></div>
             <h3 id="q-txt">?</h3>
             <div id="q-opts" style="margin-top:20px"></div>
         </div>
@@ -257,18 +258,18 @@
 
     <div class="modal-overlay" id="daily">
         <div class="modal-content" style="text-align:center">
-            <div class="modal-header"><h3>يومي</h3><button class="close-btn" onclick="closeModal('daily')">✕</button></div>
+            <div class="modal-header"><h3 data-key="daily_title">يومي</h3><button class="close-btn" onclick="closeModal('daily')">✕</button></div>
             <div style="font-size:3rem">🎁</div>
             
             <div id="daily-ready" style="display:none">
-                <p>استلم هديتك اليومية!</p>
-                <button class="btn-main" onclick="claimDaily()">استلام (+1000)</button>
+                <p data-key="daily_msg">استلم هديتك اليومية!</p>
+                <button class="btn-main" onclick="claimDaily()" data-key="daily_claim">استلام (+1000)</button>
             </div>
             
             <div id="daily-timer" style="display:none">
-                <p>الهدية القادمة بعد:</p>
+                <p data-key="daily_wait">الهدية القادمة بعد:</p>
                 <div class="countdown-box" id="timer-txt">00:00:00</div>
-                <button class="btn-sec" onclick="closeModal('daily')">إغلاق</button>
+                <button class="btn-sec" onclick="closeModal('daily')" data-key="close">إغلاق</button>
             </div>
         </div>
     </div>
@@ -277,41 +278,71 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ⚠️ إعدادات الأدمن
+        // ⚠️ Admin Settings
         const CONFIG = {
-            adminUsername: "YOUR_USERNAME", // ضع معرفك هنا بدون @
+            adminUsername: "YOUR_USERNAME", // Put your username here without @
             maxEnergy: 1000
         };
 
-        // الحالة (State) مع إضافة Multitap
+        // --- Localization Data ---
+        const LANG = {
+            ar: {
+                balance: "الرصيد الحالي", energy: "⚡ الطاقة", store_title: "اصرف نقاطك 👇",
+                nav_home: "الرئيسية", nav_tasks: "مهام", nav_quiz: "مسابقة", nav_daily: "يومي",
+                boost_btn: "🚀 ترقية", boost_title: "ترقية الضغط", boost_multitap: "النقرة المتعددة",
+                boost_desc: "زيادة عدد النقاط لكل ضغطة", level: "المستوى الحالي", upgrade: "ترقية بـ",
+                item_insta: "متابعين انستقرام", item_tele: "أعضاء تليجرام", item_tiktok: "تيك توك", item_cash: "رصيد $5",
+                order_title: "طلب", order_desc: "أدخل الرابط للتنفيذ", confirm: "تأكيد ✅",
+                daily_title: "يومي", daily_msg: "استلم هديتك اليومية!", daily_claim: "استلام", daily_wait: "الهدية القادمة بعد:",
+                close: "إغلاق", done: "تم", do: "نفذ", correct: "إجابة صحيحة", wrong: "خطأ",
+                insufficient: "نقاطك غير كافية!", link_err: "الرابط غير صحيح"
+            },
+            en: {
+                balance: "Current Balance", energy: "⚡ Energy", store_title: "Spend Points 👇",
+                nav_home: "Home", nav_tasks: "Tasks", nav_quiz: "Quiz", nav_daily: "Daily",
+                boost_btn: "🚀 Boost", boost_title: "Click Boost", boost_multitap: "Multitap",
+                boost_desc: "Increase points per tap", level: "Current Level", upgrade: "Upgrade for",
+                item_insta: "Insta Followers", item_tele: "TG Members", item_tiktok: "TikTok", item_cash: "Cash $5",
+                order_title: "Order", order_desc: "Enter Link to Process", confirm: "Confirm ✅",
+                daily_title: "Daily Reward", daily_msg: "Claim your daily reward!", daily_claim: "Claim", daily_wait: "Next reward in:",
+                close: "Close", done: "Done", do: "Go", correct: "Correct!", wrong: "Wrong!",
+                insufficient: "Insufficient Points!", link_err: "Invalid Link"
+            }
+        };
+
+        // --- Data & State ---
         let state = {
             score: parseInt(localStorage.getItem('cs_score') || 0),
             energy: parseInt(localStorage.getItem('cs_energy') || 1000),
             lastDaily: parseInt(localStorage.getItem('cs_lastDaily') || 0),
             completedTasks: JSON.parse(localStorage.getItem('cs_tasks') || "[]"),
-            multitap: parseInt(localStorage.getItem('cs_multitap') || 1) // مستوى النقر
+            multitap: parseInt(localStorage.getItem('cs_multitap') || 1),
+            lang: localStorage.getItem('cs_lang') || 'ar'
         };
 
         let currentOrder = {};
+        
+        // Bilingual Content Arrays
         const TASKS = [
-            {id:1, txt:"اشترك بالقناة", r:500, url:"https://t.me/telegram"},
-            {id:2, txt:"تابعنا انستقرام", r:300, url:"https://instagram.com"}
+            {id:1, txt_ar:"اشترك بالقناة", txt_en:"Join Channel", r:500, url:"https://t.me/telegram"},
+            {id:2, txt_ar:"تابعنا انستقرام", txt_en:"Follow Instagram", r:300, url:"https://instagram.com"}
         ];
         const QUIZ = [
-            {q:"عاصمة مصر؟", a:["القاهرة","الاسكندرية"], c:0},
-            {q:"لون السماء؟", a:["أحمر","أزرق"], c:1}
+            {q_ar:"عاصمة مصر؟", q_en:"Capital of Egypt?", a_ar:["القاهرة","الاسكندرية"], a_en:["Cairo","Alexandria"], c:0},
+            {q_ar:"لون السماء؟", q_en:"Color of Sky?", a_ar:["أحمر","أزرق"], a_en:["Red","Blue"], c:1}
         ];
 
         window.onload = () => {
+            applyLang(state.lang);
             updateUI();
             if(tg.initDataUnsafe?.user) {
                 document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
                 document.getElementById('user-id').innerText = "ID: " + tg.initDataUnsafe.user.id;
             }
-            // إعادة تعبئة الطاقة
+            // Energy Regen
             setInterval(() => {
                 if(state.energy < CONFIG.maxEnergy) {
-                    state.energy += state.multitap; // شحن اسرع مع الترقية
+                    state.energy += state.multitap;
                     if(state.energy > CONFIG.maxEnergy) state.energy = CONFIG.maxEnergy;
                     updateEnergyUI();
                 }
@@ -326,18 +357,37 @@
             localStorage.setItem('cs_lastDaily', state.lastDaily);
             localStorage.setItem('cs_tasks', JSON.stringify(state.completedTasks));
             localStorage.setItem('cs_multitap', state.multitap);
+            localStorage.setItem('cs_lang', state.lang);
         }
 
-        // --- نظام الضغط (Clicker) المعدل ---
+        // --- Localization Logic ---
+        function toggleLang() {
+            state.lang = state.lang === 'ar' ? 'en' : 'ar';
+            applyLang(state.lang);
+            save();
+        }
+
+        function applyLang(l) {
+            const data = LANG[l];
+            document.body.dir = l === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('lang-btn').innerText = l === 'ar' ? '🇺🇸' : '🇮🇶';
+            
+            // Apply text to all elements with data-key
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if(data[key]) el.innerText = data[key];
+            });
+        }
+
+        function t(key) { return LANG[state.lang][key]; } // Helper to get string in JS
+
+        // --- Clicker ---
         function handleTap(e) {
-            // نستهلك طاقة تساوي مستوى النقرة ليكون عادلاً، أو 1 ليكون سهلاً. سأجعله يستهلك 1 طاقة فقط.
             if(state.energy >= 1) {
                 state.energy--;
-                state.score += state.multitap; // زيادة النقاط حسب المستوى
-                
+                state.score += state.multitap;
                 document.getElementById('score').innerText = state.score.toLocaleString();
                 updateEnergyUI();
-
                 if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
                 showFloatNum(e.clientX, e.clientY, state.multitap);
             }
@@ -347,10 +397,8 @@
             const el = document.createElement('div');
             el.className = 'float-num';
             el.innerText = '+' + val;
-            const rX = x + (Math.random() * 40 - 20);
-            const rY = y - 20;
-            el.style.left = rX + 'px';
-            el.style.top = rY + 'px';
+            el.style.left = (x + (Math.random() * 40 - 20)) + 'px';
+            el.style.top = (y - 20) + 'px';
             document.body.appendChild(el);
             setTimeout(() => el.remove(), 800);
         }
@@ -364,16 +412,13 @@
             updateEnergyUI();
         }
 
-        // --- نظام ترقية الضغط (Boost) ---
+        // --- Boost ---
         function openBoostModal() {
             openModal('boostModal');
             document.getElementById('boost-lvl').innerText = state.multitap;
-            
-            // معادلة السعر: 500 * (2 ^ (المستوى - 1))
             const cost = 500 * Math.pow(2, state.multitap - 1);
-            const btn = document.getElementById('boost-btn');
-            btn.innerText = `ترقية بـ ${cost.toLocaleString()} نقطة`;
-            btn.onclick = () => buyBoost(cost);
+            document.getElementById('boost-btn').innerText = `${t('upgrade')} ${cost.toLocaleString()}`;
+            document.getElementById('boost-btn').onclick = () => buyBoost(cost);
         }
 
         function buyBoost(cost) {
@@ -382,15 +427,17 @@
                 state.multitap++;
                 save();
                 updateUI();
-                tg.showAlert(`تمت الترقية إلى المستوى ${state.multitap}!`);
-                openBoostModal(); // تحديث السعر الجديد
+                tg.showAlert(`Upgraded to Level ${state.multitap}!`);
+                openBoostModal();
             } else {
-                tg.showAlert("نقاطك غير كافية!");
+                tg.showAlert(t('insufficient'));
             }
         }
 
-        // --- نظام المتجر ---
-        function openOrderModal(type, name, price) {
+        // --- Store ---
+        function openOrderModal(type, keyName, price) {
+            // Translate the name based on the key passed
+            const name = t(keyName);
             currentOrder = { type, name, price };
             document.getElementById('order-title').innerText = name;
             document.getElementById('order-price-lbl').innerText = price.toLocaleString();
@@ -401,8 +448,8 @@
 
         function submitOrder() {
             const link = document.getElementById('order-link').value;
-            if(!link || link.length < 3) return tg.showAlert("الرابط غير صحيح!");
-            if(state.score < currentOrder.price) return tg.showAlert("نقاطك غير كافية!");
+            if(!link || link.length < 3) return tg.showAlert(t('link_err'));
+            if(state.score < currentOrder.price) return tg.showAlert(t('insufficient'));
 
             state.score -= currentOrder.price;
             save();
@@ -410,24 +457,22 @@
 
             const user = tg.initDataUnsafe.user;
             const uname = user ? `@${user.username || 'NoUser'} (${user.id})` : "Guest";
-            const msg = `🛒 طلب جديد:\n👤: ${uname}\n📦: ${currentOrder.name}\n🔗: ${link}\n💰: ${currentOrder.price}`;
+            const msg = `🛒 NEW ORDER:\n👤: ${uname}\n📦: ${currentOrder.name}\n🔗: ${link}\n💰: ${currentOrder.price}`;
 
             if(CONFIG.adminUsername !== "YOUR_USERNAME") {
                 tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
                 closeModal('orderModal');
                 document.getElementById('order-link').value = "";
             } else {
-                tg.showAlert("تم (يرجى ضبط اسم الأدمن)");
+                tg.showAlert("Done (Please set Admin Username)");
             }
         }
 
-        // --- نظام الهدية اليومية (المصلح) ---
+        // --- Daily Reward ---
         let dailyTimerInt;
-
         function openDailyModal() {
             openModal('daily');
             checkDailyReward();
-            // تحديث العداد كل ثانية أثناء فتح النافذة
             if(dailyTimerInt) clearInterval(dailyTimerInt);
             dailyTimerInt = setInterval(checkDailyReward, 1000);
         }
@@ -435,27 +480,21 @@
         function checkDailyReward() {
             const now = Date.now();
             const diff = now - state.lastDaily;
-            const cooldown = 86400000; // 24 ساعة
-
+            const cooldown = 86400000;
             const readyDiv = document.getElementById('daily-ready');
             const timerDiv = document.getElementById('daily-timer');
-            const timerTxt = document.getElementById('timer-txt');
 
             if(diff >= cooldown) {
-                // الهدية جاهزة
                 readyDiv.style.display = 'block';
                 timerDiv.style.display = 'none';
             } else {
-                // وقت الانتظار
                 readyDiv.style.display = 'none';
                 timerDiv.style.display = 'block';
-                
                 const remaining = cooldown - diff;
                 const h = Math.floor(remaining / (1000 * 60 * 60));
                 const m = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
                 const s = Math.floor((remaining % (1000 * 60)) / 1000);
-                
-                timerTxt.innerText = `${h < 10 ? '0'+h : h}:${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+                document.getElementById('timer-txt').innerText = `${h < 10 ? '0'+h : h}:${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
             }
         }
 
@@ -464,18 +503,20 @@
             state.lastDaily = Date.now();
             save();
             updateUI();
-            checkDailyReward(); // تحديث الواجهة فوراً
-            tg.showAlert("تم استلام 1000 نقطة!");
+            checkDailyReward();
+            tg.showAlert("+1000!");
         }
 
-        // --- مهام ومسابقة ---
+        // --- Tasks & Quiz ---
         function openTasksModal() {
             openModal('tasks');
             const d = document.getElementById('tasks-list'); d.innerHTML = '';
-            TASKS.forEach(t => {
-                const done = state.completedTasks.includes(t.id);
-                d.innerHTML += `<div class="list-item"><div><b>${t.txt}</b><br><small style="color:var(--success)">+${t.r}</small></div>
-                ${done ? '<small>تم</small>' : `<button onclick="doTask(${t.id},'${t.url}',${t.r})" style="background:var(--primary);border:none;color:#fff;padding:5px 10px;border-radius:5px">نفذ</button>`}</div>`;
+            TASKS.forEach(task => {
+                const done = state.completedTasks.includes(task.id);
+                // Select text based on language
+                const txt = state.lang === 'ar' ? task.txt_ar : task.txt_en;
+                d.innerHTML += `<div class="list-item"><div><b>${txt}</b><br><small style="color:var(--success)">+${task.r}</small></div>
+                ${done ? `<small>${t('done')}</small>` : `<button onclick="doTask(${task.id},'${task.url}',${task.r})" style="background:var(--primary);border:none;color:#fff;padding:5px 10px;border-radius:5px">${t('do')}</button>`}</div>`;
             });
         }
         function doTask(id, url, r) {
@@ -488,13 +529,19 @@
         function startQuiz() {
             openModal('quiz');
             const q = QUIZ[Math.floor(Math.random()*QUIZ.length)];
-            document.getElementById('q-txt').innerText = q.q;
+            const qText = state.lang === 'ar' ? q.q_ar : q.q_en;
+            const answers = state.lang === 'ar' ? q.a_ar : q.a_en;
+            
+            document.getElementById('q-txt').innerText = qText;
             const d = document.getElementById('q-opts'); d.innerHTML = '';
-            q.a.forEach((a, i) => d.innerHTML += `<button class="btn-main" style="margin-top:5px;background:#333" onclick="ansQuiz(${i},${q.c})">${a}</button>`);
+            answers.forEach((ans, i) => d.innerHTML += `<button class="btn-main" style="margin-top:5px;background:#333" onclick="ansQuiz(${i},${q.c})">${ans}</button>`);
         }
         function ansQuiz(s, c) {
-            if(s===c) { state.score+=100; tg.showAlert("صح +100"); closeModal('quiz'); updateUI(); save(); }
-            else tg.showAlert("خطأ");
+            if(s===c) { 
+                state.score+=100; tg.showAlert(t('correct') + " +100"); closeModal('quiz'); updateUI(); save(); 
+            } else {
+                tg.showAlert(t('wrong'));
+            }
         }
 
         function openModal(id) { document.getElementById(id).classList.add('active'); }
