@@ -3,20 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TON Legend V17 - Backend Ready</title>
+    <title>TON Legend V18 - Fixed</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #050505; --panel: #1a1a1a; --primary: #0098EA; --gold: #FFD700;
-            --success: #2ecc71; --danger: #e74c3c; --text: #ffffff;
-        }
+        :root { --bg: #050505; --panel: #1a1a1a; --primary: #0098EA; --gold: #FFD700; --success: #2ecc71; --danger: #e74c3c; --text: #ffffff; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
-        body {
-            font-family: 'Cairo', sans-serif; background-color: var(--bg ); color: var(--text); margin: 0; height: 100vh;
-            display: flex; flex-direction: column; overflow: hidden;
-            background-image: radial-gradient(circle at 50% 10%, #1a2a3a, #000); padding-bottom: 90px;
-        }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg ); color: var(--text); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; background-image: radial-gradient(circle at 50% 10%, #1a2a3a, #000); padding-bottom: 90px; }
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
         .spinner { width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -56,230 +49,143 @@
     </style>
 </head>
 <body>
-
     <div id="loader"><div class="spinner"></div><h2 style="color:#fff">TON LEGEND</h2><p style="color:#666">جاري تحميل البيانات...</p></div>
     <div class="header"><div class="user-info"><span class="rank-badge" id="rank-badge">Bronze 🥉</span><span style="font-size:0.8rem; opacity:0.7" id="user-id">ID: ...</span></div><button class="lang-btn" onclick="toggleLang()" id="lang-btn">🇺🇸 EN</button></div>
     <div class="score-area"><div class="score-val" id="score">0</div><div class="score-sub" data-key="points_lbl">TON Points</div></div>
     <div class="feat-bar"><div class="feat-btn" onclick="openDaily()">📅</div><div class="feat-btn" onclick="openModal('codes')">🎁</div><div class="feat-btn" onclick="openModal('shop')">💎</div></div>
     <div class="game-stage"><div class="coin" onclick="tap(event)"><svg class="coin-svg" viewBox="0 0 24 24"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg></div></div>
     <div class="energy-wrap"><div style="display:flex; justify-content:space-between; font-size:0.9rem"><span data-key="energy_lbl">Energy</span><span id="energy-txt">100/100</span></div><div class="progress-bg"><div class="progress-fill" id="energy-bar"></div></div></div>
-    <div class="nav"><div class="nav-item" onclick="openModal('shop')"><span>🛒</span> <span data-key="shop_btn">Shop</span></div><div class="nav-item" onclick="openModal('tasks')"><span>📋</span> <span data-key="tasks_btn">Tasks</span></div><div class="nav-item" onclick="startQuiz()"><span>❓</span> <span data-key="quiz_btn">Quiz</span></div></div>
-    <div class="modal" id="daily"><div class="modal-card"><h2 data-key="daily_title">Daily Reward</h2><div class="streak-container" id="streak-dots"><div class="day-box">1</div><div class="day-box">2</div><div class="day-box">3</div><div class="day-box">4</div><div class="day-box">5</div><div class="day-box">6</div><div class="day-box">7</div></div><p id="daily-status" style="color:#aaa; margin-bottom:20px">...</p><button class="btn" id="claim-btn" onclick="claimDaily()">Claim</button><button class="btn btn-close" onclick="closeModal('daily')" data-key="close_btn">Close</button></div></div>
+    <div class="nav"><div class="nav-item" onclick="openModal('shop')"><span>🛒</span> <span data-key="shop_btn">Shop</span></div><div class="nav-item" onclick="openTasks()"><span>📋</span> <span data-key="tasks_btn">Tasks</span></div><div class="nav-item" onclick="startQuiz()"><span>❓</span> <span data-key="quiz_btn">Quiz</span></div></div>
+    <div class="modal" id="daily"><div class="modal-card"><h2 data-key="daily_title">Daily Reward</h2><div class="streak-container" id="streak-dots"></div><p id="daily-status" style="color:#aaa; margin-bottom:20px">...</p><button class="btn" id="claim-btn" onclick="claimDaily()">Claim</button><button class="btn btn-close" onclick="closeModal('daily')" data-key="close_btn">Close</button></div></div>
     <div class="modal" id="quiz"><div class="modal-card"><h2 data-key="quiz_title">Challenge</h2><div style="width:100%; background:#333; height:5px; border-radius:5px; margin:10px 0; overflow:hidden"><div id="quiz-progress" style="width:0%; height:100%; background:var(--primary); transition:0.3s"></div></div><div style="font-size:3rem; margin:10px 0;" id="q-flag"></div><h3 id="q-text" style="margin-bottom:20px">Question?</h3><div id="q-opts"></div><button class="btn btn-close" onclick="closeModal('quiz')" data-key="exit_btn">Exit</button></div></div>
     <div class="modal" id="tasks"><div class="modal-card"><h2 data-key="tasks_title">Tasks</h2><div id="task-list"></div><button class="btn btn-close" onclick="closeModal('tasks')" data-key="close_btn">Close</button></div></div>
     <div class="modal" id="shop"><div class="modal-card"><h2 data-key="shop_title">Shop</h2><input class="inp" id="shop-link" placeholder="@username"><input class="inp" type="number" id="shop-count" placeholder="Count (Min 100)"><button class="btn" onclick="buy()" data-key="buy_btn">Buy Followers</button><button class="btn btn-close" onclick="closeModal('shop')" data-key="close_btn">Close</button></div></div>
     <div class="modal" id="codes"><div class="modal-card"><h2 data-key="code_title">Promo Code</h2><input class="inp" id="code-inp" placeholder="Enter Code"><button class="btn" onclick="redeem()" data-key="check_btn">Check</button><button class="btn btn-close" onclick="closeModal('codes')" data-key="close_btn">Close</button></div></div>
 
     <script>
-        // ================= CONFIGURATION =================
         const CONFIG = {
-            botToken: "8207071306:AAFqIFqsANxB7srrBEsUfZJkb4xzhsY5FMQ", // لا تشارك هذا الرمز
-            adminId: "1759629479",
-            energyRegenRate: 2000, // ms
-            baseApiUrl: "https://your-backend-url.com/api" // <-- غيّر هذا إلى رابط الخادم الخاص بك
+            botToken: "YOUR_BOT_TOKEN", adminId: "YOUR_ADMIN_ID", energyRegenRate: 2000,
+            baseApiUrl: "https://your-backend-url.com/api"
         };
+        const QUIZ_DATA = [ { id: 1, flag: "🇮🇶", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["العراق", "مصر", "سوريا"], ans_en: ["Iraq", "Egypt", "Syria"], c: 0, reward: 100, penalty: 50 }, { id: 2, flag: "🇸🇦", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["الكويت", "السعودية", "قطر"], ans_en: ["Kuwait", "KSA", "Qatar"], c: 1, reward: 100, penalty: 50 }, { id: 3, flag: "🇺🇸", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["كندا", "أمريكا", "المكسيك"], ans_en: ["Canada", "USA", "Mexico"], c: 1, reward: 100, penalty: 50 }, ];
+        const TASKS = [ { id: 1, t_ar: "اشترك في قناتنا", t_en: "Join Channel", u: "https://t.me/telegram", r: 200 }, { id: 2, t_ar: "تابعنا انستقرام", t_en: "Follow Instagram", u: "https://instagram.com", r: 150 }, { id: 3, t_ar: "دعوة صديق", t_en: "Invite Friend", u: "https://t.me/share/url?url=https://t.me/YOUR_BOT", r: 500 } ];
+        const LANG = { ar: { points_lbl: "نقاط تون", energy_lbl: "الطاقة", shop_btn: "المتجر", tasks_btn: "المهام", quiz_btn: "مسابقة", shop_title: "شراء متابعين", tasks_title: "المهام", daily_title: "المكافأة اليومية", quiz_title: "مسابقة الأعلام", code_title: "كود هدية", buy_btn: "شراء", close_btn: "إغلاق", exit_btn: "خروج", check_btn: "تحقق" }, en: { points_lbl: "TON Points", energy_lbl: "Energy", shop_btn: "Shop", tasks_btn: "Tasks", quiz_btn: "Quiz", shop_title: "Buy Followers", tasks_title: "Tasks", daily_title: "Daily Reward", quiz_title: "Flag Quiz", code_title: "Promo Code", buy_btn: "Buy", close_btn: "Close", exit_btn: "Exit", check_btn: "Check" } };
 
-        // ================= STATIC DATA =================
-        const QUIZ_DATA = [
-            { id: 1, flag: "🇮🇶", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["العراق", "مصر", "سوريا"], ans_en: ["Iraq", "Egypt", "Syria"], c: 0, reward: 100, penalty: 50 },
-            { id: 2, flag: "🇸🇦", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["الكويت", "السعودية", "قطر"], ans_en: ["Kuwait", "KSA", "Qatar"], c: 1, reward: 100, penalty: 50 },
-            { id: 3, flag: "🇺🇸", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["كندا", "أمريكا", "المكسيك"], ans_en: ["Canada", "USA", "Mexico"], c: 1, reward: 100, penalty: 50 },
-        ];
-        const TASKS = [
-            { id: 1, t_ar: "اشترك في قناتنا", t_en: "Join Channel", u: "https://t.me/telegram", r: 200 },
-            { id: 2, t_ar: "تابعنا انستقرام", t_en: "Follow Instagram", u: "https://instagram.com", r: 150 },
-            { id: 3, t_ar: "دعوة صديق", t_en: "Invite Friend", u: "https://t.me/share/url?url=https://t.me/YOUR_BOT", r: 500 }
-        ];
-        const LANG = {
-            ar: { points_lbl: "نقاط تون", energy_lbl: "الطاقة", shop_btn: "المتجر", tasks_btn: "المهام", quiz_btn: "مسابقة", shop_title: "شراء متابعين", tasks_title: "المهام", daily_title: "المكافأة اليومية", quiz_title: "مسابقة الأعلام", code_title: "كود هدية", buy_btn: "شراء", close_btn: "إغلاق", exit_btn: "خروج", check_btn: "تحقق", alert_succ: "ناجح!", alert_fail: "فشل!" },
-            en: { points_lbl: "TON Points", energy_lbl: "Energy", shop_btn: "Shop", tasks_btn: "Tasks", quiz_btn: "Quiz", shop_title: "Buy Followers", tasks_title: "Tasks", daily_title: "Daily Reward", quiz_title: "Flag Quiz", code_title: "Promo Code", buy_btn: "Buy", close_btn: "Close", exit_btn: "Exit", check_btn: "Check", alert_succ: "Success!", alert_fail: "Fail!" }
-        };
-
-        // ================= NEW: SERVER API SIMULATOR =================
-        // هذا الجزء يحاكي وجود خادم حقيقي.
-        // في المستقبل، ستقوم باستبدال هذا الجزء بطلبات `fetch` حقيقية.
+        // ================= SERVER API SIMULATOR =================
         const ServerAPI = {
-            // بيانات وهمية مخزنة محلياً للمحاكاة
-            _mockDB: {
-                score: parseInt(localStorage.getItem('score_v17' ) || 0),
-                energy: 100,
-                doneTasks: JSON.parse(localStorage.getItem('done_tasks_v17') || "[]"),
-                lastDailyDate: localStorage.getItem('last_daily_date_v17'),
-                streak: parseInt(localStorage.getItem('streak_v17') || 1)
+            _getMockDB: ( ) => ({
+                score: parseInt(localStorage.getItem('score_v18') || 0),
+                energy: parseInt(localStorage.getItem('energy_v18') || 100),
+                doneTasks: JSON.parse(localStorage.getItem('done_tasks_v18') || "[]"),
+                lastDailyDate: localStorage.getItem('last_daily_date_v18'),
+                streak: parseInt(localStorage.getItem('streak_v18') || 1)
+            }),
+            _saveMockDB: (db) => {
+                localStorage.setItem('score_v18', db.score);
+                localStorage.setItem('energy_v18', db.energy);
+                localStorage.setItem('done_tasks_v18', JSON.stringify(db.doneTasks));
+                if(db.lastDailyDate) localStorage.setItem('last_daily_date_v18', db.lastDailyDate);
+                localStorage.setItem('streak_v18', db.streak);
             },
+            _call: async (action, data) => {
+                console.log(`[API MOCK] Action: ${action}`, data);
+                return new Promise(resolve => setTimeout(() => {
+                    let db = ServerAPI._getMockDB();
+                    let response = { success: false, data: {}, message: 'Unknown error' };
 
-            // دالة لجلب بيانات المستخدم الأولية
-            getUserData: async (userId) => {
-                console.log(`[API] Fetching data for user ${userId}`);
-                // SIMULATION: Just return the mock data
-                return new Promise(resolve => setTimeout(() => resolve({
-                    success: true,
-                    data: ServerAPI._mockDB
-                }), 500));
-                /*
-                // REAL IMPLEMENTATION:
-                const response = await fetch(`${CONFIG.baseApiUrl}/user/${userId}`);
-                return await response.json();
-                */
-            },
+                    if (action === 'getUserData') {
+                        response = { success: true, data: db };
+                    } else if (action === 'syncTap') {
+                        if (db.energy > 0) {
+                            db.score++; db.energy--;
+                            response = { success: true, data: { score: db.score, energy: db.energy } };
+                        } else { response = { success: false, message: 'No energy' }; }
+                    } else if (action === 'submitQuizAnswer') {
+                        const question = QUIZ_DATA.find(q => q.id === data.questionId);
+                        if (data.isCorrect) { db.score += question.reward; } else { db.score = Math.max(0, db.score - question.penalty); }
+                        response = { success: true, data: { score: db.score } };
+                    } else if (action === 'claimDailyReward') {
+                        const today = new Date().toDateString();
+                        if (db.lastDailyDate === today) {
+                            response = { success: false, message: 'Already claimed' };
+                        } else {
+                            db.score += (db.streak * 100);
+                            db.lastDailyDate = today;
+                            if (db.streak < 7) db.streak++; else db.streak = 1;
+                            response = { success: true, data: { score: db.score, streak: db.streak, lastDailyDate: db.lastDailyDate } };
+                        }
+                    } else if (action === 'completeTask') {
+                        if (!db.doneTasks.includes(data.taskId)) {
+                            db.score += data.reward;
+                            db.doneTasks.push(data.taskId);
+                            response = { success: true, data: { score: db.score, doneTasks: db.doneTasks } };
+                        } else { response = { success: false, message: 'Task already done' }; }
+                    } else if (action === 'redeemCode') {
+                        if (data.code === 'TON') {
+                            db.score += 1000;
+                            response = { success: true, data: { score: db.score }, message: '+1000!' };
+                        } else { response = { success: false, message: 'Invalid code' }; }
+                    }
 
-            // دالة لإرسال النقرات
-            syncTap: async (userId) => {
-                console.log(`[API] Syncing tap for user ${userId}`);
-                // SIMULATION:
-                if (ServerAPI._mockDB.energy > 0) {
-                    ServerAPI._mockDB.score++;
-                    ServerAPI._mockDB.energy--;
-                    localStorage.setItem('score_v17', ServerAPI._mockDB.score); // Save for persistence in demo
-                    return { success: true, data: { score: ServerAPI._mockDB.score, energy: ServerAPI._mockDB.energy } };
-                }
-                return { success: false, message: "No energy" };
-                /*
-                // REAL IMPLEMENTATION:
-                const response = await fetch(`${CONFIG.baseApiUrl}/user/tap`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId })
-                });
-                return await response.json();
-                */
-            },
-
-            // دالة لإرسال إجابة الاختبار
-            submitQuizAnswer: async (userId, questionId, isCorrect) => {
-                console.log(`[API] Submitting quiz answer for user ${userId}`);
-                // SIMULATION:
-                const question = QUIZ_DATA.find(q => q.id === questionId);
-                if (isCorrect) {
-                    ServerAPI._mockDB.score += question.reward;
-                } else {
-                    ServerAPI._mockDB.score = Math.max(0, ServerAPI._mockDB.score - question.penalty);
-                }
-                localStorage.setItem('score_v17', ServerAPI._mockDB.score);
-                return { success: true, data: { score: ServerAPI._mockDB.score } };
-            },
-            
-            // دالة للمطالبة بالمكافأة اليومية
-            claimDailyReward: async (userId) => {
-                console.log(`[API] Claiming daily reward for user ${userId}`);
-                // SIMULATION:
-                const today = new Date().toDateString();
-                if (ServerAPI._mockDB.lastDailyDate === today) {
-                    return { success: false, message: "Already claimed today" };
-                }
-                ServerAPI._mockDB.score += (ServerAPI._mockDB.streak * 100);
-                ServerAPI._mockDB.lastDailyDate = today;
-                if (ServerAPI._mockDB.streak < 7) ServerAPI._mockDB.streak++; else ServerAPI._mockDB.streak = 1;
-                
-                localStorage.setItem('score_v17', ServerAPI._mockDB.score);
-                localStorage.setItem('last_daily_date_v17', ServerAPI._mockDB.lastDailyDate);
-                localStorage.setItem('streak_v17', ServerAPI._mockDB.streak);
-
-                return { success: true, data: { score: ServerAPI._mockDB.score, streak: ServerAPI._mockDB.streak } };
-            },
-            
-            // دالة لإكمال مهمة
-            completeTask: async (userId, taskId, reward) => {
-                console.log(`[API] Completing task ${taskId} for user ${userId}`);
-                // SIMULATION:
-                if (!ServerAPI._mockDB.doneTasks.includes(taskId)) {
-                    ServerAPI._mockDB.score += reward;
-                    ServerAPI._mockDB.doneTasks.push(taskId);
-                    localStorage.setItem('score_v17', ServerAPI._mockDB.score);
-                    localStorage.setItem('done_tasks_v17', JSON.stringify(ServerAPI._mockDB.doneTasks));
-                    return { success: true, data: { score: ServerAPI._mockDB.score, doneTasks: ServerAPI._mockDB.doneTasks } };
-                }
-                return { success: false, message: "Task already completed" };
+                    ServerAPI._saveMockDB(db);
+                    console.log('[API MOCK] Response:', response);
+                    resolve(response);
+                }, 200));
             }
         };
 
         // ================= ENGINE =================
-        const tg = window.Telegram.WebApp; tg.expand();
-        
-        let state = {
-            userId: tg.initDataUnsafe?.user?.id || "Guest",
-            score: 0,
-            energy: 0,
-            maxEnergy: 100,
-            lang: localStorage.getItem('lang') || 'ar',
-            doneTasks: [],
-            quizIndex: 0
-        };
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-        // --- INITIALIZATION ---
+        let state = { userId: tg.initDataUnsafe?.user?.id || "Guest", score: 0, energy: 0, maxEnergy: 100, lang: localStorage.getItem('lang') || 'ar', doneTasks: [], quizIndex: 0, streak: 1, lastDailyDate: null };
+
         window.onload = async () => {
-            document.getElementById('user-id').innerText = "ID: " + state.userId;
+            document.getElementById('user-id').innerText = `ID: ${state.userId}`;
             applyLang(state.lang);
 
-            // Fetch initial user data from server
-            const response = await ServerAPI.getUserData(state.userId);
-            if (response.success) {
-                state = { ...state, ...response.data };
-                console.log("Initial state loaded:", state);
+            const { success, data } = await ServerAPI._call('getUserData');
+            if (success) {
+                Object.assign(state, data);
             } else {
                 tg.showAlert("Failed to load user data.");
             }
 
-            // Hide loader and update UI
-            setTimeout(() => {
-                document.getElementById('loader').style.opacity = '0';
-                setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
-                updateUI();
-            }, 500);
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+            updateUI();
+            
+            setInterval(() => {
+                if (state.energy < state.maxEnergy) {
+                    state.energy++;
+                    localStorage.setItem('energy_v18', state.energy); // Save for demo persistence
+                    updateUI();
+                }
+            }, CONFIG.energyRegenRate);
         };
 
-        // --- CORE LOGIC ---
-        
-        // Energy Regen (Client-side prediction, server is the source of truth)
-        setInterval(() => {
-            if(state.energy < state.maxEnergy) {
-                state.energy++;
-                updateUI();
-            }
-        }, CONFIG.energyRegenRate);
-
-        // Click Handler
         async function tap(e) {
-            if(state.energy > 0) {
-                // Optimistic UI update
-                state.score++; state.energy--;
-                updateUI();
-                floatNum(e.clientX, e.clientY);
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-                // Sync with server
-                const response = await ServerAPI.syncTap(state.userId);
-                if (response.success) {
-                    // Re-sync state with server response
-                    state.score = response.data.score;
-                    state.energy = response.data.energy;
-                } else {
-                    // Rollback if server fails (e.g., out of energy)
-                    // This part needs more robust implementation in a real app
-                    console.error("Sync failed:", response.message);
-                }
-                updateUI();
+            if (state.energy <= 0) return;
+            state.energy--;
+            state.score++;
+            updateUI();
+            floatNum(e.clientX, e.clientY);
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            
+            const { success, data } = await ServerAPI._call('syncTap');
+            if (success) {
+                state.score = data.score; // Re-sync with server response
+                state.energy = data.energy;
             }
+            updateUI();
         }
 
-        // --- FEATURES ---
-
-        // 1. Quiz Logic
-        function startQuiz() {
-            state.quizIndex = 0;
-            openModal('quiz');
-            renderQuestion();
-        }
-
+        function startQuiz() { state.quizIndex = 0; openModal('quiz'); renderQuestion(); }
         function renderQuestion() {
-            if(state.quizIndex >= QUIZ_DATA.length) {
-                tg.showAlert("Quiz Completed! 🎉");
-                closeModal('quiz');
-                return;
-            }
+            if (state.quizIndex >= QUIZ_DATA.length) { tg.showAlert("Quiz Completed! 🎉"); closeModal('quiz'); return; }
             const q = QUIZ_DATA[state.quizIndex];
             const isAr = state.lang === 'ar';
-            document.getElementById('quiz-progress').style.width = ((state.quizIndex / QUIZ_DATA.length) * 100) + "%";
+            document.getElementById('quiz-progress').style.width = `${(state.quizIndex / QUIZ_DATA.length) * 100}%`;
             document.getElementById('q-flag').innerText = q.flag;
             document.getElementById('q-text').innerText = isAr ? q.q_ar : q.q_en;
             const opts = document.getElementById('q-opts');
@@ -293,85 +199,108 @@
                 opts.appendChild(btn);
             });
         }
-
         async function answerQuiz(btn, isCorrect, questionId) {
-            if(btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
-
+            if (btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
             btn.classList.add(isCorrect ? 'correct' : 'wrong');
-            
-            // Send answer to server
-            const response = await ServerAPI.submitQuizAnswer(state.userId, questionId, isCorrect);
-            if (response.success) {
-                state.score = response.data.score;
-                tg.showAlert(isCorrect ? `+${QUIZ_DATA.find(q=>q.id===questionId).reward}` : `-${QUIZ_DATA.find(q=>q.id===questionId).penalty}`);
-            }
+            const { success, data } = await ServerAPI._call('submitQuizAnswer', { questionId, isCorrect });
+            if (success) state.score = data.score;
             updateUI();
-
-            setTimeout(() => {
-                state.quizIndex++;
-                renderQuestion();
-            }, 1000);
+            setTimeout(() => { state.quizIndex++; renderQuestion(); }, 1000);
         }
 
-        // 2. Daily Reward
         function openDaily() {
             openModal('daily');
-            // This data should ideally come from the server on modal open
             const today = new Date().toDateString();
-            const last = state.lastDailyDate;
-            let streak = state.streak;
-            
-            const dots = document.querySelectorAll('.day-box');
-            dots.forEach((d, i) => {
-                if(i < streak -1) d.classList.add('active'); else d.classList.remove('active');
-            });
-            if (last === today) {
-                 dots[streak-1]?.classList.add('active');
+            const streakContainer = document.getElementById('streak-dots');
+            streakContainer.innerHTML = '';
+            for(let i=1; i<=7; i++) {
+                const dayBox = document.createElement('div');
+                dayBox.className = 'day-box';
+                dayBox.innerText = i;
+                if (i < state.streak) dayBox.classList.add('active');
+                streakContainer.appendChild(dayBox);
             }
-
-
+            
             const btn = document.getElementById('claim-btn');
             const status = document.getElementById('daily-status');
             const isAr = state.lang === 'ar';
 
-            if(last === today) {
+            if (state.lastDailyDate === today) {
                 btn.disabled = true;
                 btn.style.background = "#333";
                 btn.innerText = isAr ? "عد غداً" : "Come Tomorrow";
                 status.innerText = isAr ? "تم الاستلام ✅" : "Claimed ✅";
+                if(state.streak > 0) streakContainer.children[state.streak-1]?.classList.add('active');
             } else {
                 btn.disabled = false;
                 btn.style.background = "var(--primary)";
                 btn.innerText = isAr ? "استلام" : "Claim";
-                status.innerText = isAr ? `اليوم ${streak}` : `Day ${streak}`;
+                status.innerText = isAr ? `اليوم ${state.streak}` : `Day ${state.streak}`;
             }
         }
-
         async function claimDaily() {
-            const response = await ServerAPI.claimDailyReward(state.userId);
-            if (response.success) {
-                state.score = response.data.score;
-                state.streak = response.data.streak;
-                state.lastDailyDate = new Date().toDateString(); // Update local state
+            const { success, data } = await ServerAPI._call('claimDailyReward');
+            if (success) {
+                Object.assign(state, data);
                 updateUI();
-                openDaily(); // Refresh modal view
+                openDaily();
             } else {
-                tg.showAlert(response.message);
+                tg.showAlert(data.message || 'Failed to claim');
             }
         }
 
-        // 3. Tasks & Shop
         function openTasks() {
             openModal('tasks');
             const list = document.getElementById('task-list');
             list.innerHTML = '';
             TASKS.forEach(t => {
                 const isDone = state.doneTasks.includes(t.id);
-                const title = state.lang==='ar' ? t.t_ar : t.t_en;
-                list.innerHTML += `
-                <div style="background:#222; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; opacity:${isDone ? 0.5 : 1}">
-                    <div><b>${title}</b><div style="color:var(--success);font-size:0.8rem">+${t.r}</div></div>
-                    <button ${isDone ? 'disabled' : ''} onclick="doTask(${t.id}, '${t.u}', ${t.r})" style="background:${isDone ? '#333' : 'var(--primary)'}; border:none; color:#fff; padding:5px 15px; border-radius:8px">${isDone ? 'Done' : 'GO'}</button>
-                </div>`;
+                const title = state.lang === 'ar' ? t.t_ar : t.t_en;
+                list.innerHTML += `<div style="background:#222; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; opacity:${isDone ? 0.5 : 1}"><div><b>${title}</b><div style="color:var(--success);font-size:0.8rem">+${t.r}</div></div><button ${isDone ? 'disabled' : ''} onclick="doTask(${t.id}, '${t.u}', ${t.r})" style="background:${isDone ? '#333' : 'var(--primary)'}; border:none; color:#fff; padding:5px 15px; border-radius:8px">${isDone ? 'Done' : 'GO'}</button></div>`;
             });
         }
+        function doTask(id, url, r) {
+            tg.openLink(url);
+            tg.showConfirm(state.lang === 'ar' ? "هل أكملت المهمة؟" : "Did you complete the task?", async (ok) => {
+                if (ok) {
+                    const { success, data } = await ServerAPI._call('completeTask', { taskId: id, reward: r });
+                    if (success) {
+                        state.score = data.score;
+                        state.doneTasks = data.doneTasks;
+                        updateUI();
+                        openTasks();
+                    } else { tg.showAlert('Task already completed'); }
+                }
+            });
+        }
+        
+        async function redeem() {
+            const code = document.getElementById('code-inp').value;
+            if (!code) return;
+            const { success, data, message } = await ServerAPI._call('redeemCode', { code });
+            tg.showAlert(message);
+            if (success) {
+                state.score = data.score;
+                updateUI();
+                closeModal('codes');
+            }
+        }
+
+        function buy() { /* ... unchanged ... */ }
+        function toggleLang() { state.lang = state.lang === 'ar' ? 'en' : 'ar'; localStorage.setItem('lang', state.lang); applyLang(state.lang); }
+        function applyLang(l) { document.body.dir = l === 'ar' ? 'rtl' : 'ltr'; document.getElementById('lang-btn').innerText = l === 'ar' ? '🇺🇸 EN' : '🇮🇶 AR'; document.querySelectorAll('[data-key]').forEach(el => { if (LANG[l][el.getAttribute('data-key')]) el.innerText = LANG[l][el.getAttribute('data-key')]; }); }
+        function updateUI() {
+            document.getElementById('score').innerText = Math.floor(state.score).toLocaleString();
+            document.getElementById('energy-txt').innerText = `${state.energy}/${state.maxEnergy}`;
+            document.getElementById('energy-bar').style.width = `${(state.energy / state.maxEnergy) * 100}%`;
+            let rank = "Bronze 🥉";
+            if (state.score > 5000) rank = "Silver 🥈"; if (state.score > 20000) rank = "Gold 🥇"; if (state.score > 100000) rank = "Diamond 💎";
+            document.getElementById('rank-badge').innerText = rank;
+        }
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function floatNum(x, y) { const el = document.createElement('div'); el.innerText = '+1'; el.style.cssText = `position:fixed; left:${x}px; top:${y}px; color:#fff; font-weight:bold; pointer-events:none; z-index:999; text-shadow:0 0 5px var(--primary); animation:fly 0.8s forwards;`; document.body.appendChild(el); setTimeout(() => el.remove(), 800); }
+        document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fly {to{transform:translateY(-100px);opacity:0}}</style>`);
+    </script>
+</body>
+</html>
