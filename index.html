@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clicker Pro V4 - Mustafa Alaa</title>
+    <title>Clicker Pro V4 - SS34SS4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -31,68 +31,49 @@
             overflow-x: hidden;
         }
 
-        /* --- Header & Rank --- */
-        .header {
-            padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            z-index: 10;
-        }
-        .rank-display { font-size: 0.8rem; font-weight: bold; color: var(--secondary); border: 1px solid var(--secondary); padding: 4px 8px; border-radius: 10px; }
-
-        /* --- Score --- */
-        .score-container { text-align: center; margin-top: 15px; }
-        .score-val { font-size: 2.8rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(0, 152, 234, 0.5); }
-
-        /* --- Game Area --- */
-        .game-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-        .coin {
-            width: 240px; height: 240px; border-radius: 50%;
-            border: 8px solid rgba(255,255,255,0.1);
-            box-shadow: 0 0 50px rgba(0, 152, 234, 0.4);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.1s;
-        }
-        .coin.skin-gold { background: radial-gradient(circle at 30% 30%, #ffd700, #f39c12); }
-        .coin.skin-iraq { background: linear-gradient(135deg, #ce1126, #fff, #000); }
-        .coin:active { transform: scale(0.92); }
-        
-        /* Lucky Coin */
-        .lucky-coin { position: absolute; width: 60px; height: 60px; background: gold; border-radius: 50%; z-index: 20; display: flex; align-items: center; justify-content: center; animation: pop 0.5s; cursor: pointer; box-shadow: 0 0 20px #fff; }
-        @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+        /* --- Loader --- */
+        #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* --- UI Elements --- */
+        .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 10; }
+        .rank-display { font-size: 0.8rem; font-weight: bold; color: var(--secondary); border: 1px solid var(--secondary); padding: 4px 8px; border-radius: 10px; }
+        .score-container { text-align: center; margin-top: 15px; }
+        .score-val { font-size: 2.8rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(0, 152, 234, 0.5); }
         .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 20px; }
         .menu-item { background: var(--surface); border-radius: 12px; padding: 10px; text-align: center; font-size: 0.7rem; border: 1px solid var(--border); cursor: pointer; }
-        
         .energy-container { width: 85%; margin: 10px auto; }
         .energy-bar { height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin-top: 5px; }
         .energy-fill { height: 100%; background: var(--primary); width: 100%; transition: width 0.3s; }
+
+        /* --- Game Area --- */
+        .game-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        .coin { width: 240px; height: 240px; border-radius: 50%; border: 8px solid rgba(255,255,255,0.1); box-shadow: 0 0 50px rgba(0, 152, 234, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe); }
+        .coin:active { transform: scale(0.92); }
+        .lucky-coin { position: absolute; width: 60px; height: 60px; background: gold; border-radius: 50%; z-index: 20; display: flex; align-items: center; justify-content: center; animation: pop 0.5s; cursor: pointer; box-shadow: 0 0 20px #fff; }
+        @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
 
         /* --- Modals --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: none; align-items: flex-end; backdrop-filter: blur(5px); }
         .modal-overlay.active { display: flex; }
         .modal-content { background: #151515; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 2px solid var(--primary); max-height: 80vh; overflow-y: auto; }
         .close-x { float: left; background: #333; border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
+        .btn-main { width: 100%; padding: 15px; background: var(--primary); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        .inp { width: 100%; padding: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 12px; margin-bottom: 10px; text-align: center; }
 
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(20,20,20,0.9); border-radius: 20px; display: flex; justify-content: space-around; padding: 10px; border: 1px solid var(--border); }
         .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #888; cursor: pointer; }
         .nav-btn.active { color: #fff; }
-
-        .btn-main { width: 100%; padding: 15px; background: var(--primary); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; }
-        .inp { width: 100%; padding: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 12px; margin-bottom: 10px; text-align: center; }
-        
-        #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .float-num { position: fixed; color: #fff; font-weight: 900; font-size: 2rem; pointer-events: none; z-index: 100; text-shadow: 0 0 5px var(--primary); animation: floatUp 0.8s forwards; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
     </style>
 </head>
 <body>
 
     <div id="loader">
         <div class="spinner"></div>
-        <h3 style="margin-top:15px">Clicker Pro V4</h3>
+        <h3 style="margin-top:15px">جارٍ التحميل...</h3>
     </div>
 
     <div class="header">
@@ -120,7 +101,7 @@
 
     <div class="game-area" id="game-area">
         <div class="coin" id="main-coin" onpointerdown="handleTap(event)">
-            <svg viewBox="0 0 24 24" width="120" fill="white"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg>
+            <svg viewBox="0 0 24 24" width="100" fill="white"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg>
         </div>
     </div>
 
@@ -143,33 +124,8 @@
         <div class="modal-content">
             <button class="close-x" onclick="closeModal('minerModal')">✕</button>
             <h3 style="text-align:center" data-key="miner_title">روبوت التعدين</h3>
-            <div style="text-align:center; font-size:3rem; margin:10px">🤖</div>
-            <div class="inp" style="background:none; border:none"><span id="miner-rate">0</span> P/Sec</div>
-            <button class="btn-main" id="upgrade-miner-btn" onclick="upgradeMiner()">Upgrade</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="storeModal">
-        <div class="modal-content">
-            <button class="close-x" onclick="closeModal('storeModal')">✕</button>
-            <h3 style="text-align:center" data-key="nav_store">المتجر</h3>
-            <div id="store-items-list">
-                <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333" onclick="openOrder('insta', 5000)">
-                    <span>📸 Instagram Followers</span> <b>5,000 P</b>
-                </div>
-                <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333" onclick="openOrder('tele', 5000)">
-                    <span>✈️ Telegram Members</span> <b>5,000 P</b>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="orderModal">
-        <div class="modal-content">
-            <button class="close-x" onclick="closeModal('orderModal')">✕</button>
-            <h3 id="order-item-name" style="text-align:center">Order</h3>
-            <input type="text" class="inp" id="order-link-input" placeholder="Link / Username">
-            <button class="btn-main" onclick="submitOrder()">Confirm & Deduct</button>
+            <div class="inp" style="background:none; border:none; font-size:2rem; margin:10px">⛏️ <span id="miner-rate">0</span> P/Sec</div>
+            <button class="btn-main" id="upgrade-miner-btn" onclick="upgradeMiner()">Upgrade Miner</button>
         </div>
     </div>
 
@@ -177,31 +133,52 @@
         <div class="modal-content" style="text-align:center">
             <button class="close-x" onclick="closeModal('friendsModal')">✕</button>
             <h3 data-key="friends_title">Invite Friends</h3>
-            <div style="font-size:3rem; margin:15px">👥</div>
-            <p style="font-size:0.8rem; color:#aaa">احصل على 5,000 نقطة لكل صديق يدخل من رابطك!</p>
+            <p style="font-size:0.85rem; color:#aaa; margin:20px 0">احصل على 5,000 نقطة لكل صديق!</p>
             <input type="text" class="inp" id="ref-link-display" readonly>
-            <button class="btn-main" onclick="copyRef()">Copy Link</button>
+            <button class="btn-main" onclick="copyRef()">نسخ رابط الدعوة</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="storeModal">
+        <div class="modal-content">
+            <button class="close-x" onclick="closeModal('storeModal')">✕</button>
+            <h3 style="text-align:center" data-key="nav_store">المتجر</h3>
+            <div style="padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between" onclick="openOrder('📸 Instagram Followers', 5000)">
+                <span>انستقرام (100 متابع)</span> <b>5,000 P</b>
+            </div>
+            <div style="padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between" onclick="openOrder('✈️ Telegram Members', 5000)">
+                <span>تليجرام (100 عضو)</span> <b>5,000 P</b>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal-content">
+            <button class="close-x" onclick="closeModal('orderModal')">✕</button>
+            <h3 id="order-item-name" style="text-align:center">طلب جديد</h3>
+            <input type="text" class="inp" id="order-link-input" placeholder="أدخل الرابط أو المعرف">
+            <button class="btn-main" onclick="submitOrder()">تأكيد وخصم النقاط</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="offlineModal">
         <div class="modal-content" style="text-align:center">
             <h2 style="color:var(--success)">Welcome Back!</h2>
-            <p>جمع لك الروبوت أثناء غيابك:</p>
+            <p>أرباحك التلقائية أثناء غيابك:</p>
             <h1 id="offline-val" style="color:var(--primary)">0</h1>
-            <button class="btn-main" onclick="closeModal('offlineModal')">Claim</button>
+            <button class="btn-main" onclick="closeModal('offlineModal')">جمع النقاط</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="skinsModal"><div class="modal-content"><button class="close-x" onclick="closeModal('skinsModal')">✕</button><h3>Skins</h3><div id="skins-container"></div></div></div>
     <div class="modal-overlay" id="tasksModal"><div class="modal-content"><button class="close-x" onclick="closeModal('tasksModal')">✕</button><h3>Tasks</h3><div id="tasks-container"></div></div></div>
-    <div class="modal-overlay" id="quizModal"><div class="modal-content"><button class="close-x" onclick="closeModal('quizModal')">✕</button><h3>Quiz</h3><div id="quiz-container"></div></div></div>
+    <div class="modal-overlay" id="quizModal"><div class="modal-content" style="text-align:center"><button class="close-x" onclick="closeModal('quizModal')">✕</button><h3>Quiz</h3><div id="quiz-container"></div></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Config
+        // Your Exact Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyACixZDVCNww716fRN_29xm2kCnFadkL64",
             authDomain: "tele-ea6e7.firebaseapp.com",
@@ -217,14 +194,14 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Mustafa Alaa Config
+        // Mustafa Alaa New Config
         const CONFIG = {
             adminUsername: "SS34SS4", 
-            botLink: "https://t.me/tofe109tofebot", // Update this
+            botLink: "https://t.me/tofe109tofebot", 
             maxEnergy: 1000
         };
 
-        let userId = "test_user";
+        let userId = "mustafa_test";
         let isLoaded = false;
         let hasChanges = false;
         let state = {
@@ -238,7 +215,6 @@
             en: { balance: "Balance", energy: "Energy", miner: "Miner", skins: "Skins", friends: "Friends", boost: "Boost", nav_home: "Home", nav_store: "Store", nav_tasks: "Tasks", nav_quiz: "Quiz" }
         };
 
-        // --- Core ---
         window.onload = async () => {
             if(tg.initDataUnsafe?.user) userId = tg.initDataUnsafe.user.id.toString();
             document.getElementById('user-display-name').innerText = tg.initDataUnsafe?.user?.first_name || "Mustafa";
@@ -258,7 +234,7 @@
                 state = {...state, ...snap.data()};
                 if(state.minerLvl > 0){
                     const earned = Math.floor((Date.now() - state.lastLogin)/1000) * state.minerLvl;
-                    if(earned > 10){
+                    if(earned > 20){
                         state.score += earned;
                         document.getElementById('offline-val').innerText = earned.toLocaleString();
                         openModal('offlineModal');
@@ -280,12 +256,14 @@
             if(param && param.startsWith('ref_') && !state.refBy){
                 const rId = param.split('_')[1];
                 if(rId !== userId){
-                    const rRef = doc(db, "players", rId);
-                    await updateDoc(rRef, { score: increment(5000) });
-                    state.score += 1000;
-                    state.refBy = rId;
-                    await saveData(true);
-                    tg.showAlert("تمت الإحالة بنجاح! +1000");
+                    try {
+                        const rRef = doc(db, "players", rId);
+                        await updateDoc(rRef, { score: increment(5000) });
+                        state.score += 1000;
+                        state.refBy = rId;
+                        await saveData(true);
+                        tg.showAlert("تم قبول الإحالة! حصلت على 1,000 نقطة.");
+                    } catch(e) { console.error("Ref error", e); }
                 }
             }
         }
@@ -306,7 +284,7 @@
             setInterval(() => saveData(), 15000);
         }
 
-        // --- Actions ---
+        // --- Window Actions ---
         window.handleTap = (e) => {
             if(state.energy >= 1){
                 state.energy--; state.score += state.multitap;
@@ -323,7 +301,7 @@
             if(state.score >= cost){
                 state.score -= cost; state.minerLvl++;
                 await saveData(true); updateUI();
-                tg.showAlert("Upgraded!");
+                tg.showAlert("Miner Upgraded!");
             } else tg.showAlert("Insufficient points!");
         };
 
@@ -335,18 +313,18 @@
             state.score -= window.currentOrder.price;
             await saveData(true); updateUI();
             
-            const msg = `Order: ${window.currentOrder.name}\nLink: ${link}\nUser: ${userId}`;
+            const msg = `🚨 طلب جديد من: ${userId}\n📦 الخدمة: ${window.currentOrder.name}\n🔗 الرابط: ${link}`;
             tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
             closeModal('orderModal');
         };
 
-        // --- Helpers ---
-        function updateUI() {
-            updateScore(); updateEnergy();
+        window.updateUI = () => {
+            updateScore(); updateEnergy(); updateRank();
             document.getElementById('miner-rate').innerText = state.minerLvl;
             document.getElementById('ref-link-display').value = `${CONFIG.botLink}?start=ref_${userId}`;
             applyLang();
-        }
+        };
+
         function updateScore() { document.getElementById('score').innerText = Math.floor(state.score).toLocaleString(); }
         function updateEnergy() {
             document.getElementById('energy-txt').innerText = `${state.energy}/${CONFIG.maxEnergy}`;
@@ -357,8 +335,8 @@
             if(state.score>50000){r="Silver";c="#aaa";}
             if(state.score>500000){r="Gold";c="#ffd700";}
             if(state.score>5000000){r="Diamond";c="#00d2ff";}
-            document.getElementById('rank-name').innerText = r;
-            document.getElementById('rank-name').style.color = c;
+            const el = document.getElementById('rank-name');
+            el.innerText = r; el.style.color = c;
         }
 
         window.openModal = (id) => document.getElementById(id).classList.add('active');
@@ -372,22 +350,22 @@
                 const k = el.getAttribute('data-key'); if(d[k]) el.innerText = d[k];
             });
         }
+        window.t = (k) => LANGS[state.lang][k];
 
         window.openOrder = (name, price) => {
             window.currentOrder = {name, price};
             document.getElementById('order-item-name').innerText = name;
-            document.getElementById('order-price-lbl')?.innerText = price;
             openModal('orderModal');
         };
 
         window.copyRef = () => {
             navigator.clipboard.writeText(document.getElementById('ref-link-display').value);
-            tg.showAlert("Copied!");
+            tg.showAlert("تم النسخ!");
         };
 
         function showFloat(x,y,t){
             const e = document.createElement('div'); e.className='float-num'; e.innerText=t;
-            e.style.left=x+'px'; e.style.top=(y-30)+'px'; e.style.position='fixed'; e.style.color='#fff';
+            e.style.left=x+'px'; e.style.top=(y-30)+'px';
             document.body.appendChild(e);
             setTimeout(()=>e.remove(), 800);
         }
@@ -400,7 +378,6 @@
             document.getElementById('game-area').appendChild(c);
             setTimeout(()=>c.remove(), 1000);
         }
-
     </script>
 </body>
 </html>
