@@ -35,6 +35,7 @@
 
         /* --- Animations --- */
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-80px) scale(1.5); } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
         /* --- Header --- */
         .header {
@@ -146,26 +147,22 @@
         .modal-title { font-size: 1.4rem; font-weight: 800; color: #fff; }
         .close-btn { background: #333; border: none; width: 30px; height: 30px; border-radius: 50%; color: #fff; font-weight: bold; cursor: pointer; }
 
-        /* --- Common List Item Style --- */
+        /* --- List Items (Shop/Tasks) --- */
         .list-item {
             background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;
             margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
             border: 1px solid transparent; transition: 0.2s;
         }
         .list-item:active { background: rgba(255,255,255,0.1); transform: scale(0.98); }
-        .list-icon { font-size: 1.5rem; width: 45px; height: 45px; background: rgba(0,0,0,0.3); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-left: 10px; } /* Margin left for RTL */
+        .list-icon { font-size: 1.5rem; width: 45px; height: 45px; background: rgba(0,0,0,0.3); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-left: 10px; }
         
-        /* Task Button */
-        .action-btn {
-            padding: 8px 15px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-size: 0.9rem; color: #fff;
-        }
+        /* Task Buttons */
+        .action-btn { padding: 8px 15px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-size: 0.9rem; color: #fff; }
         .btn-go { background: var(--primary); }
         .btn-claim { background: var(--success); animation: pulse 1s infinite; }
         .btn-done { background: #333; color: #888; cursor: default; }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-
-        /* Quiz Styles */
+        /* Quiz Options */
         .quiz-opt {
             background: #252525; padding: 15px; border-radius: 12px; margin-bottom: 10px;
             cursor: pointer; border: 1px solid #333; text-align: center; font-size: 1.1rem;
@@ -179,6 +176,7 @@
             margin: 20px 0; text-shadow: 0 0 10px rgba(255,255,255,0.2);
         }
 
+        /* Loader */
         #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.5s; }
         .loader-ring { width: 50px; height: 50px; border: 4px solid #333; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 15px; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -281,8 +279,12 @@
 
     <div class="modal-overlay" id="daily">
         <div class="modal-content" style="text-align:center">
-            <h2 data-key="daily_reward">Daily Reward</h2>
-            <div style="font-size:3rem; margin:20px 0">🎁</div>
+            <div class="modal-header">
+                <span class="modal-title" data-key="daily_reward">Daily Reward</span>
+                <button class="close-btn" onclick="closeModal('daily')">✕</button>
+            </div>
+
+            <div style="font-size:3rem; margin:10px 0 20px 0">🎁</div>
             
             <div id="daily-ready-area">
                 <p style="color:#aaa; margin-bottom:20px" data-key="daily_desc">Claim your free points now!</p>
@@ -294,8 +296,8 @@
             <div id="daily-timer-area" style="display:none;">
                 <p style="color:#aaa;" data-key="next_reward">Next reward in:</p>
                 <div class="countdown-box" id="daily-countdown">00:00:00</div>
-                <button class="mini-btn" style="width:100%; justify-content:center; background:#333; padding:15px; cursor:default">
-                    <span data-key="wait">Please Wait</span>
+                <button class="mini-btn" style="width:100%; justify-content:center; background:#333; padding:15px; margin-top:15px" onclick="closeModal('daily')">
+                    <span data-key="close_btn">Close</span>
                 </button>
             </div>
         </div>
@@ -372,17 +374,17 @@
         const CONFIG = {
             baseEnergy: 1000,
             baseCost: { multitap: 500, limit: 1000, speed: 2000 },
-            dailyCooldown: 24 * 60 * 60 * 1000 // 24 Hours in ms
+            dailyCooldown: 24 * 60 * 60 * 1000 
         };
 
         let state = {
             score: parseInt(localStorage.getItem('tl_score') || 0),
             energy: parseInt(localStorage.getItem('tl_energy') || 1000),
             upgrades: JSON.parse(localStorage.getItem('tl_upgrades') || '{"multitap":1, "limit":1, "speed":1}'),
-            lastDaily: parseInt(localStorage.getItem('tl_lastDaily') || 0), // Timestamp
+            lastDaily: parseInt(localStorage.getItem('tl_lastDaily') || 0),
             lang: localStorage.getItem('tl_lang') || 'ar',
             completedTasks: JSON.parse(localStorage.getItem('tl_tasks') || "[]"),
-            quizIdx: 0 // Local session only
+            quizIdx: 0
         };
 
         const LANG = {
@@ -393,7 +395,8 @@
                 tasks_title: "قائمة المهام", daily_reward: "المكافأة اليومية", gift: "كود", daily: "يومي",
                 claim: "استلام", wait: "انتظر", next_reward: "المكافأة التالية بعد:", daily_desc: "احصل على نقاط مجانية كل 24 ساعة!",
                 quiz_title: "مسابقة ثقافية", quiz_done: "انتهت المسابقة!",
-                btn_go: "نفذ", btn_claim: "تحقق", btn_done: "تم"
+                btn_go: "نفذ", btn_claim: "تحقق", btn_done: "تم",
+                close_btn: "إغلاق"
             },
             en: {
                 balance: "Total Balance", energy: "Energy",
@@ -402,7 +405,8 @@
                 tasks_title: "Task List", daily_reward: "Daily Reward", gift: "Code", daily: "Daily",
                 claim: "Claim", wait: "Wait", next_reward: "Next reward in:", daily_desc: "Get free points every 24h!",
                 quiz_title: "Trivia Quiz", quiz_done: "Quiz Completed!",
-                btn_go: "Go", btn_claim: "Check", btn_done: "Done"
+                btn_go: "Go", btn_claim: "Check", btn_done: "Done",
+                close_btn: "Close"
             }
         };
 
@@ -436,11 +440,10 @@
             localStorage.setItem('tl_lastDaily', state.lastDaily);
         }
 
-        // --- Daily Reward Logic (With Timer) ---
+        // --- Daily Reward Logic ---
         function openDailyModal() {
             openModal('daily');
             checkDailyStatus();
-            // Update timer every second while modal is open
             if(dailyInterval) clearInterval(dailyInterval);
             dailyInterval = setInterval(checkDailyStatus, 1000);
         }
@@ -452,11 +455,9 @@
             const timerArea = document.getElementById('daily-timer-area');
 
             if(diff >= CONFIG.dailyCooldown) {
-                // Ready to claim
                 readyArea.style.display = 'block';
                 timerArea.style.display = 'none';
             } else {
-                // Cooldown
                 readyArea.style.display = 'none';
                 timerArea.style.display = 'block';
                 
@@ -480,7 +481,7 @@
             tg.showAlert("+1000 Points!");
         }
 
-        // --- Multiple Tasks Logic ---
+        // --- Tasks Logic ---
         function openTasksModal() {
             openModal('tasks');
             const list = document.getElementById('tasks-list-container');
@@ -521,13 +522,11 @@
             const isAr = state.lang === 'ar';
             
             if(btn.classList.contains('btn-go')) {
-                // First click: Open Link
                 window.open(url, '_blank');
                 btn.classList.remove('btn-go');
                 btn.classList.add('btn-claim');
                 btn.innerText = isAr ? LANG.ar.btn_claim : LANG.en.btn_claim;
             } else if (btn.classList.contains('btn-claim')) {
-                // Second click: Claim Reward
                 state.score += reward;
                 state.completedTasks.push(id);
                 save(); updateUI();
@@ -540,7 +539,7 @@
             }
         }
 
-        // --- Multiple Quiz Logic ---
+        // --- Quiz Logic ---
         function startQuiz() {
             openModal('quiz');
             state.quizIdx = 0;
@@ -551,7 +550,6 @@
 
         function renderQuizQuestion() {
             if(state.quizIdx >= QUESTIONS.length) {
-                // Quiz Finished
                 document.getElementById('quiz-game-area').style.display = 'none';
                 document.getElementById('quiz-done-area').style.display = 'block';
                 return;
@@ -560,14 +558,11 @@
             const q = QUESTIONS[state.quizIdx];
             const isAr = state.lang === 'ar';
             
-            // Update Bar
             const pct = ((state.quizIdx) / QUESTIONS.length) * 100;
             document.getElementById('quiz-bar').style.width = pct + "%";
 
-            // Text
             document.getElementById('q-txt').innerText = isAr ? q.q_ar : q.q_en;
             
-            // Options
             const optsDiv = document.getElementById('q-opts');
             optsDiv.innerHTML = '';
             const answers = isAr ? q.opts_ar : q.opts_en;
@@ -588,23 +583,20 @@
             
             if(selected === correct) {
                 btn.classList.add('correct');
-                state.score += 100; // Reward per question
+                state.score += 100;
                 tg.HapticFeedback.impactOccurred('light');
             } else {
                 btn.classList.add('wrong');
-                // Highlight the correct one
                 allOpts[correct].classList.add('correct');
                 tg.HapticFeedback.notificationOccurred('error');
             }
             save(); updateUI();
 
-            // Next Question Delay
             setTimeout(() => {
                 state.quizIdx++;
                 renderQuizQuestion();
             }, 1000);
         }
-
 
         // --- Base Game Logic ---
         function handleTap(e) {
@@ -694,7 +686,6 @@
             state.lang = state.lang === 'ar' ? 'en' : 'ar';
             localStorage.setItem('tl_lang', state.lang);
             applyLang(state.lang);
-            // Re-render lists if open
             if(document.getElementById('tasks').classList.contains('active')) openTasksModal();
             if(document.getElementById('daily').classList.contains('active')) openDailyModal();
             location.reload();
