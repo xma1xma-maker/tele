@@ -3,483 +3,559 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TON Legend V16</title>
+    <title>TON Legend Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #050505;
-            --panel: #1a1a1a;
-            --primary: #0098EA; /* لون تون */
-            --gold: #FFD700;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-            --text: #ffffff;
+            --bg-dark: #0a0a0a;
+            --primary: #0098EA;
+            --primary-glow: rgba(0, 152, 234, 0.6);
+            --secondary: #f39c12;
+            --surface: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #888;
+            --success: #00E096;
+            --danger: #FF3B30;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
         
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 0%, #1a3a5a, #000);
+            color: var(--text-main);
             margin: 0; height: 100vh;
             display: flex; flex-direction: column;
             overflow: hidden;
-            background-image: radial-gradient(circle at 50% 10%, #1a2a3a, #000);
-            padding-bottom: 90px; /* مساحة للقائمة السفلية */
+            padding-bottom: 95px;
         }
 
-        /* --- شاشة التحميل --- */
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; transition: opacity 0.5s;
-        }
-        .spinner {
-            width: 50px; height: 50px; border: 5px solid #333;
-            border-top: 5px solid var(--primary); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* --- Animations --- */
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-80px) scale(1.5); } }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 20px var(--primary-glow); } 100% { box-shadow: 0 0 40px var(--primary-glow); } }
 
-        /* --- الرأس (Header) --- */
+        /* --- Header --- */
         .header {
-            padding: 15px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
         }
-        .user-info { display: flex; gap: 10px; align-items: center; }
-        .rank-badge { background: var(--gold); color: #000; padding: 3px 10px; border-radius: 10px; font-weight: bold; font-size: 0.8rem; }
-        .lang-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 5px 12px; border-radius: 15px; cursor: pointer; font-weight: bold; }
+        .user-badge { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 35px; height: 35px; background: linear-gradient(45deg, var(--primary), #00d2ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+        .rank-info { display: flex; flex-direction: column; line-height: 1.2; }
+        .rank-name { font-weight: 800; font-size: 0.9rem; color: var(--secondary); }
+        .rank-bar-bg { width: 80px; height: 4px; background: #333; border-radius: 2px; margin-top: 3px; overflow: hidden; }
+        .rank-bar-fill { height: 100%; background: var(--secondary); width: 0%; transition: width 0.5s; }
 
-        /* --- العداد (Score) --- */
-        .score-area { text-align: center; margin-top: 20px; animation: pulse 2s infinite alternate; }
-        .score-val { font-size: 3.5rem; font-weight: 900; text-shadow: 0 0 25px var(--primary); line-height: 1; }
-        .score-sub { font-size: 0.9rem; color: #aaa; margin-top: 5px; }
+        /* --- Score Display --- */
+        .score-container { text-align: center; margin-top: 30px; position: relative; }
+        .score-val { font-size: 3.8rem; font-weight: 900; background: -webkit-linear-gradient(#fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 15px rgba(255,255,255,0.3)); }
+        .score-label { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: -5px; }
 
-        /* --- شريط الميزات (Features) --- */
-        .feat-bar { display: flex; justify-content: center; gap: 20px; margin: 20px 0; }
-        .feat-btn {
-            background: rgba(255,255,255,0.05); width: 60px; height: 60px; border-radius: 18px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
-            border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.2s;
+        /* --- The Coin Area (3D Effect) --- */
+        .game-stage { flex-grow: 1; display: flex; justify-content: center; align-items: center; perspective: 1000px; position: relative; }
+        
+        .coin-wrapper {
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            cursor: pointer;
+            box-shadow: 0 0 80px rgba(0, 152, 234, 0.2);
         }
-        .feat-btn:active { transform: scale(0.9); background: var(--primary); border-color: var(--primary); }
+        
+        .coin-wrapper:active { transform: scale(0.95) !important; }
 
-        /* --- العملة (The Coin) --- */
-        .game-stage { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
-        .coin {
-            width: 260px; height: 260px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #0098EA, #005580);
-            border: 8px solid rgba(255,255,255,0.1);
-            box-shadow: 0 0 60px rgba(0, 152, 234, 0.5);
+        .coin-inner {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe);
+            border: 10px solid rgba(255,255,255,0.1);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.08s; position: relative;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
         }
-        .coin:active { transform: scale(0.92); }
-        .coin-svg { width: 60%; fill: #fff; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3)); }
+        
+        /* Coin Glare */
+        .coin-inner::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(to bottom right, rgba(255,255,255,0.4) 0%, transparent 40%, transparent 100%);
+            pointer-events: none; transform: rotate(45deg);
+        }
 
-        /* --- الطاقة --- */
-        .energy-wrap { margin: 0 20px; background: var(--panel); padding: 12px; border-radius: 15px; border: 1px solid #333; }
-        .progress-bg { background: #000; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 8px; }
-        .progress-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #fff, var(--primary)); transition: width 0.3s; }
+        .coin-logo { width: 65%; fill: #fff; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4)); z-index: 2; }
 
-        /* --- القائمة السفلية (Fixed Nav) --- */
-        .nav {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(15px);
-            border-top: 1px solid #333;
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-            padding: 10px 15px; padding-bottom: calc(15px + env(safe-area-inset-bottom));
-            z-index: 800;
+        /* --- Floating Numbers --- */
+        .float-num {
+            position: absolute; color: #fff; font-weight: 900; font-size: 2rem;
+            pointer-events: none; z-index: 100; text-shadow: 0 0 10px var(--primary);
+            animation: floatUp 0.8s forwards;
+        }
+
+        /* --- Controls & Stats --- */
+        .controls-row { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        .mini-btn {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 10px 20px; border-radius: 20px; color: #fff;
+            display: flex; align-items: center; gap: 8px; font-weight: bold;
+            font-size: 0.9rem; transition: 0.2s;
+        }
+        .mini-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
+
+        /* --- Energy Bar --- */
+        .energy-container {
+            margin: 0 25px 20px 25px;
+            background: rgba(0,0,0,0.3); padding: 10px 15px;
+            border-radius: 20px; border: 1px solid var(--border);
+            backdrop-filter: blur(5px);
+        }
+        .energy-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; }
+        .energy-track { height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; position: relative; }
+        .energy-fill { height: 100%; background: linear-gradient(90deg, #ffd700, #f39c12); width: 100%; transition: width 0.2s linear; box-shadow: 0 0 10px rgba(243, 156, 18, 0.5); }
+
+        /* --- Bottom Nav --- */
+        .nav-bar {
+            position: fixed; bottom: 15px; left: 15px; right: 15px;
+            background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(20px);
+            border-radius: 25px; border: 1px solid rgba(255,255,255,0.08);
+            display: flex; justify-content: space-around;
+            padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 500;
         }
         .nav-item {
-            background: rgba(255,255,255,0.03); color: #fff; border: none;
-            padding: 12px; border-radius: 12px; font-weight: bold; font-size: 0.9rem;
-            display: flex; flex-direction: column; align-items: center; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #888; font-size: 0.75rem; gap: 4px; padding: 5px 10px;
+            border-radius: 15px; transition: 0.2s; width: 60px;
         }
-        .nav-item:active { background: rgba(255,255,255,0.1); }
+        .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; transform: translateY(-5px); }
+        .nav-icon { font-size: 1.4rem; }
 
-        /* --- النوافذ المنبثقة (Modals) --- */
-        .modal {
+        /* --- Modals (Glassmorphism) --- */
+        .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 1000;
-            display: flex; align-items: flex-end; justify-content: center;
+            background: rgba(0,0,0,0.8); z-index: 900;
             opacity: 0; visibility: hidden; transition: 0.3s;
+            backdrop-filter: blur(5px);
         }
-        .modal.active { opacity: 1; visibility: visible; }
-        .modal-card {
-            background: #151515; width: 100%; max-width: 500px;
-            border-radius: 30px 30px 0 0; padding: 30px 20px;
-            border-top: 3px solid var(--primary);
-            transform: translateY(100%); transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            max-height: 85vh; overflow-y: auto; text-align: center;
-            padding-bottom: 50px;
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .modal-content {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: #1a1a1a;
+            border-radius: 30px 30px 0 0;
+            padding: 25px;
+            transform: translateY(100%); transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            max-height: 80vh; overflow-y: auto;
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
         }
-        .modal.active .modal-card { transform: translateY(0); }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
 
-        /* --- عناصر واجهة المستخدم --- */
-        .btn { width: 100%; padding: 16px; background: var(--primary); color: #fff; border: none; border-radius: 14px; font-weight: bold; margin-top: 15px; font-size: 1rem; cursor: pointer; box-shadow: 0 5px 15px rgba(0, 152, 234, 0.3); }
-        .btn-close { background: #333; box-shadow: none; margin-top: 10px; }
-        .inp { width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 12px; margin-bottom: 12px; text-align: center; font-size: 1rem; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-size: 1.4rem; font-weight: 800; color: #fff; }
+        .close-btn { background: #333; border: none; width: 30px; height: 30px; border-radius: 50%; color: #fff; font-weight: bold; }
 
-        /* Quiz Specific */
-        .quiz-option {
-            background: #252525; padding: 15px; border-radius: 12px; margin-bottom: 10px;
-            cursor: pointer; border: 1px solid #333; font-size: 1.1rem; transition: 0.2s;
+        /* --- Shop Items --- */
+        .shop-item {
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;
+            margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+            border: 1px solid transparent; transition: 0.2s;
         }
-        .quiz-option:active { transform: scale(0.98); }
-        .correct { background: var(--success) !important; color: #000; border-color: var(--success); }
-        .wrong { background: var(--danger) !important; border-color: var(--danger); }
+        .shop-item:active { background: rgba(255,255,255,0.1); transform: scale(0.98); }
+        .shop-icon { font-size: 1.8rem; margin-left: 15px; background: rgba(0,0,0,0.3); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .shop-details h4 { margin: 0; font-size: 1rem; color: #fff; }
+        .shop-details p { margin: 5px 0 0; font-size: 0.8rem; color: #aaa; }
+        .shop-price { background: var(--primary); color: #fff; padding: 8px 15px; border-radius: 10px; font-weight: bold; font-size: 0.9rem; min-width: 80px; text-align: center; }
+        .shop-price.disabled { background: #444; color: #888; }
 
-        /* Daily Reward */
-        .streak-container { display: flex; gap: 5px; justify-content: center; margin: 20px 0; }
-        .day-box { width: 40px; height: 40px; background: #333; border-radius: 8px; display: flex; align-items: center; justify-content: center; opacity: 0.5; font-size: 0.8rem; }
-        .day-box.active { opacity: 1; background: var(--success); color: #000; font-weight: bold; }
+        /* Loader */
+        #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.5s; }
+        .loader-ring { width: 50px; height: 50px; border: 4px solid #333; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <div class="spinner"></div>
-        <h2 style="color:#fff">TON LEGEND</h2>
-        <p style="color:#666">جاري تحميل البيانات...</p>
+        <div class="loader-ring"></div>
+        <h3 style="color:#fff; letter-spacing:2px">TON LEGEND</h3>
     </div>
 
     <div class="header">
-        <div class="user-info">
-            <span class="rank-badge" id="rank-badge">Bronze 🥉</span>
-            <span style="font-size:0.8rem; opacity:0.7" id="user-id">ID: ...</span>
+        <div class="user-badge">
+            <div class="avatar">👤</div>
+            <div class="rank-info">
+                <span class="rank-name" id="rank-name">Bronze</span>
+                <div class="rank-bar-bg"><div class="rank-bar-fill" id="rank-bar"></div></div>
+            </div>
         </div>
-        <button class="lang-btn" onclick="toggleLang()" id="lang-btn">🇺🇸 EN</button>
+        <button class="mini-btn" onclick="toggleLang()">
+            <span id="lang-icon">🇺🇸</span> <span id="lang-text">EN</span>
+        </button>
     </div>
 
-    <div class="score-area">
+    <div class="score-container">
         <div class="score-val" id="score">0</div>
-        <div class="score-sub" data-key="points_lbl">TON Points</div>
+        <div class="score-label" data-key="balance">Total Balance</div>
     </div>
 
-    <div class="feat-bar">
-        <div class="feat-btn" onclick="openDaily()">📅</div>
-        <div class="feat-btn" onclick="openModal('codes')">🎁</div>
-        <div class="feat-btn" onclick="openModal('shop')">💎</div>
+    <div class="controls-row" style="margin-top: 20px;">
+        <div class="mini-btn" onclick="openModal('daily')">
+            <span>📅</span> <span data-key="daily">Daily</span>
+        </div>
+        <div class="mini-btn" onclick="openModal('code')">
+            <span>🎁</span> <span data-key="gift">Code</span>
+        </div>
     </div>
 
     <div class="game-stage">
-        <div class="coin" onclick="tap(event)">
-            <svg class="coin-svg" viewBox="0 0 24 24"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg>
+        <div class="coin-wrapper" id="coin" onpointerdown="handleTap(event)">
+            <div class="coin-inner">
+                <svg class="coin-logo" viewBox="0 0 24 24"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg>
+            </div>
         </div>
     </div>
 
-    <div class="energy-wrap">
-        <div style="display:flex; justify-content:space-between; font-size:0.9rem">
-            <span data-key="energy_lbl">Energy</span>
-            <span id="energy-txt">100/100</span>
+    <div class="energy-container">
+        <div class="energy-info">
+            <span style="color:#f39c12">⚡ <span data-key="energy">Energy</span></span>
+            <span id="energy-txt">1000/1000</span>
         </div>
-        <div class="progress-bg"><div class="progress-fill" id="energy-bar"></div></div>
+        <div class="energy-track"><div class="energy-fill" id="energy-bar"></div></div>
     </div>
 
-    <div class="nav">
-        <div class="nav-item" onclick="openModal('shop')">
-            <span>🛒</span> <span data-key="shop_btn">Shop</span>
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="switchTab('game')">
+            <span class="nav-icon">🎮</span>
+            <span data-key="game_tab">Game</span>
+        </div>
+        <div class="nav-item" onclick="openModal('boost')">
+            <span class="nav-icon">🚀</span>
+            <span data-key="boost_tab">Boost</span>
         </div>
         <div class="nav-item" onclick="openModal('tasks')">
-            <span>📋</span> <span data-key="tasks_btn">Tasks</span>
+            <span class="nav-icon">📋</span>
+            <span data-key="tasks_tab">Tasks</span>
         </div>
-        <div class="nav-item" onclick="startQuiz()">
-            <span>❓</span> <span data-key="quiz_btn">Quiz</span>
+        <div class="nav-item" onclick="openModal('quiz')">
+            <span class="nav-icon">🧠</span>
+            <span data-key="quiz_tab">Quiz</span>
         </div>
     </div>
 
-    <div class="modal" id="daily">
-        <div class="modal-card">
-            <h2 data-key="daily_title">Daily Reward</h2>
-            <div class="streak-container" id="streak-dots">
-                <div class="day-box">1</div><div class="day-box">2</div><div class="day-box">3</div>
-                <div class="day-box">4</div><div class="day-box">5</div><div class="day-box">6</div><div class="day-box">7</div>
+    <div class="modal-overlay" id="boost">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" data-key="boost_title">Boosters</span>
+                <button class="close-btn" onclick="closeModal('boost')">✕</button>
             </div>
-            <p id="daily-status" style="color:#aaa; margin-bottom:20px">...</p>
-            <button class="btn" id="claim-btn" onclick="claimDaily()">Claim</button>
-            <button class="btn btn-close" onclick="closeModal('daily')" data-key="close_btn">Close</button>
-        </div>
-    </div>
-
-    <div class="modal" id="quiz">
-        <div class="modal-card">
-            <h2 data-key="quiz_title">Challenge</h2>
-            <div style="width:100%; background:#333; height:5px; border-radius:5px; margin:10px 0; overflow:hidden">
-                <div id="quiz-progress" style="width:0%; height:100%; background:var(--primary); transition:0.3s"></div>
+            
+            <div class="shop-item" onclick="upgrade('multitap')">
+                <div class="shop-icon">👆</div>
+                <div class="shop-details">
+                    <h4 data-key="multitap">Multitap</h4>
+                    <p id="multitap-lvl">Level 1</p>
+                </div>
+                <div class="shop-price" id="multitap-price">500</div>
             </div>
-            <div style="font-size:3rem; margin:10px 0;" id="q-flag"></div>
-            <h3 id="q-text" style="margin-bottom:20px">Question?</h3>
-            <div id="q-opts"></div>
-            <button class="btn btn-close" onclick="closeModal('quiz')" data-key="exit_btn">Exit</button>
+
+            <div class="shop-item" onclick="upgrade('limit')">
+                <div class="shop-icon">🔋</div>
+                <div class="shop-details">
+                    <h4 data-key="energy_limit">Energy Limit</h4>
+                    <p id="limit-lvl">Level 1</p>
+                </div>
+                <div class="shop-price" id="limit-price">1000</div>
+            </div>
+
+            <div class="shop-item" onclick="upgrade('speed')">
+                <div class="shop-icon">⚡</div>
+                <div class="shop-details">
+                    <h4 data-key="recharge">Recharging Speed</h4>
+                    <p id="speed-lvl">Level 1</p>
+                </div>
+                <div class="shop-price" id="speed-price">2000</div>
+            </div>
         </div>
     </div>
 
-    <div class="modal" id="tasks">
-        <div class="modal-card">
-            <h2 data-key="tasks_title">Tasks</h2>
-            <div id="task-list"></div>
-            <button class="btn btn-close" onclick="closeModal('tasks')" data-key="close_btn">Close</button>
+    <div class="modal-overlay" id="tasks">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" data-key="tasks_title">Earn Tasks</span>
+                <button class="close-btn" onclick="closeModal('tasks')">✕</button>
+            </div>
+            <div id="tasks-list">
+                </div>
         </div>
     </div>
 
-    <div class="modal" id="shop">
-        <div class="modal-card">
-            <h2 data-key="shop_title">Shop</h2>
-            <input class="inp" id="shop-link" placeholder="@username">
-            <input class="inp" type="number" id="shop-count" placeholder="Count (Min 100)">
-            <button class="btn" onclick="buy()" data-key="buy_btn">Buy Followers</button>
-            <button class="btn btn-close" onclick="closeModal('shop')" data-key="close_btn">Close</button>
+    <div class="modal-overlay" id="daily">
+        <div class="modal-content" style="text-align:center">
+            <h2 data-key="daily_reward">Daily Reward</h2>
+            <div style="font-size:3rem; margin:20px 0">🎁</div>
+            <p id="daily-msg" style="color:#aaa; margin-bottom:20px">Come back every day for rewards!</p>
+            <button class="mini-btn" style="width:100%; justify-content:center; background:var(--primary); padding:15px;" onclick="claimDaily()" id="daily-btn">Claim</button>
         </div>
     </div>
 
-    <div class="modal" id="codes">
-        <div class="modal-card">
-            <h2 data-key="code_title">Promo Code</h2>
-            <input class="inp" id="code-inp" placeholder="Enter Code">
-            <button class="btn" onclick="redeem()" data-key="check_btn">Check</button>
-            <button class="btn btn-close" onclick="closeModal('codes')" data-key="close_btn">Close</button>
+    <div class="modal-overlay" id="quiz">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Quiz Challenge</span>
+                <button class="close-btn" onclick="closeModal('quiz')">✕</button>
+            </div>
+            <div id="quiz-container" style="text-align:center">
+                <h1 id="q-icon" style="font-size:4rem; margin:10px 0">🌍</h1>
+                <h3 id="q-txt">Question Text</h3>
+                <div id="q-opts" style="display:grid; gap:10px; margin-top:20px"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="code">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Promo Code</span>
+                <button class="close-btn" onclick="closeModal('code')">✕</button>
+            </div>
+            <input type="text" id="promo-input" placeholder="Enter Code..." style="width:100%; padding:15px; background:#222; border:1px solid #444; color:#fff; border-radius:12px; margin-bottom:15px;">
+            <button class="mini-btn" style="width:100%; justify-content:center; background:var(--success)" onclick="redeemCode()">Submit</button>
         </div>
     </div>
 
     <script>
-        // ================= CONFIGURATION =================
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#1a3a5a');
+
+        // --- Config & State ---
         const CONFIG = {
-            botToken: "8207071306:AAFqIFqsANxB7srrBEsUfZJkb4xzhsY5FMQ",
-            adminId: "1759629479"
+            baseEnergy: 1000,
+            baseCost: { multitap: 500, limit: 1000, speed: 2000 }
         };
 
-        // ================= DATA =================
-        const QUIZ_DATA = [
-            { flag: "🇮🇶", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["العراق", "مصر", "سوريا"], ans_en: ["Iraq", "Egypt", "Syria"], c: 0 },
-            { flag: "🇸🇦", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["الكويت", "السعودية", "قطر"], ans_en: ["Kuwait", "KSA", "Qatar"], c: 1 },
-            { flag: "🇺🇸", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["كندا", "أمريكا", "المكسيك"], ans_en: ["Canada", "USA", "Mexico"], c: 1 },
-            { flag: "🇹🇷", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["تونس", "ليبيا", "تركيا"], ans_en: ["Tunisia", "Libya", "Turkey"], c: 2 },
-            { flag: "🇧🇷", q_ar: "ما هذه الدولة؟", q_en: "Which country?", ans_ar: ["البرازيل", "الأرجنتين", "تشيلي"], ans_en: ["Brazil", "Argentina", "Chile"], c: 0 }
-        ];
-
-        const TASKS = [
-            { id: 1, t_ar: "اشترك في قناتنا", t_en: "Join Channel", u: "https://t.me/telegram", r: 200 },
-            { id: 2, t_ar: "تابعنا انستقرام", t_en: "Follow Instagram", u: "https://instagram.com", r: 150 },
-            { id: 3, t_ar: "دعوة صديق", t_en: "Invite Friend", u: "https://t.me/share/url?url=https://t.me/YOUR_BOT", r: 500 }
-        ];
+        let state = {
+            score: parseInt(localStorage.getItem('tl_score') || 0),
+            energy: parseInt(localStorage.getItem('tl_energy') || 1000),
+            upgrades: JSON.parse(localStorage.getItem('tl_upgrades') || '{"multitap":1, "limit":1, "speed":1}'),
+            lastLogin: localStorage.getItem('tl_lastLogin'),
+            lang: localStorage.getItem('tl_lang') || 'ar',
+            completedTasks: JSON.parse(localStorage.getItem('tl_tasks') || "[]")
+        };
 
         const LANG = {
-            ar: { points_lbl: "نقاط تون", energy_lbl: "الطاقة", shop_btn: "المتجر", tasks_btn: "المهام", quiz_btn: "مسابقة", shop_title: "شراء متابعين", tasks_title: "المهام", daily_title: "المكافأة اليومية", quiz_title: "مسابقة الأعلام", code_title: "كود هدية", buy_btn: "شراء", close_btn: "إغلاق", exit_btn: "خروج", check_btn: "تحقق", alert_succ: "ناجح!", alert_fail: "فشل!" },
-            en: { points_lbl: "TON Points", energy_lbl: "Energy", shop_btn: "Shop", tasks_btn: "Tasks", quiz_btn: "Quiz", shop_title: "Buy Followers", tasks_title: "Tasks", daily_title: "Daily Reward", quiz_title: "Flag Quiz", code_title: "Promo Code", buy_btn: "Buy", close_btn: "Close", exit_btn: "Exit", check_btn: "Check", alert_succ: "Success!", alert_fail: "Fail!" }
+            ar: { 
+                balance: "الرصيد الكلي", energy: "الطاقة", 
+                game_tab: "اللعب", boost_tab: "تعزيز", tasks_tab: "مهام", quiz_tab: "مسابقة",
+                boost_title: "مركز التعزيز", multitap: "نقرة متعددة", energy_limit: "سعة الطاقة", recharge: "سرعة الشحن",
+                tasks_title: "قائمة المهام", daily_reward: "المكافأة اليومية", gift: "كود", daily: "يومي"
+            },
+            en: {
+                balance: "Total Balance", energy: "Energy",
+                game_tab: "Game", boost_tab: "Boost", tasks_tab: "Tasks", quiz_tab: "Quiz",
+                boost_title: "Boost Center", multitap: "Multitap", energy_limit: "Energy Limit", recharge: "Recharge Speed",
+                tasks_title: "Task List", daily_reward: "Daily Reward", gift: "Code", daily: "Daily"
+            }
         };
 
-        // ================= ENGINE =================
-        const tg = window.Telegram.WebApp; tg.expand();
-        
-        let state = {
-            score: parseInt(localStorage.getItem('score_v16') || 0),
-            energy: 100,
-            lang: localStorage.getItem('lang') || 'ar',
-            doneTasks: JSON.parse(localStorage.getItem('done_tasks') || "[]"),
-            quizIndex: 0
-        };
-
-        // Loading Screen
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('loader').style.opacity = '0';
-                setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
-            }, 1500);
-            
-            // Set User ID
-            const uid = tg.initDataUnsafe?.user?.id || "Guest";
-            document.getElementById('user-id').innerText = "ID: " + uid;
-            
+        // --- Core Functions ---
+        function init() {
             updateUI();
+            updateUpgradesUI();
             applyLang(state.lang);
-        };
-
-        // Energy Regen
-        setInterval(() => { if(state.energy<100) { state.energy++; updateUI(); } }, 2000);
-
-        // Click Handler
-        function tap(e) {
-            if(state.energy > 0) {
-                state.score++; state.energy--;
-                save(); updateUI();
-                floatNum(e.clientX, e.clientY);
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            }
-        }
-
-        // --- FEATURES ---
-
-        // 1. Quiz Logic (Fixed & Continuous)
-        function startQuiz() {
-            state.quizIndex = 0;
-            openModal('quiz');
-            renderQuestion();
-        }
-
-        function renderQuestion() {
-            if(state.quizIndex >= QUIZ_DATA.length) {
-                tg.showAlert("Quiz Completed! 🎉");
-                closeModal('quiz');
-                return;
-            }
+            animateCoinTilt();
             
-            const q = QUIZ_DATA[state.quizIndex];
-            const isAr = state.lang === 'ar';
-            
-            document.getElementById('quiz-progress').style.width = ((state.quizIndex / QUIZ_DATA.length) * 100) + "%";
-            document.getElementById('q-flag').innerText = q.flag;
-            document.getElementById('q-text').innerText = isAr ? q.q_ar : q.q_en;
-            
-            const opts = document.getElementById('q-opts');
-            opts.innerHTML = '';
-            
-            const answers = isAr ? q.ans_ar : q.ans_en;
-            answers.forEach((ans, i) => {
-                const btn = document.createElement('div');
-                btn.className = 'quiz-option';
-                btn.innerText = ans;
-                btn.onclick = () => answerQuiz(btn, i, q.c);
-                opts.appendChild(btn);
-            });
-        }
-
-        function answerQuiz(btn, selected, correct) {
-            if(btn.classList.contains('correct') || btn.classList.contains('wrong')) return; // prevent double click
-
-            if(selected === correct) {
-                btn.classList.add('correct');
-                state.score += 100;
-                tg.showAlert("+100");
-            } else {
-                btn.classList.add('wrong');
-                if(state.score >= 50) state.score -= 50;
-                tg.showAlert("-50");
-            }
-            save(); updateUI();
-
-            setTimeout(() => {
-                state.quizIndex++;
-                renderQuestion();
+            // Auto Recovery
+            setInterval(() => {
+                const max = CONFIG.baseEnergy * state.upgrades.limit;
+                const rec = state.upgrades.speed;
+                if(state.energy < max) {
+                    state.energy = Math.min(state.energy + rec, max);
+                    updateEnergyUI();
+                }
             }, 1000);
+
+            // Hide Loader
+            setTimeout(() => document.getElementById('loader').style.opacity = 0, 1000);
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 1500);
         }
 
-        // 2. Daily Reward (Fixed)
-        function openDaily() {
-            openModal('daily');
-            const today = new Date().toDateString();
-            const last = localStorage.getItem('last_daily_date');
-            let streak = parseInt(localStorage.getItem('streak') || 1);
+        function save() {
+            localStorage.setItem('tl_score', state.score);
+            localStorage.setItem('tl_upgrades', JSON.stringify(state.upgrades));
+            localStorage.setItem('tl_tasks', JSON.stringify(state.completedTasks));
+        }
+
+        // --- Tap Logic ---
+        function handleTap(e) {
+            const tapPower = state.upgrades.multitap;
             
-            // Render Dots
-            const dots = document.querySelectorAll('.day-box');
-            dots.forEach((d, i) => {
-                if(i < streak) d.classList.add('active');
-                else d.classList.remove('active');
-            });
+            if(state.energy >= tapPower) {
+                // Logic
+                state.score += tapPower;
+                state.energy -= tapPower;
+                save();
+                updateUI();
+                updateEnergyUI();
+                
+                // Haptic
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
-            const btn = document.getElementById('claim-btn');
-            const status = document.getElementById('daily-status');
-            const isAr = state.lang === 'ar';
-
-            if(last === today) {
-                btn.disabled = true;
-                btn.style.background = "#333";
-                btn.innerText = isAr ? "عد غداً" : "Come Tomorrow";
-                status.innerText = isAr ? "تم الاستلام ✅" : "Claimed ✅";
-            } else {
-                btn.disabled = false;
-                btn.style.background = "var(--primary)";
-                btn.innerText = isAr ? "استلام" : "Claim";
-                status.innerText = isAr ? `اليوم ${streak}` : `Day ${streak}`;
+                // Float Number Effect
+                spawnFloatText(e, `+${tapPower}`);
             }
         }
 
+        // --- 3D Coin Effect ---
+        function animateCoinTilt() {
+            const coin = document.getElementById('coin');
+            const container = document.querySelector('.game-stage');
+
+            container.addEventListener('pointermove', (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                // Limit rotation
+                const rotateX = -y / 10;
+                const rotateY = x / 10;
+
+                coin.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            container.addEventListener('pointerleave', () => {
+                coin.style.transform = `rotateX(0) rotateY(0)`;
+            });
+        }
+
+        function spawnFloatText(e, text) {
+            const el = document.createElement('div');
+            el.className = 'float-num';
+            el.innerText = text;
+            
+            // Randomize position slightly
+            const x = e.clientX + (Math.random() * 40 - 20);
+            const y = e.clientY - 20;
+            
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+            
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        // --- Upgrade System ---
+        function upgrade(type) {
+            const level = state.upgrades[type];
+            const cost = CONFIG.baseCost[type] * (2 ** (level - 1));
+
+            if(state.score >= cost) {
+                state.score -= cost;
+                state.upgrades[type]++;
+                save();
+                updateUI();
+                updateUpgradesUI();
+                tg.showAlert("Upgrade Successful! 🚀");
+            } else {
+                tg.showAlert("Not enough points! 💸");
+            }
+        }
+
+        // --- UI Updates ---
+        function updateUI() {
+            document.getElementById('score').innerText = state.score.toLocaleString();
+            
+            // Rank Logic
+            let rank = "Bronze";
+            let progress = 0;
+            if(state.score < 5000) { progress = (state.score/5000)*100; }
+            else if(state.score < 25000) { rank = "Silver"; progress = ((state.score-5000)/20000)*100; }
+            else if(state.score < 100000) { rank = "Gold"; progress = ((state.score-25000)/75000)*100; }
+            else { rank = "Diamond"; progress = 100; }
+            
+            document.getElementById('rank-name').innerText = rank;
+            document.getElementById('rank-bar').style.width = `${progress}%`;
+        }
+
+        function updateEnergyUI() {
+            const max = CONFIG.baseEnergy * state.upgrades.limit;
+            document.getElementById('energy-txt').innerText = `${Math.floor(state.energy)} / ${max}`;
+            document.getElementById('energy-bar').style.width = `${(state.energy/max)*100}%`;
+        }
+
+        function updateUpgradesUI() {
+            const u = state.upgrades;
+            // Multitap
+            document.getElementById('multitap-lvl').innerText = `Lvl ${u.multitap} (+${u.multitap} tap)`;
+            document.getElementById('multitap-price').innerText = (CONFIG.baseCost.multitap * (2**(u.multitap-1))).toLocaleString();
+            
+            // Limit
+            document.getElementById('limit-lvl').innerText = `Lvl ${u.limit} (${1000*u.limit} energy)`;
+            document.getElementById('limit-price').innerText = (CONFIG.baseCost.limit * (2**(u.limit-1))).toLocaleString();
+
+            // Speed
+            document.getElementById('speed-lvl').innerText = `Lvl ${u.speed} (+${u.speed}/sec)`;
+            document.getElementById('speed-price').innerText = (CONFIG.baseCost.speed * (2**(u.speed-1))).toLocaleString();
+        }
+
+        // --- Features (Daily, Tasks, Quiz) ---
         function claimDaily() {
-            let streak = parseInt(localStorage.getItem('streak') || 1);
-            state.score += (streak * 100);
-            localStorage.setItem('last_daily_date', new Date().toDateString());
-            if(streak < 7) streak++; else streak = 1;
-            localStorage.setItem('streak', streak);
-            save(); updateUI(); openDaily();
+            const today = new Date().toDateString();
+            if(state.lastLogin !== today) {
+                state.score += 1000;
+                state.lastLogin = today;
+                localStorage.setItem('tl_lastLogin', today);
+                save(); updateUI();
+                closeModal('daily');
+                tg.showAlert("+1000 Points!");
+            } else {
+                tg.showAlert("Come back tomorrow!");
+            }
         }
 
-        // 3. Tasks & Shop
-        function openTasks() {
-            openModal('tasks');
-            const list = document.getElementById('task-list');
-            list.innerHTML = '';
-            TASKS.filter(t => !state.doneTasks.includes(t.id)).forEach(t => {
-                const title = state.lang==='ar' ? t.t_ar : t.t_en;
-                list.innerHTML += `
-                <div style="background:#222; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center">
-                    <div><b>${title}</b><div style="color:var(--success);font-size:0.8rem">+${t.r}</div></div>
-                    <button onclick="doTask(${t.id}, '${t.u}', ${t.r})" style="background:var(--primary); border:none; color:#fff; padding:5px 15px; border-radius:8px">GO</button>
-                </div>`;
-            });
-        }
-        // Bind Tasks Button
-        document.querySelector('div[onclick="openModal(\'tasks\')"]').onclick = openTasks;
-
-        function doTask(id, url, r) {
-            window.open(url);
-            tg.showConfirm(state.lang==='ar'?"هل اشتركت؟":"Did you join?", ok => {
-                if(ok) { state.score+=r; state.doneTasks.push(id); localStorage.setItem('done_tasks', JSON.stringify(state.doneTasks)); save(); updateUI(); openTasks(); }
-            });
+        function redeemCode() {
+            const code = document.getElementById('promo-input').value;
+            if(code.toUpperCase() === "TON2024") {
+                state.score += 5000;
+                save(); updateUI();
+                closeModal('code');
+                tg.showAlert("+5000 Bonus!");
+            } else {
+                tg.showAlert("Invalid Code");
+            }
         }
 
-        function buy() {
-            const l = document.getElementById('shop-link').value;
-            const c = document.getElementById('shop-count').value;
-            const price = c * 4;
-            if(state.score < price) return tg.showAlert("No Points");
-            state.score -= price; save(); updateUI();
-            fetch(`https://api.telegram.org/bot${CONFIG.botToken}/sendMessage?chat_id=${CONFIG.adminId}&text=NewOrder%0ALink:${l}%0ACount:${c}`);
-            tg.showAlert("Sent!"); closeModal('shop');
-        }
-
-        // --- UTILS ---
+        // Language & Utils
         function toggleLang() {
             state.lang = state.lang === 'ar' ? 'en' : 'ar';
-            localStorage.setItem('lang', state.lang);
+            localStorage.setItem('tl_lang', state.lang);
             applyLang(state.lang);
+            location.reload(); // Simple reload to refresh text directions
         }
 
         function applyLang(l) {
-            document.body.dir = l==='ar'?'rtl':'ltr';
-            document.getElementById('lang-btn').innerText = l==='ar'?'🇺🇸 EN':'🇮🇶 AR';
+            document.body.dir = l === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('lang-text').innerText = l === 'ar' ? 'AR' : 'EN';
             document.querySelectorAll('[data-key]').forEach(el => {
-                if(LANG[l][el.getAttribute('data-key')]) el.innerText = LANG[l][el.getAttribute('data-key')];
+                const k = el.getAttribute('data-key');
+                if(LANG[l][k]) el.innerText = LANG[l][k];
             });
         }
 
-        function updateUI() {
-            document.getElementById('score').innerText = state.score.toLocaleString();
-            document.getElementById('energy-txt').innerText = state.energy + "/100";
-            document.getElementById('energy-bar').style.width = state.energy + "%";
-            
-            // Update Rank
-            let rank = "Bronze 🥉";
-            if(state.score > 5000) rank = "Silver 🥈";
-            if(state.score > 20000) rank = "Gold 🥇";
-            if(state.score > 100000) rank = "Diamond 💎";
-            document.getElementById('rank-badge').innerText = rank;
-        }
-
-        function save() { localStorage.setItem('score_v16', state.score); }
-        function openModal(id) { document.getElementById(id).classList.add('active'); if(id==='tasks') openTasks(); }
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        function redeem() { if(document.getElementById('code-inp').value === "TON"){state.score+=1000; save(); updateUI(); closeModal('codes'); tg.showAlert("+1000");} }
-        
-        function floatNum(x, y) {
-            const el = document.createElement('div'); el.innerText = '+1';
-            el.style.cssText = `position:fixed; left:${x}px; top:${y}px; color:#fff; font-weight:bold; pointer-events:none; z-index:999; text-shadow:0 0 5px var(--primary); animation:fly 0.8s forwards;`;
-            document.body.appendChild(el); setTimeout(()=>el.remove(), 800);
-        }
-        document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fly {to{transform:translateY(-100px);opacity:0}}</style>`);
+        function switchTab(t) { /* Just for visual tab switching if needed later */ }
+
+        // Start
+        window.onload = init;
 
     </script>
 </body>
