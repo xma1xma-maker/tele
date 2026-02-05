@@ -32,6 +32,11 @@
             transition: all 0.3s ease;
         }
 
+        /* --- Loader --- */
+        #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.5s; }
+        .loader-ring { width: 50px; height: 50px; border: 4px solid #333; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         /* --- Header --- */
         .header {
             padding: 15px 20px;
@@ -56,7 +61,6 @@
             position: relative; margin: 20px 0;
         }
         
-        /* Coin Skins Styles */
         .coin {
             width: 240px; height: 240px; border-radius: 50%;
             border: 8px solid rgba(255,255,255,0.1);
@@ -64,7 +68,7 @@
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: transform 0.1s;
             position: relative; z-index: 5;
-            background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe); /* Default */
+            background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe);
         }
         /* Skins */
         .coin.skin-gold { background: radial-gradient(circle at 30% 30%, #ffd700, #f39c12); box-shadow: 0 0 50px rgba(243, 156, 18, 0.5); border-color: #ffeaa7; }
@@ -74,7 +78,6 @@
         .coin:active { transform: scale(0.95); }
         .coin svg { width: 60%; fill: #fff; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3)); }
 
-        /* Lucky Coin */
         .lucky-coin {
             position: absolute; width: 60px; height: 60px; background: gold; border-radius: 50%;
             border: 3px solid #fff; box-shadow: 0 0 20px gold; z-index: 20;
@@ -96,11 +99,11 @@
         .energy-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; }
         .energy-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #f1c40f); width: 100%; transition: width 0.2s; }
 
-        /* --- Menus Grid --- */
+        /* Menus Grid */
         .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 15px; }
         .menu-btn { background: var(--surface); border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 
-        /* --- Nav --- */
+        /* Nav */
         .nav-bar {
             position: fixed; bottom: 15px; left: 15px; right: 15px;
             background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(20px);
@@ -116,7 +119,7 @@
         }
         .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; transform: translateY(-5px); }
 
-        /* --- Modals --- */
+        /* Modals */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 900;
@@ -134,19 +137,22 @@
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .close-btn { background: #333; border: none; width: 30px; height: 30px; border-radius: 50%; color: #fff; cursor: pointer; }
 
-        /* General UI */
+        /* UI Elements */
         .inp { width: 100%; padding: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 12px; margin-bottom: 15px; text-align: center; }
         .btn-main { width: 100%; padding: 16px; background: var(--primary); color: #fff; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .list-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .store-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 20px; }
         .store-card { background: var(--surface); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid var(--border); cursor: pointer; }
-        
-        /* Mining Animation */
         .mining-active { animation: pulse 2s infinite; color: var(--success); }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
+
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <h3 style="color:#fff;">جاري تحميل البيانات...</h3>
+    </div>
 
     <div class="header">
         <div class="user-badge">
@@ -214,29 +220,29 @@
         <div class="modal-content" style="text-align:center">
             <div class="modal-header"><h3 data-key="miner_title">روبوت التعدين</h3><button class="close-btn" onclick="closeModal('minerModal')">✕</button></div>
             <div style="font-size:4rem">🤖</div>
-            <p data-key="miner_desc">يقوم بجمع النقاط تلقائياً حتى وأنت نائم!</p>
+            <p data-key="miner_desc">يقوم بجمع النقاط تلقائياً</p>
             <div class="list-item">
-                <div data-key="miner_speed">السرعة الحالية</div>
+                <div data-key="miner_speed">السرعة</div>
                 <div style="color:var(--success); font-weight:bold"><span id="miner-speed">0</span> P/Sec</div>
             </div>
-            <button class="btn-main" onclick="upgradeMiner()" id="miner-btn">Buy (20,000)</button>
+            <button class="btn-main" onclick="upgradeMiner()" id="miner-btn">Buy</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="skinsModal">
         <div class="modal-content">
-            <div class="modal-header"><h3 data-key="skins_title">المظاهر (Skins)</h3><button class="close-btn" onclick="closeModal('skinsModal')">✕</button></div>
+            <div class="modal-header"><h3 data-key="skins_title">المظاهر</h3><button class="close-btn" onclick="closeModal('skinsModal')">✕</button></div>
             <div id="skins-list"></div>
         </div>
     </div>
 
     <div class="modal-overlay" id="friendsModal">
         <div class="modal-content" style="text-align:center">
-            <div class="modal-header"><h3 data-key="friends_title">دعوة الأصدقاء</h3><button class="close-btn" onclick="closeModal('friendsModal')">✕</button></div>
+            <div class="modal-header"><h3 data-key="friends_title">الأصدقاء</h3><button class="close-btn" onclick="closeModal('friendsModal')">✕</button></div>
             <div style="font-size:4rem">📨</div>
-            <h3 style="color:var(--secondary)">+5,000 Points</h3>
-            <p style="color:#aaa; margin-bottom:20px" data-key="friends_desc">لكل صديق تقوم بدعوته.</p>
-            <input type="text" class="inp" id="ref-link" readonly value="https://t.me/YOUR_BOT?start=123">
+            <h3 style="color:var(--secondary)">+5,000 P</h3>
+            <p data-key="friends_desc">لكل دعوة ناجحة</p>
+            <input type="text" class="inp" id="ref-link" readonly value="Loading...">
             <button class="btn-main" onclick="copyRef()" data-key="copy_link">نسخ الرابط</button>
         </div>
     </div>
@@ -245,16 +251,16 @@
         <div class="modal-content">
             <div class="modal-header"><h3 data-key="nav_store">المتجر</h3><button class="close-btn" onclick="closeModal('storeModal')">✕</button></div>
             <div class="store-grid">
-                <div class="store-card" onclick="openOrderModal('insta', 'متابعين انستقرام', 5000)">
+                <div class="store-card" onclick="openOrderModal('insta', 'item_insta', 5000)">
                     <div style="font-size:2rem">📸</div><div>Instagram</div><div style="color:var(--secondary)">5,000 P</div>
                 </div>
-                <div class="store-card" onclick="openOrderModal('tele', 'أعضاء تليجرام', 5000)">
+                <div class="store-card" onclick="openOrderModal('tele', 'item_tele', 5000)">
                     <div style="font-size:2rem">✈️</div><div>Telegram</div><div style="color:var(--secondary)">5,000 P</div>
                 </div>
-                <div class="store-card" onclick="openOrderModal('tiktok', 'تيك توك', 6000)">
+                <div class="store-card" onclick="openOrderModal('tiktok', 'item_tiktok', 6000)">
                     <div style="font-size:2rem">🎵</div><div>TikTok</div><div style="color:var(--secondary)">6,000 P</div>
                 </div>
-                <div class="store-card" onclick="openOrderModal('cash', 'رصيد $5', 50000)">
+                <div class="store-card" onclick="openOrderModal('cash', 'item_cash', 50000)">
                     <div style="font-size:2rem">💵</div><div>Cash $5</div><div style="color:var(--secondary)">50,000 P</div>
                 </div>
             </div>
@@ -265,10 +271,10 @@
         <div class="modal-content">
             <div class="modal-header"><h3 id="order-title">Order</h3><button class="close-btn" onclick="closeModal('orderModal')">✕</button></div>
             <div style="text-align:center; margin-bottom:20px">
-                <p style="color:#aaa" data-key="order_desc">أدخل الرابط</p>
+                <p data-key="order_desc">الرابط</p>
                 <h3 style="color:var(--secondary)" id="order-price-lbl">0</h3>
             </div>
-            <input type="text" class="inp" id="order-link" placeholder="Link / ID">
+            <input type="text" class="inp" id="order-link" placeholder="Link">
             <button class="btn-main" onclick="submitOrder()" data-key="confirm">تأكيد</button>
         </div>
     </div>
@@ -288,7 +294,7 @@
         <div class="modal-content" style="text-align:center">
             <div class="modal-header"><h3>Welcome Back!</h3><button class="close-btn" onclick="closeModal('offlineModal')">✕</button></div>
             <div style="font-size:3rem">💤💰</div>
-            <p>قام الروبوت بجمع نقاط لك أثناء غيابك:</p>
+            <p>أرباح التعدين أثناء الغياب:</p>
             <h2 style="color:var(--success); font-size:2.5rem" id="offline-amount">+0</h2>
             <button class="btn-main" onclick="closeModal('offlineModal')">Collect</button>
         </div>
@@ -297,18 +303,347 @@
     <div class="modal-overlay" id="tasksModal"><div class="modal-content"><div class="modal-header"><h3>Tasks</h3><button class="close-btn" onclick="closeModal('tasksModal')">✕</button></div><div id="tasks-list"></div></div></div>
     <div class="modal-overlay" id="quizModal"><div class="modal-content" style="text-align:center"><div class="modal-header"><h3>Quiz</h3><button class="close-btn" onclick="closeModal('quizModal')">✕</button></div><h3 id="q-txt">?</h3><div id="q-opts" style="margin-top:20px"></div></div></div>
 
-    <script>
+    <script type="module">
+        // 1. Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // 2. Your Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyACixZDVCNww716fRN_29xm2kCnFadkL64",
+            authDomain: "tele-ea6e7.firebaseapp.com",
+            projectId: "tele-ea6e7",
+            storageBucket: "tele-ea6e7.firebasestorage.app",
+            messagingSenderId: "693110799024",
+            appId: "1:693110799024:web:4dd4057eef17b9ed3e1975",
+            measurementId: "G-902LN1FW97"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Telegram Web App
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ⚠️ ADMIN CONFIG
+        // ⚠️ ADMIN CONFIG ⚠️
         const CONFIG = {
-            adminUsername: "YOUR_USERNAME", // Put your username
-            botLink: "https://t.me/YOUR_BOT_USERNAME", // For referral link
+            adminUsername: "ضع_معرفك_هنا", // مثال: "ahmed" (بدون @)
+            botLink: "https://t.me/YOUR_BOT_USERNAME", // ضع يوزر البوت هنا
             maxEnergy: 1000
         };
 
-        // --- Localization ---
+        // Global Vars
+        let userId = "guest";
+        let isDataLoaded = false;
+        let hasUnsavedChanges = false;
+        
+        // Initial State
+        let state = {
+            score: 0,
+            energy: 1000,
+            multitap: 1,
+            minerLvl: 0,
+            lastLogin: Date.now(),
+            skin: 'default',
+            ownedSkins: ["default"],
+            lang: 'ar',
+            referrals: 0
+        };
+
+        // --- Initialization ---
+        window.onload = async () => {
+            if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                userId = tg.initDataUnsafe.user.id.toString();
+                document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
+            }
+
+            await loadUserData();
+
+            // Set UI
+            window.applyLang(state.lang);
+            window.updateUI();
+            window.updateRank();
+            window.applySkin(state.skin);
+            
+            // Check Referrals
+            const startParam = tg.initDataUnsafe?.start_param;
+            if(startParam && startParam.startsWith('ref_') && startParam !== `ref_${userId}`) {
+                 processReferral(startParam.split('_')[1]);
+            }
+
+            // Remove Loader
+            setTimeout(() => {
+                const l = document.getElementById('loader');
+                if(l) { l.style.opacity = '0'; setTimeout(()=>l.style.display='none', 500); }
+            }, 1000);
+
+            startLoops();
+        };
+
+        // --- Firebase Logic ---
+        async function loadUserData() {
+            try {
+                const docRef = doc(db, "players", userId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    state = { ...state, ...data };
+                    
+                    // Offline Mining
+                    if(state.minerLvl > 0) {
+                        const now = Date.now();
+                        const seconds = Math.floor((now - state.lastLogin) / 1000);
+                        if(seconds > 60) {
+                            const earned = seconds * state.minerLvl;
+                            state.score += earned;
+                            hasUnsavedChanges = true;
+                            document.getElementById('offline-amount').innerText = "+" + earned.toLocaleString();
+                            window.openModal('offlineModal');
+                        }
+                    }
+                } else {
+                    await saveData(true); // Create new user
+                }
+                isDataLoaded = true;
+            } catch (e) {
+                console.error("Load Error:", e);
+                tg.showAlert("Connection Error");
+            }
+        }
+
+        async function saveData(force = false) {
+            if((!hasUnsavedChanges && !force) || !userId) return;
+            try {
+                state.lastLogin = Date.now();
+                await setDoc(doc(db, "players", userId), state, { merge: true });
+                hasUnsavedChanges = false;
+            } catch (e) { console.error("Save Error:", e); }
+        }
+
+        async function processReferral(referrerId) {
+            // Check if already referred (simple local check, better in backend)
+            if(localStorage.getItem('referred')) return;
+            
+            try {
+                // Bonus for new user
+                state.score += 1000;
+                hasUnsavedChanges = true;
+                
+                // Bonus for referrer
+                const refRef = doc(db, "players", referrerId);
+                await updateDoc(refRef, {
+                    score: increment(5000),
+                    referrals: increment(1)
+                });
+                
+                localStorage.setItem('referred', 'true');
+                tg.showAlert("Referral Bonus: +1000 Points!");
+            } catch(e) { console.error("Ref Error", e); }
+        }
+
+        function startLoops() {
+            setInterval(() => {
+                if(!isDataLoaded) return;
+                let changed = false;
+                
+                // Energy
+                if(state.energy < CONFIG.maxEnergy) {
+                    state.energy += state.multitap;
+                    if(state.energy > CONFIG.maxEnergy) state.energy = CONFIG.maxEnergy;
+                    changed = true;
+                }
+                
+                // Mining
+                if(state.minerLvl > 0) {
+                    state.score += state.minerLvl;
+                    changed = true;
+                    const ms = document.getElementById('mining-status');
+                    ms.innerText = `⛏️ +${state.minerLvl}/s`;
+                    ms.classList.add('mining-active');
+                }
+
+                if(changed) {
+                    window.updateUI();
+                    window.updateEnergyUI();
+                    hasUnsavedChanges = true;
+                }
+            }, 1000);
+
+            // Auto Save
+            setInterval(() => saveData(), 10000);
+        }
+
+        // --- Window Exported Functions ---
+
+        window.handleTap = (e) => {
+            if(!isDataLoaded) return;
+            if(state.energy >= 1) {
+                state.energy--;
+                state.score += state.multitap;
+                window.updateUI(); window.updateEnergyUI(); window.updateRank();
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                window.showFloatNum(e.clientX, e.clientY, '+' + state.multitap);
+                hasUnsavedChanges = true;
+                
+                if(Math.random() < 0.05) window.spawnLuckyCoin();
+            }
+        };
+
+        window.buyBoost = () => {
+            const cost = 500 * Math.pow(2, state.multitap - 1);
+            if(state.score >= cost) {
+                state.score -= cost;
+                state.multitap++;
+                hasUnsavedChanges = true;
+                window.updateUI();
+                window.openModal('boostModal');
+                tg.showAlert("Upgraded!");
+            } else tg.showAlert(window.t('insufficient'));
+        };
+
+        window.upgradeMiner = () => {
+            const cost = 20000 * (state.minerLvl + 1);
+            if(state.score >= cost) {
+                state.score -= cost;
+                state.minerLvl++;
+                hasUnsavedChanges = true;
+                window.updateUI();
+                window.openModal('minerModal');
+                tg.showAlert("Miner Started!");
+            } else tg.showAlert(window.t('insufficient'));
+        };
+
+        // Skins
+        window.buySkin = (id, price) => {
+            if(state.score >= price) {
+                state.score -= price;
+                state.ownedSkins.push(id);
+                hasUnsavedChanges = true;
+                window.renderSkins(); window.updateUI();
+            } else tg.showAlert(window.t('insufficient'));
+        };
+        window.equipSkin = (id) => {
+            state.skin = id;
+            hasUnsavedChanges = true;
+            window.renderSkins(); window.applySkin(id);
+        };
+        window.applySkin = (id) => {
+            document.getElementById('main-coin').className = 'coin ' + id;
+        };
+        window.renderSkins = () => {
+            const div = document.getElementById('skins-list'); div.innerHTML = '';
+            SKINS.forEach(s => {
+                const owned = state.ownedSkins.includes(s.id);
+                const active = state.skin === s.id;
+                let btn = active ? `<button class="btn-sec" disabled>Active</button>` :
+                          owned ? `<button class="btn-main" onclick="equipSkin('${s.id}')" style="padding:5px;margin:0">Equip</button>` :
+                          `<button class="btn-main" onclick="buySkin('${s.id}',${s.price})" style="padding:5px;margin:0;background:var(--secondary)">Buy ${s.price/1000}k</button>`;
+                div.innerHTML += `<div class="list-item"><div style="display:flex;align-items:center;gap:10px;font-size:1.5rem">${s.icon} <span style="font-size:1rem;font-weight:bold">${s.name}</span></div>${btn}</div>`;
+            });
+        };
+
+        // Store
+        let currentOrder = {};
+        window.openOrderModal = (type, keyName, price) => {
+            currentOrder = {type, keyName, price};
+            document.getElementById('order-title').innerText = window.t(keyName);
+            document.getElementById('order-price-lbl').innerText = price.toLocaleString();
+            window.openModal('orderModal');
+        };
+        window.submitOrder = () => {
+            const val = document.getElementById('order-link').value;
+            if(!val) return;
+            if(state.score < currentOrder.price) return tg.showAlert(window.t('insufficient'));
+            
+            state.score -= currentOrder.price;
+            hasUnsavedChanges = true;
+            window.updateUI();
+            
+            const msg = `ORDER: ${window.t(currentOrder.keyName)}\nLink: ${val}\nUser: ${userId}`;
+            tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
+            window.closeModal('orderModal');
+        };
+
+        // Utils
+        window.updateUI = () => {
+            document.getElementById('score').innerText = Math.floor(state.score).toLocaleString();
+            document.getElementById('energy-txt').innerText = `${state.energy}/${CONFIG.maxEnergy}`;
+            document.getElementById('energy-bar').style.width = (state.energy/CONFIG.maxEnergy*100)+"%";
+            
+            // Updates for modals text
+            if(document.getElementById('miner-speed')) {
+                 document.getElementById('miner-speed').innerText = state.minerLvl;
+                 document.getElementById('miner-btn').innerText = `Upgrade (${(20000*(state.minerLvl+1)).toLocaleString()})`;
+            }
+            if(document.getElementById('boost-lvl')) {
+                document.getElementById('boost-lvl').innerText = state.multitap;
+                document.getElementById('boost-btn').innerText = `Upgrade (${(500*Math.pow(2,state.multitap-1)).toLocaleString()})`;
+            }
+            // Referral Link
+            document.getElementById('ref-link').value = `${CONFIG.botLink}?start=ref_${userId}`;
+        };
+        
+        window.updateEnergyUI = () => {
+            document.getElementById('energy-txt').innerText = `${state.energy}/${CONFIG.maxEnergy}`;
+            document.getElementById('energy-bar').style.width = (state.energy/CONFIG.maxEnergy*100)+"%";
+        };
+
+        window.updateRank = () => {
+            let r="🥉 Bronze", c="#cd7f32";
+            if(state.score>5000){r="🥈 Silver";c="#bdc3c7";}
+            if(state.score>50000){r="🥇 Gold";c="#f1c40f";}
+            if(state.score>1000000){r="💎 Diamond";c="#3498db";}
+            const el = document.getElementById('rank-display');
+            el.innerText=r; el.style.color=c; el.style.borderColor=c;
+        };
+
+        window.copyRef = () => {
+            navigator.clipboard.writeText(document.getElementById('ref-link').value);
+            tg.showAlert("Copied!");
+        };
+
+        window.spawnLuckyCoin = () => {
+            const c = document.createElement('div'); c.className='lucky-coin'; c.innerText='🍀';
+            const area = document.getElementById('game-area');
+            const r = area.getBoundingClientRect();
+            c.style.left = (Math.random()*(r.width-60))+'px';
+            c.style.top = (Math.random()*(r.height-60))+'px';
+            c.onpointerdown = (e) => {
+                e.stopPropagation(); state.score+=500; hasUnsavedChanges=true;
+                if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                window.showFloatNum(e.clientX, e.clientY, '+500!'); c.remove();
+            };
+            area.appendChild(c); setTimeout(()=>c.remove(), 800);
+        };
+
+        window.showFloatNum = (x,y,t) => {
+            const e = document.createElement('div'); e.className='float-num'; e.innerText=t;
+            e.style.left=x+'px'; e.style.top=(y-30)+'px';
+            document.body.appendChild(e); setTimeout(()=>e.remove(), 800);
+        };
+
+        window.toggleLang = () => { state.lang = state.lang==='ar'?'en':'ar'; window.applyLang(state.lang); hasUnsavedChanges=true; };
+        window.applyLang = (l) => {
+            const d = LANG[l]; document.body.dir = l==='ar'?'rtl':'ltr';
+            document.getElementById('lang-btn').innerText = l==='ar'?'🇺🇸':'🇮🇶';
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const k = el.getAttribute('data-key'); if(d[k]) el.innerText = d[k];
+            });
+        };
+        window.t = (k) => LANG[state.lang][k];
+
+        window.openModal = (id) => { 
+            document.getElementById(id).classList.add('active'); 
+            if(id==='skinsModal') window.renderSkins();
+            if(id==='boostModal' || id==='minerModal') window.updateUI();
+        };
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+        window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('active'));
+
+        // --- Data ---
         const LANG = {
             ar: {
                 balance: "الرصيد", energy: "الطاقة",
@@ -316,7 +651,8 @@
                 miner: "تعدين", skins: "سكنات", friends: "أصدقاء", boost: "ترقية",
                 miner_title: "روبوت التعدين", miner_desc: "يجمع النقاط تلقائياً", miner_speed: "السرعة",
                 skins_title: "متجر المظاهر", friends_title: "دعوة صديق", friends_desc: "احصل على 5000 نقطة لكل دعوة", copy_link: "نسخ الرابط",
-                order_desc: "أدخل الرابط للتنفيذ", confirm: "تأكيد", level: "المستوى", insufficient: "رصيد غير كافي"
+                order_desc: "أدخل الرابط للتنفيذ", confirm: "تأكيد", level: "المستوى", insufficient: "رصيد غير كافي",
+                item_insta: "متابعين انستقرام", item_tele: "أعضاء تليجرام", item_tiktok: "تيك توك", item_cash: "رصيد $5"
             },
             en: {
                 balance: "Balance", energy: "Energy",
@@ -324,258 +660,17 @@
                 miner: "Miner", skins: "Skins", friends: "Friends", boost: "Boost",
                 miner_title: "Auto Miner", miner_desc: "Collects points automatically", miner_speed: "Speed",
                 skins_title: "Skins Shop", friends_title: "Invite Friends", friends_desc: "Get 5000 points per invite", copy_link: "Copy Link",
-                order_desc: "Enter Link", confirm: "Confirm", level: "Level", insufficient: "Insufficient Funds"
+                order_desc: "Enter Link", confirm: "Confirm", level: "Level", insufficient: "Insufficient Funds",
+                item_insta: "Insta Followers", item_tele: "TG Members", item_tiktok: "TikTok", item_cash: "Cash $5"
             }
         };
 
-        // --- State ---
-        let state = {
-            score: parseInt(localStorage.getItem('cp_score') || 0),
-            energy: parseInt(localStorage.getItem('cp_energy') || 1000),
-            multitap: parseInt(localStorage.getItem('cp_multitap') || 1),
-            minerLvl: parseInt(localStorage.getItem('cp_minerLvl') || 0), // 0 = not bought
-            lastLogin: parseInt(localStorage.getItem('cp_lastTime') || Date.now()),
-            skin: localStorage.getItem('cp_skin') || 'default',
-            ownedSkins: JSON.parse(localStorage.getItem('cp_skinsOwned') || '["default"]'),
-            lang: localStorage.getItem('cp_lang') || 'ar'
-        };
-
-        // Skins Data
         const SKINS = [
             {id: 'default', name: 'Original', price: 0, icon: '🔵'},
             {id: 'skin-gold', name: 'Golden Coin', price: 50000, icon: '🟡'},
             {id: 'skin-iraq', name: 'Iraq Flag', price: 100000, icon: '🇮🇶'},
             {id: 'skin-matrix', name: 'Matrix', price: 200000, icon: '👾'}
         ];
-
-        window.onload = () => {
-            applyLang(state.lang);
-            updateUI();
-            updateRank();
-            applySkin(state.skin);
-            
-            // Offline Earnings Logic
-            const now = Date.now();
-            if(state.minerLvl > 0) {
-                const secondsPassed = Math.floor((now - state.lastLogin) / 1000);
-                if(secondsPassed > 60) {
-                    const earned = secondsPassed * state.minerLvl; // 1 point per sec per level
-                    state.score += earned;
-                    document.getElementById('offline-amount').innerText = "+" + earned.toLocaleString();
-                    openModal('offlineModal');
-                }
-                // Start live mining UI effect
-                document.getElementById('mining-status').innerText = "⛏️ Mining...";
-                document.getElementById('mining-status').classList.add('mining-active');
-            }
-
-            // Loops
-            setInterval(() => { // Energy & Mining
-                if(state.energy < CONFIG.maxEnergy) {
-                    state.energy += state.multitap; 
-                    if(state.energy > CONFIG.maxEnergy) state.energy = CONFIG.maxEnergy;
-                    updateEnergyUI();
-                }
-                if(state.minerLvl > 0) {
-                    state.score += state.minerLvl; // Add miner points live
-                    updateUI();
-                }
-            }, 1000);
-            
-            setInterval(save, 5000); // Auto Save
-        };
-
-        function save() {
-            localStorage.setItem('cp_score', state.score);
-            localStorage.setItem('cp_energy', state.energy);
-            localStorage.setItem('cp_multitap', state.multitap);
-            localStorage.setItem('cp_minerLvl', state.minerLvl);
-            localStorage.setItem('cp_skin', state.skin);
-            localStorage.setItem('cp_skinsOwned', JSON.stringify(state.ownedSkins));
-            localStorage.setItem('cp_lastTime', Date.now());
-            localStorage.setItem('cp_lang', state.lang);
-        }
-
-        // --- Core Mechanics ---
-
-        function handleTap(e) {
-            if(state.energy >= 1) {
-                state.energy--;
-                state.score += state.multitap;
-                updateUI(); updateEnergyUI(); updateRank();
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                showFloatNum(e.clientX, e.clientY, '+' + state.multitap);
-                
-                // 🌟 Tap to Luck (5% Chance)
-                if(Math.random() < 0.05) spawnLuckyCoin();
-            }
-        }
-
-        function spawnLuckyCoin() {
-            const coin = document.createElement('div');
-            coin.className = 'lucky-coin';
-            coin.innerText = '🍀';
-            // Random Pos inside game area
-            const area = document.getElementById('game-area');
-            const rect = area.getBoundingClientRect();
-            coin.style.left = (Math.random() * (rect.width - 60)) + 'px';
-            coin.style.top = (Math.random() * (rect.height - 60)) + 'px';
-            
-            coin.onpointerdown = (e) => {
-                e.stopPropagation();
-                state.score += 500;
-                tg.HapticFeedback.notificationOccurred('success');
-                showFloatNum(e.clientX, e.clientY, '+500!');
-                coin.remove();
-            };
-            
-            area.appendChild(coin);
-            setTimeout(() => coin.remove(), 800); // Disappear fast
-        }
-
-        function updateRank() {
-            let r = "🥉 Bronze";
-            let c = "#cd7f32";
-            if(state.score > 5000) { r = "🥈 Silver"; c = "#bdc3c7"; }
-            if(state.score > 50000) { r = "🥇 Gold"; c = "#f1c40f"; }
-            if(state.score > 1000000) { r = "💎 Diamond"; c = "#3498db"; }
-            const el = document.getElementById('rank-display');
-            el.innerText = r;
-            el.style.color = c;
-            el.style.borderColor = c;
-        }
-
-        // --- Miner System ---
-        function upgradeMiner() {
-            // Cost formula: 20000 * (level + 1)
-            const cost = 20000 * (state.minerLvl + 1);
-            if(state.score >= cost) {
-                state.score -= cost;
-                state.minerLvl++;
-                save(); updateUI();
-                openModal('minerModal'); // Refresh UI
-                tg.showAlert(`Miner Upgraded to Lvl ${state.minerLvl}`);
-            } else tg.showAlert(LANG[state.lang].insufficient);
-        }
-
-        // --- Skins System ---
-        function renderSkins() {
-            const div = document.getElementById('skins-list');
-            div.innerHTML = '';
-            SKINS.forEach(s => {
-                const owned = state.ownedSkins.includes(s.id);
-                const active = state.skin === s.id;
-                let btnHtml = '';
-                
-                if(active) btnHtml = `<button class="btn-sec" disabled>Equipped</button>`;
-                else if(owned) btnHtml = `<button class="btn-main" onclick="equipSkin('${s.id}')" style="padding:5px 10px;margin:0">Equip</button>`;
-                else btnHtml = `<button class="btn-main" onclick="buySkin('${s.id}', ${s.price})" style="padding:5px 10px;margin:0;background:var(--secondary)">Buy ${s.price/1000}k</button>`;
-
-                div.innerHTML += `
-                <div class="list-item">
-                    <div style="display:flex;align-items:center;gap:10px;font-size:1.5rem">${s.icon} <span style="font-size:1rem;font-weight:bold">${s.name}</span></div>
-                    ${btnHtml}
-                </div>`;
-            });
-        }
-        function buySkin(id, price) {
-            if(state.score >= price) {
-                state.score -= price;
-                state.ownedSkins.push(id);
-                save(); renderSkins();
-            } else tg.showAlert(LANG[state.lang].insufficient);
-        }
-        function equipSkin(id) {
-            state.skin = id;
-            save(); renderSkins(); applySkin(id);
-        }
-        function applySkin(id) {
-            const c = document.getElementById('main-coin');
-            c.className = 'coin ' + id; // e.g. "coin skin-iraq"
-        }
-
-        // --- Referral ---
-        function copyRef() {
-            const uid = tg.initDataUnsafe?.user?.id || '123';
-            const link = `${CONFIG.botLink}?start=ref_${uid}`;
-            navigator.clipboard.writeText(link);
-            tg.showAlert("Link Copied! Send it to friends.");
-        }
-
-        // --- Boost ---
-        function buyBoost() {
-            const cost = 500 * Math.pow(2, state.multitap - 1);
-            if(state.score >= cost) {
-                state.score -= cost;
-                state.multitap++;
-                save(); updateUI();
-                document.getElementById('boost-lvl').innerText = state.multitap;
-                document.getElementById('boost-btn').innerText = "Upgrade " + (500 * Math.pow(2, state.multitap - 1));
-            } else tg.showAlert(LANG[state.lang].insufficient);
-        }
-
-        // --- UI & Utils ---
-        function updateUI() {
-            document.getElementById('score').innerText = Math.floor(state.score).toLocaleString();
-            document.getElementById('energy-txt').innerText = `${state.energy}/${CONFIG.maxEnergy}`;
-            document.getElementById('energy-bar').style.width = (state.energy / CONFIG.maxEnergy * 100) + "%";
-            
-            // Miner Modal Update
-            const nextMinerCost = 20000 * (state.minerLvl + 1);
-            document.getElementById('miner-speed').innerText = state.minerLvl;
-            document.getElementById('miner-btn').innerText = `Upgrade (${nextMinerCost.toLocaleString()})`;
-            
-            // Boost Modal Update
-            document.getElementById('boost-lvl').innerText = state.multitap;
-            document.getElementById('boost-btn').innerText = `Upgrade (${(500 * Math.pow(2, state.multitap - 1)).toLocaleString()})`;
-        }
-
-        function showFloatNum(x, y, txt) {
-            const el = document.createElement('div');
-            el.className = 'float-num'; el.innerText = txt;
-            el.style.left = x + 'px'; el.style.top = (y-30) + 'px';
-            document.body.appendChild(el);
-            setTimeout(()=>el.remove(), 800);
-        }
-
-        function toggleLang() {
-            state.lang = state.lang==='ar'?'en':'ar';
-            applyLang(state.lang); save();
-        }
-        function applyLang(l) {
-            const d = LANG[l];
-            document.body.dir = l==='ar'?'rtl':'ltr';
-            document.getElementById('lang-btn').innerText = l==='ar'?'🇺🇸':'🇮🇶';
-            document.querySelectorAll('[data-key]').forEach(el => {
-                if(d[el.getAttribute('data-key')]) el.innerText = d[el.getAttribute('data-key')];
-            });
-        }
-
-        function openModal(id) { 
-            document.getElementById(id).classList.add('active'); 
-            if(id === 'skinsModal') renderSkins();
-        }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        function closeAllModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
-
-        // --- Store Order ---
-        let currentOrder = {};
-        function openOrderModal(type, name, price) {
-            currentOrder = {type, name, price};
-            document.getElementById('order-title').innerText = name;
-            document.getElementById('order-price-lbl').innerText = price.toLocaleString();
-            openModal('orderModal');
-        }
-        function submitOrder() {
-            const val = document.getElementById('order-link').value;
-            if(!val) return tg.showAlert("Error");
-            if(state.score < currentOrder.price) return tg.showAlert(LANG[state.lang].insufficient);
-            state.score -= currentOrder.price; save(); updateUI();
-            const msg = `ORDER: ${currentOrder.name} - Link: ${val} - User: ${tg.initDataUnsafe?.user?.id}`;
-            tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
-            closeModal('orderModal');
-        }
-
     </script>
 </body>
 </html>
