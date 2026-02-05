@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clicker Pro V4 - SS34SS4</title>
+    <title>Clicker Pro V5 - SS34SS4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -31,40 +31,31 @@
             overflow-x: hidden;
         }
 
-        /* --- Loader --- */
+        /* --- UI Components --- */
         #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* --- UI Elements --- */
         .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 10; }
         .rank-display { font-size: 0.8rem; font-weight: bold; color: var(--secondary); border: 1px solid var(--secondary); padding: 4px 8px; border-radius: 10px; }
+
         .score-container { text-align: center; margin-top: 15px; }
         .score-val { font-size: 2.8rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(0, 152, 234, 0.5); }
-        .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 20px; }
-        .menu-item { background: var(--surface); border-radius: 12px; padding: 10px; text-align: center; font-size: 0.7rem; border: 1px solid var(--border); cursor: pointer; }
-        .energy-container { width: 85%; margin: 10px auto; }
-        .energy-bar { height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin-top: 5px; }
-        .energy-fill { height: 100%; background: var(--primary); width: 100%; transition: width 0.3s; }
 
-        /* --- Game Area --- */
         .game-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-        .coin { width: 240px; height: 240px; border-radius: 50%; border: 8px solid rgba(255,255,255,0.1); box-shadow: 0 0 50px rgba(0, 152, 234, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe); }
+        .coin { width: 220px; height: 220px; border-radius: 50%; border: 8px solid rgba(255,255,255,0.1); box-shadow: 0 0 50px rgba(0, 152, 234, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe); }
         .coin:active { transform: scale(0.92); }
-        .lucky-coin { position: absolute; width: 60px; height: 60px; background: gold; border-radius: 50%; z-index: 20; display: flex; align-items: center; justify-content: center; animation: pop 0.5s; cursor: pointer; box-shadow: 0 0 20px #fff; }
-        @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
 
-        /* --- Modals --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: none; align-items: flex-end; backdrop-filter: blur(5px); }
         .modal-overlay.active { display: flex; }
         .modal-content { background: #151515; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 2px solid var(--primary); max-height: 80vh; overflow-y: auto; }
-        .close-x { float: left; background: #333; border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
-        .btn-main { width: 100%; padding: 15px; background: var(--primary); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; }
-        .inp { width: 100%; padding: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 12px; margin-bottom: 10px; text-align: center; }
-
+        
+        .btn-main { width: 100%; padding: 15px; background: var(--primary); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 10px; cursor: pointer; }
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(20,20,20,0.9); border-radius: 20px; display: flex; justify-content: space-around; padding: 10px; border: 1px solid var(--border); }
         .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #888; cursor: pointer; }
         .nav-btn.active { color: #fff; }
+
+        .list-item { background: var(--surface); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
         .float-num { position: fixed; color: #fff; font-weight: 900; font-size: 2rem; pointer-events: none; z-index: 100; text-shadow: 0 0 5px var(--primary); animation: floatUp 0.8s forwards; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
     </style>
@@ -73,18 +64,13 @@
 
     <div id="loader">
         <div class="spinner"></div>
-        <h3 style="margin-top:15px">جارٍ التحميل...</h3>
+        <h3 style="margin-top:15px">جاري تحميل البيانات...</h3>
     </div>
 
     <div class="header">
-        <div class="user-badge">
-            <button style="background:none; border:none; font-size:1.2rem; cursor:pointer" onclick="toggleLang()">🌐</button>
-            <span class="rank-display" id="rank-name">Bronze</span>
-        </div>
-        <div style="text-align:left">
-            <div id="user-display-name" style="font-weight:bold; font-size:0.8rem">...</div>
-            <div id="mining-anim" style="font-size:0.6rem; color:#aaa">💤 Idle</div>
-        </div>
+        <button style="background:none; border:none; font-size:1.5rem; cursor:pointer" onclick="toggleLang()">🌐</button>
+        <span id="rank-name" class="rank-display">Bronze</span>
+        <div id="user-display-name" style="font-weight:bold; font-size:0.8rem">...</div>
     </div>
 
     <div class="score-container">
@@ -92,93 +78,56 @@
         <div style="color:#888; font-size:0.8rem" data-key="balance">الرصيد الحالي</div>
     </div>
 
-    <div class="menu-grid">
-        <div class="menu-item" onclick="openModal('minerModal')">⛏️ <span data-key="miner">تعدين</span></div>
-        <div class="menu-item" onclick="openModal('skinsModal')">🎨 <span data-key="skins">سكنات</span></div>
-        <div class="menu-item" onclick="openModal('friendsModal')">👥 <span data-key="friends">أصدقاء</span></div>
-        <div class="menu-item" onclick="openModal('boostModal')">🚀 <span data-key="boost">ترقية</span></div>
-    </div>
-
-    <div class="game-area" id="game-area">
+    <div class="game-area">
         <div class="coin" id="main-coin" onpointerdown="handleTap(event)">
             <svg viewBox="0 0 24 24" width="100" fill="white"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg>
         </div>
     </div>
 
-    <div class="energy-container">
-        <div style="display:flex; justify-content:space-between; font-size:0.8rem">
-            <span data-key="energy">الطاقة</span>
-            <span id="energy-txt">1000/1000</span>
-        </div>
-        <div class="energy-bar"><div class="energy-fill" id="energy-fill"></div></div>
-    </div>
-
     <div class="nav-bar">
         <div class="nav-btn active" onclick="closeAllModals()">🏠 <span data-key="nav_home">الرئيسية</span></div>
-        <div class="nav-btn" onclick="openModal('storeModal')">🛍️ <span data-key="nav_store">المتجر</span></div>
-        <div class="nav-btn" onclick="openModal('tasksModal')">📋 <span data-key="nav_tasks">مهام</span></div>
-        <div class="nav-btn" onclick="openModal('quizModal')">🧠 <span data-key="nav_quiz">مسابقة</span></div>
-    </div>
-
-    <div class="modal-overlay" id="minerModal">
-        <div class="modal-content">
-            <button class="close-x" onclick="closeModal('minerModal')">✕</button>
-            <h3 style="text-align:center" data-key="miner_title">روبوت التعدين</h3>
-            <div class="inp" style="background:none; border:none; font-size:2rem; margin:10px">⛏️ <span id="miner-rate">0</span> P/Sec</div>
-            <button class="btn-main" id="upgrade-miner-btn" onclick="upgradeMiner()">Upgrade Miner</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="friendsModal">
-        <div class="modal-content" style="text-align:center">
-            <button class="close-x" onclick="closeModal('friendsModal')">✕</button>
-            <h3 data-key="friends_title">Invite Friends</h3>
-            <p style="font-size:0.85rem; color:#aaa; margin:20px 0">احصل على 5,000 نقطة لكل صديق!</p>
-            <input type="text" class="inp" id="ref-link-display" readonly>
-            <button class="btn-main" onclick="copyRef()">نسخ رابط الدعوة</button>
-        </div>
+        <div class="nav-btn" onclick="openStore()">🛍️ <span data-key="nav_store">المتجر</span></div>
+        <div class="nav-btn" onclick="openTasks()">📋 <span data-key="nav_tasks">مهام</span></div>
+        <div class="nav-btn" onclick="startQuiz()">🧠 <span data-key="nav_quiz">مسابقة</span></div>
     </div>
 
     <div class="modal-overlay" id="storeModal">
         <div class="modal-content">
-            <button class="close-x" onclick="closeModal('storeModal')">✕</button>
             <h3 style="text-align:center" data-key="nav_store">المتجر</h3>
-            <div style="padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between" onclick="openOrder('📸 Instagram Followers', 5000)">
-                <span>انستقرام (100 متابع)</span> <b>5,000 P</b>
-            </div>
-            <div style="padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between" onclick="openOrder('✈️ Telegram Members', 5000)">
-                <span>تليجرام (100 عضو)</span> <b>5,000 P</b>
-            </div>
+            <div id="store-items-list"></div>
+            <button class="btn-main" style="background:#333" onclick="closeModal('storeModal')">إغلاق</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="orderModal">
         <div class="modal-content">
-            <button class="close-x" onclick="closeModal('orderModal')">✕</button>
-            <h3 id="order-item-name" style="text-align:center">طلب جديد</h3>
-            <input type="text" class="inp" id="order-link-input" placeholder="أدخل الرابط أو المعرف">
-            <button class="btn-main" onclick="submitOrder()">تأكيد وخصم النقاط</button>
+            <h3 id="order-item-title" style="text-align:center">طلب</h3>
+            <input type="text" class="inp" id="order-link" placeholder="أدخل الرابط أو المعرف" style="width:100%; padding:15px; background:#222; border:1px solid #444; color:#fff; border-radius:12px; margin-bottom:10px; text-align:center;">
+            <button class="btn-main" onclick="processOrder()">تأكيد وخصم النقاط</button>
         </div>
     </div>
 
-    <div class="modal-overlay" id="offlineModal">
+    <div class="modal-overlay" id="tasksModal">
+        <div class="modal-content">
+            <h3 style="text-align:center" data-key="nav_tasks">المهام</h3>
+            <div id="tasks-list"></div>
+            <button class="btn-main" style="background:#333" onclick="closeModal('tasksModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="quizModal">
         <div class="modal-content" style="text-align:center">
-            <h2 style="color:var(--success)">Welcome Back!</h2>
-            <p>أرباحك التلقائية أثناء غيابك:</p>
-            <h1 id="offline-val" style="color:var(--primary)">0</h1>
-            <button class="btn-main" onclick="closeModal('offlineModal')">جمع النقاط</button>
+            <h3 data-key="nav_quiz">المسابقة</h3>
+            <div id="quiz-container"></div>
+            <button class="btn-main" style="background:#333" onclick="closeModal('quizModal')">إغلاق</button>
         </div>
     </div>
-
-    <div class="modal-overlay" id="skinsModal"><div class="modal-content"><button class="close-x" onclick="closeModal('skinsModal')">✕</button><h3>Skins</h3><div id="skins-container"></div></div></div>
-    <div class="modal-overlay" id="tasksModal"><div class="modal-content"><button class="close-x" onclick="closeModal('tasksModal')">✕</button><h3>Tasks</h3><div id="tasks-container"></div></div></div>
-    <div class="modal-overlay" id="quizModal"><div class="modal-content" style="text-align:center"><button class="close-x" onclick="closeModal('quizModal')">✕</button><h3>Quiz</h3><div id="quiz-container"></div></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Your Exact Firebase Config
+        // إعدادات Firebase الخاصة بك
         const firebaseConfig = {
             apiKey: "AIzaSyACixZDVCNww716fRN_29xm2kCnFadkL64",
             authDomain: "tele-ea6e7.firebaseapp.com",
@@ -194,189 +143,207 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Mustafa Alaa New Config
+        // إعدادات الأدمن Mustafa Alaa
         const CONFIG = {
             adminUsername: "SS34SS4", 
-            botLink: "https://t.me/tofe109tofebot", 
-            maxEnergy: 1000
+            botLink: "https://t.me/tofe109tofebot" 
         };
 
-        let userId = "mustafa_test";
-        let isLoaded = false;
-        let hasChanges = false;
-        let state = {
-            score: 0, energy: 1000, multitap: 1, minerLvl: 0,
-            lastLogin: Date.now(), skin: 'default', ownedSkins: ['default'],
-            lang: 'ar', refBy: null
-        };
+        let userId = "guest_user";
+        let state = { score: 0, lang: 'ar', completedTasks: [] };
+        let currentOrder = null;
 
         const LANGS = {
-            ar: { balance: "الرصيد", energy: "الطاقة", miner: "تعدين", skins: "سكنات", friends: "أصدقاء", boost: "ترقية", nav_home: "الرئيسية", nav_store: "المتجر", nav_tasks: "مهام", nav_quiz: "مسابقة" },
-            en: { balance: "Balance", energy: "Energy", miner: "Miner", skins: "Skins", friends: "Friends", boost: "Boost", nav_home: "Home", nav_store: "Store", nav_tasks: "Tasks", nav_quiz: "Quiz" }
+            ar: { balance: "الرصيد الحالي", nav_home: "الرئيسية", nav_store: "المتجر", nav_tasks: "مهام", nav_quiz: "مسابقة" },
+            en: { balance: "Current Balance", nav_home: "Home", nav_store: "Store", nav_tasks: "Tasks", nav_quiz: "Quiz" }
         };
 
         window.onload = async () => {
-            if(tg.initDataUnsafe?.user) userId = tg.initDataUnsafe.user.id.toString();
-            document.getElementById('user-display-name').innerText = tg.initDataUnsafe?.user?.first_name || "Mustafa";
+            if(tg.initDataUnsafe?.user) {
+                userId = tg.initDataUnsafe.user.id.toString();
+                document.getElementById('user-display-name').innerText = tg.initDataUnsafe.user.first_name;
+            } else {
+                document.getElementById('user-display-name').innerText = "Mustafa";
+            }
 
-            await loadData();
-            checkRef();
+            await loadUserData();
             updateUI();
-            
             document.getElementById('loader').style.display = 'none';
-            startLoops();
+            
+            // حلقة الحفظ التلقائي
+            setInterval(syncPoints, 15000);
         };
 
-        async function loadData() {
-            const docRef = doc(db, "players", userId);
-            const snap = await getDoc(docRef);
-            if(snap.exists()){
-                state = {...state, ...snap.data()};
-                if(state.minerLvl > 0){
-                    const earned = Math.floor((Date.now() - state.lastLogin)/1000) * state.minerLvl;
-                    if(earned > 20){
-                        state.score += earned;
-                        document.getElementById('offline-val').innerText = earned.toLocaleString();
-                        openModal('offlineModal');
-                    }
-                }
-            } else { await saveData(true); }
-            isLoaded = true;
+        async function loadUserData() {
+            try {
+                const docRef = doc(db, "players", userId);
+                const snap = await getDoc(docRef);
+                if(snap.exists()) { state = {...state, ...snap.data()}; }
+                else { await setDoc(docRef, state); }
+            } catch(e) { console.error("Load Error", e); }
         }
 
-        async function saveData(force = false) {
-            if(!isLoaded || (!hasChanges && !force)) return;
-            state.lastLogin = Date.now();
+        async function syncPoints() {
+            if(!userId) return;
             await setDoc(doc(db, "players", userId), state, {merge:true});
-            hasChanges = false;
         }
 
-        async function checkRef() {
-            const param = tg.initDataUnsafe?.start_param;
-            if(param && param.startsWith('ref_') && !state.refBy){
-                const rId = param.split('_')[1];
-                if(rId !== userId){
-                    try {
-                        const rRef = doc(db, "players", rId);
-                        await updateDoc(rRef, { score: increment(5000) });
-                        state.score += 1000;
-                        state.refBy = rId;
-                        await saveData(true);
-                        tg.showAlert("تم قبول الإحالة! حصلت على 1,000 نقطة.");
-                    } catch(e) { console.error("Ref error", e); }
-                }
-            }
-        }
-
-        function startLoops() {
-            setInterval(() => {
-                if(state.energy < CONFIG.maxEnergy){
-                    state.energy = Math.min(CONFIG.maxEnergy, state.energy + state.multitap);
-                    updateEnergy();
-                }
-                if(state.minerLvl > 0){
-                    state.score += state.minerLvl;
-                    updateScore();
-                    document.getElementById('mining-anim').innerText = "⛏️ Mining...";
-                    hasChanges = true;
-                }
-            }, 1000);
-            setInterval(() => saveData(), 15000);
-        }
-
-        // --- Window Actions ---
-        window.handleTap = (e) => {
-            if(state.energy >= 1){
-                state.energy--; state.score += state.multitap;
-                updateScore(); updateEnergy(); updateRank();
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                showFloat(e.clientX, e.clientY, "+"+state.multitap);
-                hasChanges = true;
-                if(Math.random() < 0.05) spawnLucky();
-            }
+        // --- المتجر الديناميكي ---
+        window.openStore = async () => {
+            document.getElementById('storeModal').classList.add('active');
+            const listDiv = document.getElementById('store-items-list');
+            listDiv.innerHTML = "جاري تحميل الهدايا...";
+            
+            try {
+                const snap = await getDocs(collection(db, "gifts"));
+                listDiv.innerHTML = "";
+                snap.forEach(docSnap => {
+                    const item = docSnap.data();
+                    const name = state.lang === 'ar' ? item.name_ar : item.name_en;
+                    listDiv.innerHTML += `
+                        <div class="list-item" onclick="prepareOrder('${name}', ${item.price})">
+                            <span>${item.icon || '🎁'} ${name}</span>
+                            <b style="color:var(--secondary)">${item.price.toLocaleString()} P</b>
+                        </div>`;
+                });
+            } catch(e) { listDiv.innerHTML = "خطأ في الاتصال"; }
         };
 
-        window.upgradeMiner = async () => {
-            const cost = 20000 * (state.minerLvl + 1);
-            if(state.score >= cost){
-                state.score -= cost; state.minerLvl++;
-                await saveData(true); updateUI();
-                tg.showAlert("Miner Upgraded!");
-            } else tg.showAlert("Insufficient points!");
+        window.prepareOrder = (name, price) => {
+            currentOrder = { name, price };
+            document.getElementById('order-item-title').innerText = name;
+            document.getElementById('orderModal').classList.add('active');
         };
 
-        window.submitOrder = async () => {
-            const link = document.getElementById('order-link-input').value;
-            if(!link) return;
-            if(state.score < window.currentOrder.price) return tg.showAlert("No Points!");
-            
-            state.score -= window.currentOrder.price;
-            await saveData(true); updateUI();
-            
-            const msg = `🚨 طلب جديد من: ${userId}\n📦 الخدمة: ${window.currentOrder.name}\n🔗 الرابط: ${link}`;
+        window.processOrder = async () => {
+            const link = document.getElementById('order-link').value;
+            if(!link) return tg.showAlert("يرجى إدخال الرابط!");
+            if(state.score < currentOrder.price) return tg.showAlert("عذراً، نقاطك غير كافية!");
+
+            state.score -= currentOrder.price;
+            updateUI();
+            await syncPoints();
+
+            const msg = `🚨 طلب جديد من المتجر:\n🎁 الخدمة: ${currentOrder.name}\n🔗 الرابط: ${link}\n👤 المستخدم: ${userId}`;
             tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
-            closeModal('orderModal');
+            closeAllModals();
+            tg.showAlert("تم استلام الطلب وخصم النقاط!");
         };
 
-        window.updateUI = () => {
-            updateScore(); updateEnergy(); updateRank();
-            document.getElementById('miner-rate').innerText = state.minerLvl;
-            document.getElementById('ref-link-display').value = `${CONFIG.botLink}?start=ref_${userId}`;
-            applyLang();
+        // --- المهام الديناميكية ---
+        window.openTasks = async () => {
+            document.getElementById('tasksModal').classList.add('active');
+            const listDiv = document.getElementById('tasks-list');
+            listDiv.innerHTML = "جاري تحميل المهام...";
+            
+            try {
+                const snap = await getDocs(collection(db, "tasks"));
+                listDiv.innerHTML = "";
+                snap.forEach(docSnap => {
+                    const task = docSnap.data();
+                    const taskId = docSnap.id;
+                    if(state.completedTasks.includes(taskId)) return;
+
+                    const txt = state.lang === 'ar' ? task.txt_ar : task.txt_en;
+                    listDiv.innerHTML += `
+                        <div class="list-item">
+                            <span>${txt} (+${task.r})</span>
+                            <button onclick="doTask('${taskId}', '${task.url}', ${task.r})" style="background:var(--primary); color:#fff; border:none; padding:8px 12px; border-radius:10px; cursor:pointer;">GO</button>
+                        </div>`;
+                });
+            } catch(e) { listDiv.innerHTML = "خطأ في التحميل"; }
         };
 
-        function updateScore() { document.getElementById('score').innerText = Math.floor(state.score).toLocaleString(); }
-        function updateEnergy() {
-            document.getElementById('energy-txt').innerText = `${state.energy}/${CONFIG.maxEnergy}`;
-            document.getElementById('energy-fill').style.width = (state.energy/CONFIG.maxEnergy*100)+"%";
+        window.doTask = async (id, url, reward) => {
+            window.open(url, '_blank');
+            state.score += reward;
+            state.completedTasks.push(id);
+            updateUI();
+            await syncPoints();
+            tg.showAlert("تمت إضافة الجائزة بنجاح!");
+            window.openTasks();
+        };
+
+        // --- المسابقة الديناميكية ---
+        window.startQuiz = async () => {
+            document.getElementById('quizModal').classList.add('active');
+            const quizDiv = document.getElementById('quiz-container');
+            quizDiv.innerHTML = "جاري اختيار سؤال...";
+
+            try {
+                const snap = await getDocs(collection(db, "quiz"));
+                const questions = [];
+                snap.forEach(d => questions.push(d.data()));
+                
+                if(questions.length === 0) return quizDiv.innerHTML = "لا توجد أسئلة حالياً";
+                const q = questions[Math.floor(Math.random() * questions.length)];
+                
+                const qTxt = state.lang === 'ar' ? q.q_ar : q.q_en;
+                const opts = state.lang === 'ar' ? q.opts_ar : q.opts_en;
+
+                quizDiv.innerHTML = `<p style="margin-bottom:20px; font-weight:bold;">${qTxt}</p>`;
+                opts.forEach((opt, i) => {
+                    quizDiv.innerHTML += `<button class="btn-main" style="background:#222; margin-top:5px;" onclick="checkAnswer(${i}, ${q.c})">${opt}</button>`;
+                });
+            } catch(e) { quizDiv.innerHTML = "تعذر الاتصال"; }
+        };
+
+        window.checkAnswer = async (sel, corr) => {
+            if(sel === corr) {
+                state.score += 500;
+                await syncPoints();
+                updateUI();
+                tg.showAlert("رائع! إجابة صحيحة +500 نقطة.");
+                closeModal('quizModal');
+            } else {
+                tg.showAlert("إجابة خاطئة، حاول في المرة القادمة!");
+            }
+        };
+
+        // --- نظام الضغط ---
+        window.handleTap = (e) => {
+            state.score += 1;
+            updateUI();
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            showFloat(e.clientX, e.clientY, "+1");
+        };
+
+        function updateUI() {
+            document.getElementById('score').innerText = Math.floor(state.score).toLocaleString();
+            applyLangUI();
+            updateRank();
         }
+
         function updateRank() {
-            let r="Bronze", c="#cd7f32";
-            if(state.score>50000){r="Silver";c="#aaa";}
-            if(state.score>500000){r="Gold";c="#ffd700";}
-            if(state.score>5000000){r="Diamond";c="#00d2ff";}
-            const el = document.getElementById('rank-name');
-            el.innerText = r; el.style.color = c;
+            let r = "Bronze", c = "#cd7f32";
+            if(state.score > 50000) { r = "Silver"; c = "#aaa"; }
+            if(state.score > 500000) { r = "Gold"; c = "#ffd700"; }
+            document.getElementById('rank-name').innerText = r;
+            document.getElementById('rank-name').style.color = c;
         }
 
-        window.openModal = (id) => document.getElementById(id).classList.add('active');
-        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-        window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('active'));
-        window.toggleLang = () => { state.lang = state.lang==='ar'?'en':'ar'; applyLang(); hasChanges=true; };
-        function applyLang() {
+        window.toggleLang = () => {
+            state.lang = state.lang === 'ar' ? 'en' : 'ar';
+            applyLangUI();
+            syncPoints();
+        };
+
+        function applyLangUI() {
             const d = LANGS[state.lang];
-            document.body.dir = state.lang==='ar'?'rtl':'ltr';
+            document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
             document.querySelectorAll('[data-key]').forEach(el => {
-                const k = el.getAttribute('data-key'); if(d[k]) el.innerText = d[k];
+                const key = el.getAttribute('data-key');
+                if(d[key]) el.innerText = d[key];
             });
         }
-        window.t = (k) => LANGS[state.lang][k];
 
-        window.openOrder = (name, price) => {
-            window.currentOrder = {name, price};
-            document.getElementById('order-item-name').innerText = name;
-            openModal('orderModal');
-        };
-
-        window.copyRef = () => {
-            navigator.clipboard.writeText(document.getElementById('ref-link-display').value);
-            tg.showAlert("تم النسخ!");
-        };
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+        window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
 
         function showFloat(x,y,t){
-            const e = document.createElement('div'); e.className='float-num'; e.innerText=t;
-            e.style.left=x+'px'; e.style.top=(y-30)+'px';
+            const e = document.createElement('div'); e.className='float-num'; e.style.left=x+'px'; e.style.top=y+'px'; e.innerText=t;
             document.body.appendChild(e);
             setTimeout(()=>e.remove(), 800);
-        }
-
-        function spawnLucky(){
-            const c = document.createElement('div'); c.className='lucky-coin'; c.innerText='🍀';
-            const area = document.getElementById('game-area').getBoundingClientRect();
-            c.style.left=(Math.random()*(area.width-60))+'px'; c.style.top=(Math.random()*(area.height-60))+'px';
-            c.onpointerdown=(e)=>{ e.stopPropagation(); state.score+=1000; hasChanges=true; updateScore(); c.remove(); };
-            document.getElementById('game-area').appendChild(c);
-            setTimeout(()=>c.remove(), 1000);
         }
     </script>
 </body>
