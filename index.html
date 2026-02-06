@@ -176,7 +176,6 @@
 
         const CONFIG = { adminUsername: "SS34SS4", botLink: "https://t.me/tofe109tofebot" };
         let userId = "mustafa_user";
-        // إضافة مؤقتات افتراضية في الـ state
         let state = { score: 0, lang: 'ar', completedTasks: [], lastDaily: 0, lastQuiz: 0 };
         let currentOrderData = null;
 
@@ -187,7 +186,7 @@
             await loadUserData();
             updateUI();
             checkReferral();
-            startGlobalTimers(); // تشغيل عداد الوقت العالمي
+            startGlobalTimers();
             document.getElementById('loader').style.display = 'none';
         };
 
@@ -212,7 +211,7 @@
         function updateTimersDisplay() {
             const now = Date.now();
             const oneDay = 24 * 60 * 60 * 1000;
-            const quizWait = 1 * 60 * 60 * 1000; // وقت الانتظار للأسئلة: ساعة واحدة
+            const quizWait = 1 * 60 * 60 * 1000;
 
             // Daily Timer
             const dailyDiff = oneDay - (now - state.lastDaily);
@@ -256,7 +255,7 @@
                 tg.showAlert(state.lang === 'ar' ? "تم استلام المكافأة اليومية! +1000" : "Daily reward claimed! +1000");
                 closeModal('dailyModal');
             } else {
-                tg.showAlert(state.lang === 'ar' ? "لقد استلمت المكافأة بالفعل، عد لاحقاً!" : "Already claimed, come back later!");
+                tg.showAlert(state.lang === 'ar' ? "لقد استلمت المكافأة بالفعل!" : "Already claimed!");
             }
         };
 
@@ -322,7 +321,6 @@
                 return;
             }
 
-            // اختيار سؤال عشوائي
             const q = questions[Math.floor(Math.random() * questions.length)];
             const qTxt = state.lang === 'ar' ? q.q_ar : q.q_en;
             const opts = state.lang === 'ar' ? q.opts_ar : q.opts_en;
@@ -348,11 +346,10 @@
             } else {
                 btn.classList.add('wrong');
                 allOptions[correct].classList.add('correct');
-                state.score = Math.max(0, state.score - 200); // خصم نقاط عند الخطأ
+                state.score = Math.max(0, state.score - 200); 
                 tg.HapticFeedback.notificationOccurred('error');
             }
 
-            // تسجيل وقت انتهاء الاختبار لتفعيل المؤقت
             state.lastQuiz = Date.now();
             updateUI();
             await syncPoints();
@@ -380,7 +377,8 @@
             });
 
             if(!hasTasks) {
-                listDiv.innerHTML = `<div style="text-align:center; padding:20px; color:var(--secondary); font-weight:bold;">${state.lang === 'ar' ? "انتظر أسئلة قادمة" : "Wait for upcoming questions"}</div>`;
+                // تعديل الرسالة لتظهر "انتظر المهام القادمة"
+                listDiv.innerHTML = `<div style="text-align:center; padding:20px; color:var(--secondary); font-weight:bold;">${state.lang === 'ar' ? "انتظر المهام القادمة" : "Wait for upcoming tasks"}</div>`;
             }
         };
 
@@ -410,8 +408,6 @@
         function updateUI() {
             document.getElementById('score').innerText = state.score.toLocaleString();
             document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
-            
-            // تحديث أيقونات اللغة
             document.getElementById('lang-text').innerText = state.lang === 'ar' ? 'AR' : 'EN';
             document.getElementById('lang-icon').innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
 
@@ -427,7 +423,6 @@
                 if(translations[k]) el.innerText = translations[k];
             });
             
-            // Daily Reward Button UI
             const now = Date.now();
             const oneDay = 24 * 60 * 60 * 1000;
             const dailyBtn = document.getElementById('daily-claim-btn');
@@ -452,7 +447,6 @@
             setTimeout(()=>e.remove(), 700);
         }
 
-        // Referral logic remains the same
         async function checkReferral() {
             const param = tg.initDataUnsafe?.start_param;
             if(param && param.startsWith('ref_') && !state.referred) {
