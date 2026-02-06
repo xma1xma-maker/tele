@@ -47,7 +47,7 @@
         .modal-overlay.active { display: flex; }
         .modal-content { background: #111; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 3px solid var(--primary); max-height: 85vh; overflow-y: auto; }
         
-        /* --- Nav Bar (تمت إضافة زر الدعوة هنا) --- */
+        /* --- Nav Bar --- */
         .nav-bar { position: fixed; bottom: 15px; left: 10px; right: 10px; background: rgba(20,20,20,0.95); border-radius: 25px; display: flex; justify-content: space-between; padding: 12px 15px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.65rem; color: #777; cursor: pointer; transition: 0.2s; flex: 1; }
         .nav-btn.active { color: #fff; transform: translateY(-3px); }
@@ -136,8 +136,10 @@
             if(tg.initDataUnsafe?.user) userId = tg.initDataUnsafe.user.id.toString();
             document.getElementById('user-display-name').innerText = tg.initDataUnsafe?.user?.first_name || "Player";
 
+            // تحميل البيانات أولاً
             await loadUserData();
-            await checkReferral(); // التحقق الفوري من رابط الإحالة
+            // التأكد من معالجة الإحالة فوراً بعد التحميل
+            await checkReferral(); 
             updateUI();
             document.getElementById('loader').style.display = 'none';
         };
@@ -145,33 +147,47 @@
         async function loadUserData() {
             const docRef = doc(db, "players", userId);
             const snap = await getDoc(docRef);
-            if(snap.exists()) state = {...state, ...snap.data()};
-            else await setDoc(docRef, state);
+            if(snap.exists()) {
+                state = {...state, ...snap.data()};
+            } else {
+                await setDoc(docRef, state);
+            }
         }
 
         async function syncPoints() {
             await setDoc(doc(db, "players", userId), state, {merge:true});
         }
 
-        // --- إصلاح نظام الإحالة ---
+        // --- مصلح نظام الإحالة الجوهري ---
         async function checkReferral() {
             const param = tg.initDataUnsafe?.start_param;
+            // شرط: وجود كود إحالة، ولم يسبق للمستخدم أن أُحيل من قبل
             if(param && param.startsWith('ref_') && !state.referredBy) {
                 const referrerId = param.split('_')[1];
+                
+                // منع الشخص من إحالة نفسه
                 if(referrerId !== userId) {
                     try {
-                        const refRef = doc(db, "players", referrerId);
-                        // زيادة نقاط من أرسل الرابط
-                        await updateDoc(refRef, { 
+                        const referrerRef = doc(db, "players", referrerId);
+                        
+                        // 1. تحديث بيانات الداعي (صاحب الرابط) في السيرفر
+                        await updateDoc(referrerRef, { 
                             score: increment(5000),
                             inviteCount: increment(1)
                         });
-                        // إضافة مكافأة لك (المدعو) وتثبيت أنك دخلت برابط
+
+                        // 2. تحديث بيانات المستخدم الحالي (المدعو)
                         state.score += 1000;
                         state.referredBy = referrerId;
-                        await syncPoints();
-                        tg.showAlert("رائع! حصلت على مكافأة دخول 1000 نقطة 🎁");
-                    } catch(e) { console.error("Referral Sync Error", e); }
+                        
+                        // حفظ البيانات فوراً لضمان عدم ضياع النقاط
+                        await syncPoints(); 
+                        
+                        tg.showAlert("رائع! حصلت على مكافأة دخول 1000 نقطة 🎁 وصديقك حصل على 5000!");
+                    } catch(e) { 
+                        console.error("Referral Sync Error:", e);
+                        // إذا فشل تحديث الداعي، قد يكون بسبب عدم وجود وثيقته بعد
+                    }
                 }
             }
         }
@@ -182,8 +198,6 @@
             tg.showAlert("تم النسخ! أرسل الرابط للأصدقاء لربح 5000 نقطة.");
         };
 
-        // ... (باقي دوال الحفظ والضغط واللغة تبقى كما هي لضمان عدم تغيير منطقك)
-        
         window.handleTap = (e) => {
             state.score += 1;
             updateUI();
@@ -199,6 +213,15 @@
         window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
         window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+
+        // دوال لغات مبسطة للحفاظ على الاستقرار
+        window.toggleLang = () => {
+            state.lang = state.lang === 'ar' ? 'en' : 'ar';
+            document.getElementById('lang-icon').innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
+            document.getElementById('lang-text').innerText = state.lang === 'ar' ? 'AR' : 'EN';
+            document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+            syncPoints();
+        };
 
     </script>
 </body>
