@@ -31,23 +31,19 @@
             overflow-x: hidden;
         }
 
-        /* --- Header --- */
         .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 10; }
         .lang-toggle { background: var(--surface); border: 1px solid var(--border); color: #fff; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
         
-        /* --- Score & Game --- */
         .score-container { text-align: center; margin-top: 20px; }
         .score-val { font-size: 3.2rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--primary); }
         .game-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; }
         .coin { width: 230px; height: 230px; border-radius: 50%; border: 10px solid rgba(255,255,255,0.1); box-shadow: 0 0 60px rgba(0, 152, 234, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe); }
         .coin:active { transform: scale(0.9); }
 
-        /* --- Modals --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: flex-end; backdrop-filter: blur(8px); }
         .modal-overlay.active { display: flex; }
         .modal-content { background: #111; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 3px solid var(--primary); max-height: 85vh; overflow-y: auto; }
         
-        /* --- Nav Bar --- */
         .nav-bar { position: fixed; bottom: 15px; left: 10px; right: 10px; background: rgba(20,20,20,0.95); border-radius: 25px; display: flex; justify-content: space-between; padding: 12px 15px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.65rem; color: #777; cursor: pointer; transition: 0.2s; flex: 1; }
         .nav-btn.active { color: #fff; transform: translateY(-3px); }
@@ -136,10 +132,12 @@
             if(tg.initDataUnsafe?.user) userId = tg.initDataUnsafe.user.id.toString();
             document.getElementById('user-display-name').innerText = tg.initDataUnsafe?.user?.first_name || "Player";
 
-            // تحميل البيانات أولاً
+            // 1. تحميل بيانات المستخدم الحالي أولاً
             await loadUserData();
-            // التأكد من معالجة الإحالة فوراً بعد التحميل
+            
+            // 2. التحقق من الإحالة ومعالجتها فوراً
             await checkReferral(); 
+            
             updateUI();
             document.getElementById('loader').style.display = 'none';
         };
@@ -150,18 +148,21 @@
             if(snap.exists()) {
                 state = {...state, ...snap.data()};
             } else {
+                // مستخدم جديد تماماً
                 await setDoc(docRef, state);
             }
         }
 
         async function syncPoints() {
+            if(!userId) return;
             await setDoc(doc(db, "players", userId), state, {merge:true});
         }
 
-        // --- مصلح نظام الإحالة الجوهري ---
+        // --- إصلاح نظام الإحالة الجوهري ---
         async function checkReferral() {
             const param = tg.initDataUnsafe?.start_param;
-            // شرط: وجود كود إحالة، ولم يسبق للمستخدم أن أُحيل من قبل
+            
+            // التأكد من وجود كود إحالة وأن المستخدم لم يسبق إحالته
             if(param && param.startsWith('ref_') && !state.referredBy) {
                 const referrerId = param.split('_')[1];
                 
@@ -170,23 +171,22 @@
                     try {
                         const referrerRef = doc(db, "players", referrerId);
                         
-                        // 1. تحديث بيانات الداعي (صاحب الرابط) في السيرفر
+                        // تحديث بيانات الداعي في السيرفر (زيادة نقاطه وعداد الإحالات)
                         await updateDoc(referrerRef, { 
                             score: increment(5000),
                             inviteCount: increment(1)
                         });
 
-                        // 2. تحديث بيانات المستخدم الحالي (المدعو)
+                        // تحديث بيانات المستخدم الحالي (المدعو) بـ 1000 نقطة
                         state.score += 1000;
                         state.referredBy = referrerId;
                         
-                        // حفظ البيانات فوراً لضمان عدم ضياع النقاط
+                        // حفظ التغييرات فوراً لضمان عدم الضياع
                         await syncPoints(); 
                         
-                        tg.showAlert("رائع! حصلت على مكافأة دخول 1000 نقطة 🎁 وصديقك حصل على 5000!");
+                        tg.showAlert("مبروك! حصلت على 1000 نقطة كهدية دخول 🎁");
                     } catch(e) { 
-                        console.error("Referral Sync Error:", e);
-                        // إذا فشل تحديث الداعي، قد يكون بسبب عدم وجود وثيقته بعد
+                        console.error("Referral Error:", e);
                     }
                 }
             }
@@ -195,7 +195,7 @@
         window.copyRef = () => {
             const link = `${CONFIG.botLink}?start=ref_${userId}`;
             navigator.clipboard.writeText(link);
-            tg.showAlert("تم النسخ! أرسل الرابط للأصدقاء لربح 5000 نقطة.");
+            tg.showAlert("تم نسخ الرابط! شاركه لتربح 5000 نقطة عن كل صديق.");
         };
 
         window.handleTap = (e) => {
@@ -214,7 +214,6 @@
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
         window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
 
-        // دوال لغات مبسطة للحفاظ على الاستقرار
         window.toggleLang = () => {
             state.lang = state.lang === 'ar' ? 'en' : 'ar';
             document.getElementById('lang-icon').innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
@@ -222,7 +221,6 @@
             document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
             syncPoints();
         };
-
     </script>
 </body>
 </html>
