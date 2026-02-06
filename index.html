@@ -1,206 +1,205 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clicker Pro V6.4 - Mustafa Alaa</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #0a0a0a;
-            --primary: #0098EA;
-            --secondary: #f39c12;
-            --surface: rgba(255, 255, 255, 0.08);
-            --border: rgba(255, 255, 255, 0.1);
-            --text-main: #ffffff;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Clicker Pro V6.4 - Mustafa Alaa</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --primary: #0098EA;
+            --secondary: #f39c12;
+            --surface: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+        }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
-        
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at 50% 0%, #1a3a5a, #000);
-            color: var(--text-main);
-            margin: 0; min-height: 100vh;
-            display: flex; flex-direction: column;
-            padding-bottom: 95px;
-            overflow-x: hidden;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 0%, #1a3a5a, #000);
+            color: var(--text-main);
+            margin: 0; min-height: 100vh;
+            display: flex; flex-direction: column;
+            padding-bottom: 95px;
+            overflow-x: hidden;
+        }
 
-        /* --- Header --- */
-        .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 10; }
-        .lang-toggle { background: var(--surface); border: 1px solid var(--border); color: #fff; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
-        
-        /* --- Score & Game --- */
-        .score-container { text-align: center; margin-top: 20px; }
-        .score-val { font-size: 3.2rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--primary); }
-        .game-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-        .coin { width: 230px; height: 230px; border-radius: 50%; border: 10px solid rgba(255,255,255,0.1); box-shadow: 0 0 60px rgba(0, 152, 234, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe); }
-        .coin:active { transform: scale(0.9); }
+        /* --- Header --- */
+        .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 10; }
+        .lang-toggle { background: var(--surface); border: 1px solid var(--border); color: #fff; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
+        
+        /* --- Score & Game --- */
+        .score-container { text-align: center; margin-top: 20px; }
+        .score-val { font-size: 3.2rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--primary); }
+        .game-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        .coin { width: 230px; height: 230px; border-radius: 50%; border: 10px solid rgba(255,255,255,0.1); box-shadow: 0 0 60px rgba(0, 152, 234, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe); }
+        .coin:active { transform: scale(0.9); }
 
-        /* --- Modals --- */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: flex-end; backdrop-filter: blur(8px); }
-        .modal-overlay.active { display: flex; }
-        .modal-content { background: #111; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 3px solid var(--primary); max-height: 85vh; overflow-y: auto; }
-        
-        /* --- Nav Bar (تمت إضافة زر الدعوة هنا) --- */
-        .nav-bar { position: fixed; bottom: 15px; left: 10px; right: 10px; background: rgba(20,20,20,0.95); border-radius: 25px; display: flex; justify-content: space-between; padding: 12px 15px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.65rem; color: #777; cursor: pointer; transition: 0.2s; flex: 1; }
-        .nav-btn.active { color: #fff; transform: translateY(-3px); }
+        /* --- Modals --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: flex-end; backdrop-filter: blur(8px); }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: #111; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 3px solid var(--primary); max-height: 85vh; overflow-y: auto; }
+        
+        /* --- Nav Bar (تمت إضافة زر الدعوة هنا) --- */
+        .nav-bar { position: fixed; bottom: 15px; left: 10px; right: 10px; background: rgba(20,20,20,0.95); border-radius: 25px; display: flex; justify-content: space-between; padding: 12px 15px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.65rem; color: #777; cursor: pointer; transition: 0.2s; flex: 1; }
+        .nav-btn.active { color: #fff; transform: translateY(-3px); }
 
-        .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; color: #fff; border-radius: 14px; font-weight: bold; margin-top: 15px; cursor: pointer; }
-        .inp { width: 100%; padding: 15px; background: #1a1a1a; border: 1px solid #333; color: var(--primary); border-radius: 12px; margin: 15px 0; text-align: center; }
-        
-        #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-    </style>
+        .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; color: #fff; border-radius: 14px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        .inp { width: 100%; padding: 15px; background: #1a1a1a; border: 1px solid #333; color: var(--primary); border-radius: 12px; margin: 15px 0; text-align: center; }
+        
+        #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div style="width: 50px; height: 50px; border: 5px solid #222; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear;"></div>
-        <h3 style="margin-top:20px; color: #fff;">Clicker Pro V6.4</h3>
-    </div>
+    <div id="loader">
+        <div style="width: 50px; height: 50px; border: 5px solid #222; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear;"></div>
+        <h3 style="margin-top:20px; color: #fff;">Clicker Pro V6.4</h3>
+    </div>
 
-    <div class="header">
-        <div class="lang-toggle" onclick="toggleLang()">
-            <span id="lang-icon">🇮🇶</span>
-            <span id="lang-text">AR</span>
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-             <button onclick="openModal('dailyModal')" style="background: gold; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer;">🎁</button>
-             <span id="rank-name" style="font-weight:bold; color:var(--secondary); font-size: 0.9rem;">🥉 Bronze</span>
-        </div>
-        <div id="user-display-name" style="font-weight:bold; font-size:0.8rem">Player</div>
-    </div>
+    <div class="header">
+        <div class="lang-toggle" onclick="toggleLang()">
+            <span id="lang-icon">🇮🇶</span>
+            <span id="lang-text">AR</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+             <button onclick="openModal('dailyModal')" style="background: gold; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer;">🎁</button>
+             <span id="rank-name" style="font-weight:bold; color:var(--secondary); font-size: 0.9rem;">🥉 Bronze</span>
+        </div>
+        <div id="user-display-name" style="font-weight:bold; font-size:0.8rem">Player</div>
+    </div>
 
-    <div class="score-container">
-        <div class="score-val" id="score">0</div>
-        <div style="color:#666; font-size:0.8rem;" data-key="balance">الرصيد الحالي</div>
-    </div>
+    <div class="score-container">
+        <div class="score-val" id="score">0</div>
+        <div style="color:#666; font-size:0.8rem;" data-key="balance">الرصيد الحالي</div>
+    </div>
 
-    <div class="game-area" id="game-area">
-        <div class="coin" id="main-coin" onpointerdown="handleTap(event)">
-            <svg viewBox="0 0 24 24" width="110" fill="white"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg>
-        </div>
-    </div>
+    <div class="game-area" id="game-area">
+        <div class="coin" id="main-coin" onpointerdown="handleTap(event)">
+            <svg viewBox="0 0 24 24" width="110" fill="white"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg>
+        </div>
+    </div>
 
-    <div class="nav-bar">
-        <div class="nav-btn active" onclick="closeAllModals()">🏠 <span data-key="nav_home">الرئيسية</span></div>
-        <div class="nav-btn" onclick="openStore()">🛍️ <span data-key="nav_store">المتجر</span></div>
-        <div class="nav-btn" onclick="openModal('friendsModal')">👥 <span data-key="nav_friends">دعوة</span></div>
-        <div class="nav-btn" onclick="openTasks()">📋 <span data-key="nav_tasks">مهام</span></div>
-        <div class="nav-btn" onclick="startQuiz()">🧠 <span data-key="nav_quiz">مسابقة</span></div>
-    </div>
+    <div class="nav-bar">
+        <div class="nav-btn active" onclick="closeAllModals()">🏠 <span data-key="nav_home">الرئيسية</span></div>
+        <div class="nav-btn" onclick="openStore()">🛍️ <span data-key="nav_store">المتجر</span></div>
+        <div class="nav-btn" onclick="openModal('friendsModal')">👥 <span data-key="nav_friends">دعوة</span></div>
+        <div class="nav-btn" onclick="openTasks()">📋 <span data-key="nav_tasks">مهام</span></div>
+        <div class="nav-btn" onclick="startQuiz()">🧠 <span data-key="nav_quiz">مسابقة</span></div>
+    </div>
 
-    <div class="modal-overlay" id="friendsModal">
-        <div class="modal-content" style="text-align:center">
-            <h3 data-key="friends_title">نظام الإحالة</h3>
-            <div style="background: rgba(0, 152, 234, 0.1); border: 1px dashed var(--primary); padding: 10px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; color: var(--primary);">
-                🤝 إحالاتك الناجحة: <span id="invite-count">0</span>
-            </div>
-            <p style="color:#888; font-size:0.9rem;">+5,000 نقطة لكل صديق يدعو من رابطك!</p>
-            <input type="text" class="inp" id="ref-link-display" readonly>
-            <button class="btn-main" onclick="copyRef()">نسخ رابط الدعوة</button>
-            <button class="btn-main" style="background:#222" onclick="closeModal('friendsModal')">إغلاق</button>
-        </div>
-    </div>
+    <div class="modal-overlay" id="friendsModal">
+        <div class="modal-content" style="text-align:center">
+            <h3 data-key="friends_title">نظام الإحالة</h3>
+            <div style="background: rgba(0, 152, 234, 0.1); border: 1px dashed var(--primary); padding: 10px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; color: var(--primary);">
+                🤝 إحالاتك الناجحة: <span id="invite-count">0</span>
+            </div>
+            <p style="color:#888; font-size:0.9rem;">+5,000 نقطة لكل صديق يدعو من رابطك!</p>
+            <input type="text" class="inp" id="ref-link-display" readonly>
+            <button class="btn-main" onclick="copyRef()">نسخ رابط الدعوة</button>
+            <button class="btn-main" style="background:#222" onclick="closeModal('friendsModal')">إغلاق</button>
+        </div>
+    </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyACixZDVCNww716fRN_29xm2kCnFadkL64",
-            authDomain: "tele-ea6e7.firebaseapp.com",
-            projectId: "tele-ea6e7",
-            storageBucket: "tele-ea6e7.firebasestorage.app",
-            messagingSenderId: "693110799024",
-            appId: "1:693110799024:web:4dd4057eef17b9ed3e1975",
-            measurementId: "G-902LN1FW97"
-        };
+        const firebaseConfig = {
+            apiKey: "AIzaSyACixZDVCNww716fRN_29xm2kCnFadkL64",
+            authDomain: "tele-ea6e7.firebaseapp.com",
+            projectId: "tele-ea6e7",
+            storageBucket: "tele-ea6e7.firebasestorage.app",
+            messagingSenderId: "693110799024",
+            appId: "1:693110799024:web:4dd4057eef17b9ed3e1975",
+            measurementId: "G-902LN1FW97"
+        };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-        const CONFIG = { adminUsername: "SS34SS4", botLink: "https://t.me/tofe109tofebot" };
-        let userId = "mustafa_user";
-        let state = { score: 0, lang: 'ar', completedTasks: [], lastDaily: 0, referredBy: null, inviteCount: 0 };
+        const CONFIG = { adminUsername: "SS34SS4", botLink: "https://t.me/tofe109tofebot" };
+        let userId = "mustafa_user";
+        let state = { score: 0, lang: 'ar', completedTasks: [], lastDaily: 0, referredBy: null, inviteCount: 0 };
 
-        window.onload = async () => {
-            if(tg.initDataUnsafe?.user) userId = tg.initDataUnsafe.user.id.toString();
-            document.getElementById('user-display-name').innerText = tg.initDataUnsafe?.user?.first_name || "Player";
+        window.onload = async () => {
+            if(tg.initDataUnsafe?.user) userId = tg.initDataUnsafe.user.id.toString();
+            document.getElementById('user-display-name').innerText = tg.initDataUnsafe?.user?.first_name || "Player";
 
-            await loadUserData();
-            await checkReferral(); // التحقق الفوري من رابط الإحالة
-            updateUI();
-            document.getElementById('loader').style.display = 'none';
-        };
+            await loadUserData();
+            await checkReferral(); // التحقق الفوري من رابط الإحالة
+            updateUI();
+            document.getElementById('loader').style.display = 'none';
+        };
 
-        async function loadUserData() {
-            const docRef = doc(db, "players", userId);
-            const snap = await getDoc(docRef);
-            if(snap.exists()) state = {...state, ...snap.data()};
-            else await setDoc(docRef, state);
-        }
+        async function loadUserData() {
+            const docRef = doc(db, "players", userId);
+            const snap = await getDoc(docRef);
+            if(snap.exists()) state = {...state, ...snap.data()};
+            else await setDoc(docRef, state);
+        }
 
-        async function syncPoints() {
-            await setDoc(doc(db, "players", userId), state, {merge:true});
-        }
+        async function syncPoints() {
+            await setDoc(doc(db, "players", userId), state, {merge:true});
+        }
 
-        // --- إصلاح نظام الإحالة ---
-        async function checkReferral() {
-            const param = tg.initDataUnsafe?.start_param;
-            if(param && param.startsWith('ref_') && !state.referredBy) {
-                const referrerId = param.split('_')[1];
-                if(referrerId !== userId) {
-                    try {
-                        const refRef = doc(db, "players", referrerId);
-                        // زيادة نقاط من أرسل الرابط
-                        await updateDoc(refRef, { 
-                            score: increment(5000),
-                            inviteCount: increment(1)
-                        });
-                        // إضافة مكافأة لك (المدعو) وتثبيت أنك دخلت برابط
-                        state.score += 1000;
-                        state.referredBy = referrerId;
-                        await syncPoints();
-                        tg.showAlert("رائع! حصلت على مكافأة دخول 1000 نقطة 🎁");
-                    } catch(e) { console.error("Referral Sync Error", e); }
-                }
-            }
-        }
+        // --- إصلاح نظام الإحالة ---
+        async function checkReferral() {
+            const param = tg.initDataUnsafe?.start_param;
+            if(param && param.startsWith('ref_') && !state.referredBy) {
+                const referrerId = param.split('_')[1];
+                if(referrerId !== userId) {
+                    try {
+                        const refRef = doc(db, "players", referrerId);
+                        // زيادة نقاط من أرسل الرابط
+                        await updateDoc(refRef, { 
+                            score: increment(5000),
+                            inviteCount: increment(1)
+                        });
+                        // إضافة مكافأة لك (المدعو) وتثبيت أنك دخلت برابط
+                        state.score += 1000;
+                        state.referredBy = referrerId;
+                        await syncPoints();
+                        tg.showAlert("رائع! حصلت على مكافأة دخول 1000 نقطة 🎁");
+                    } catch(e) { console.error("Referral Sync Error", e); }
+                }
+            }
+        }
 
-        window.copyRef = () => {
-            const link = `${CONFIG.botLink}?start=ref_${userId}`;
-            navigator.clipboard.writeText(link);
-            tg.showAlert("تم النسخ! أرسل الرابط للأصدقاء لربح 5000 نقطة.");
-        };
+        window.copyRef = () => {
+            const link = `${CONFIG.botLink}?start=ref_${userId}`;
+            navigator.clipboard.writeText(link);
+            tg.showAlert("تم النسخ! أرسل الرابط للأصدقاء لربح 5000 نقطة.");
+        };
 
-        // ... (باقي دوال الحفظ والضغط واللغة تبقى كما هي لضمان عدم تغيير منطقك)
-        
-        window.handleTap = (e) => {
-            state.score += 1;
-            updateUI();
-            if(state.score % 20 === 0) syncPoints();
-        };
+        // ... (باقي دوال الحفظ والضغط واللغة تبقى كما هي لضمان عدم تغيير منطقك)
+        
+        window.handleTap = (e) => {
+            state.score += 1;
+            updateUI();
+            if(state.score % 20 === 0) syncPoints();
+        };
 
-        function updateUI() {
-            document.getElementById('score').innerText = state.score.toLocaleString();
-            document.getElementById('invite-count').innerText = state.inviteCount || 0;
-            document.getElementById('ref-link-display').value = `${CONFIG.botLink}?start=ref_${userId}`;
-        }
+        function updateUI() {
+            document.getElementById('score').innerText = state.score.toLocaleString();
+            document.getElementById('invite-count').innerText = state.inviteCount || 0;
+            document.getElementById('ref-link-display').value = `${CONFIG.botLink}?start=ref_${userId}`;
+        }
 
-        window.openModal = (id) => document.getElementById(id).classList.add('active');
-        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-        window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        window.openModal = (id) => document.getElementById(id).classList.add('active');
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+        window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
 
-    </script>
+    </script>
 </body>
 </html>
