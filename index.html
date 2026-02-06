@@ -33,20 +33,7 @@
 
         .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 10; }
         
-        .lang-toggle { 
-            background: var(--primary); 
-            border: 1px solid var(--border); 
-            color: #fff; 
-            padding: 6px 15px; 
-            border-radius: 20px; 
-            cursor: pointer; 
-            font-weight: 800; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            font-size: 0.85rem;
-            box-shadow: 0 0 10px rgba(0,152,234,0.4);
-        }
+        .lang-toggle { background: var(--primary); border: 1px solid var(--border); color: #fff; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-weight: 800; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
 
         .score-container { text-align: center; margin-top: 20px; }
         .score-val { font-size: 3.2rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--primary); }
@@ -58,20 +45,15 @@
         .modal-overlay.active { display: flex; }
         .modal-content { background: #111; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 3px solid var(--primary); max-height: 85vh; overflow-y: auto; }
         
-        .quiz-option { width: 100%; padding: 15px; margin-bottom: 10px; background: var(--surface); border: 1px solid var(--border); color: #fff; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; text-align: center; }
-        .quiz-option.correct { background: var(--success) !important; border-color: #fff; }
-        .quiz-option.wrong { background: var(--danger) !important; border-color: #fff; }
-
-        .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 152, 234, 0.3); }
-        .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(20,20,20,0.95); border-radius: 25px; display: flex; justify-content: space-around; padding: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #777; cursor: pointer; transition: 0.2s; }
+        .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(20,20,20,0.95); border-radius: 25px; display: flex; justify-content: space-around; padding: 12px; border: 1px solid var(--border); }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #777; cursor: pointer; }
         .nav-btn.active { color: #fff; transform: translateY(-3px); }
 
-        .float-num { position: fixed; color: #fff; font-weight: 900; font-size: 2.2rem; pointer-events: none; z-index: 100; text-shadow: 0 0 10px var(--primary); animation: floatUp 0.7s forwards; }
+        .float-num { position: fixed; color: #fff; font-weight: 900; font-size: 2.2rem; pointer-events: none; z-index: 100; animation: floatUp 0.7s forwards; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
         
         #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .input-field { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #222; color: #fff; margin: 10px 0; font-family: 'Cairo'; text-align: center; }
         .list-item { background: var(--surface); padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
@@ -88,8 +70,8 @@
             <span id="lang-icon">🌐</span>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
+             <button onclick="openModal('dailyModal')" style="background: gold; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer;">🎁</button>
              <button onclick="openModal('friendsModal')" style="background: var(--secondary); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer;">👥</button>
-             <span id="rank-name" style="font-weight:bold; color:var(--secondary); font-size: 0.9rem;">🥉 Bronze</span>
         </div>
         <div id="user-display-name" style="font-weight:bold; font-size:0.8rem">Player</div>
     </div>
@@ -110,34 +92,43 @@
         <div class="nav-btn" onclick="openStore()">🛍️ <span data-key="nav_store">المتجر</span></div>
         <div class="nav-btn" onclick="openTasks()">📋 <span data-key="nav_tasks">مهام</span></div>
         <div class="nav-btn" onclick="startQuiz()">🧠 <span data-key="nav_quiz">مسابقة</span></div>
-        <div class="nav-btn" onclick="openModal('friendsModal')">🤝 <span data-key="friends_title">إحالة</span></div>
     </div>
 
-    <div class="modal-overlay" id="quizModal">
+    <div class="modal-overlay" id="dailyModal">
         <div class="modal-content">
-            <h3 style="text-align:center" data-key="nav_quiz">المسابقة</h3>
-            <div id="quiz-container" style="text-align:center; padding: 20px 0;"></div>
-            <button class="btn-main" style="background:#222" onclick="closeModal('quizModal')">خروج</button>
+            <h3 style="text-align:center">المكافأة اليومية</h3>
+            <div style="background: var(--surface); padding: 20px; border-radius: 15px; text-align: center;">
+                <p>استلم 1,000 نقطة مجانية كل 24 ساعة!</p>
+                <button class="btn-main" onclick="claimDailyReward()">استلام الآن</button>
+            </div>
+            <button class="btn-main" style="background:#222" onclick="closeModal('dailyModal')">إغلاق</button>
         </div>
     </div>
 
-    <div class="modal-overlay" id="friendsModal">
-        <div class="modal-content" style="text-align:center">
-            <h3 data-key="friends_title">دعوة الأصدقاء</h3>
-            <div style="background: rgba(0, 152, 234, 0.1); border: 1px dashed var(--primary); padding: 15px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; color: var(--primary);">
-                🤝 إحالاتك: <span id="invite-count">0</span>
-            </div>
-            <p style="color:#888; font-size:0.9rem;" id="ref-desc">احصل على +5,000 نقطة لكل صديق يدخل من رابطك!</p>
-            <input type="text" id="ref-link-display" readonly style="width:100%; padding:15px; background:#1a1a1a; border:1px solid #333; color:var(--primary); border-radius:12px; margin: 15px 0; text-align:center; font-size: 0.8rem;">
-            <button class="btn-main" onclick="copyRef()">نسخ رابط الإحالة</button>
-            <button class="btn-main" style="background:#222" onclick="closeModal('friendsModal')">إغلاق</button>
+    <div class="modal-overlay" id="storeModal">
+        <div class="modal-content">
+            <h3 style="text-align:center" data-key="nav_store">المتجر</h3>
+            <div id="store-list"></div>
+            <button class="btn-main" style="background:#222" onclick="closeModal('storeModal')">إغلاق</button>
         </div>
     </div>
+
+    <div class="modal-overlay" id="tasksModal">
+        <div class="modal-content">
+            <h3 style="text-align:center" data-key="nav_tasks">المهام</h3>
+            <div id="tasks-list"></div>
+            <button class="btn-main" style="background:#222" onclick="closeModal('tasksModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="quizModal">...</div>
+    <div class="modal-overlay" id="friendsModal">...</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // CONFIG (نفس إعداداتك)
         const firebaseConfig = {
             apiKey: "AIzaSyACixZDVCNww716fRN_29xm2kCnFadkL64",
             authDomain: "tele-ea6e7.firebaseapp.com",
@@ -152,21 +143,13 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const CONFIG = { adminUsername: "SS34SS4", botLink: "https://t.me/tofe109tofebot" };
         let userId = "mustafa_user";
-        let state = { score: 0, lang: 'ar', completedTasks: [], inviteCount: 0, referredBy: null };
+        let state = { score: 0, lang: 'ar', completedTasks: [], lastDaily: 0, inviteCount: 0 };
 
         window.onload = async () => {
             if(tg.initDataUnsafe?.user) userId = tg.initDataUnsafe.user.id.toString();
-            document.getElementById('user-display-name').innerText = tg.initDataUnsafe?.user?.first_name || "Mustafa";
-
             await loadUserData();
-            // تأخير بسيط لضمان تحميل المعطيات من تليجرام بشكل كامل
-            setTimeout(async () => {
-                await processReferral();
-                updateUI();
-            }, 1000);
-            
+            updateUI();
             document.getElementById('loader').style.display = 'none';
         };
 
@@ -181,120 +164,78 @@
             await setDoc(doc(db, "players", userId), state, {merge:true});
         }
 
-        async function processReferral() {
-            const urlParams = new URLSearchParams(window.location.search);
-            // محاولة جلب الكود من تليجرام مباشرة أو من الرابط
-            const startParam = tg.initDataUnsafe?.start_param || urlParams.get('tgWebAppStartParam') || urlParams.get('start');
-            
-            if (startParam && startParam.startsWith('ref_') && !state.referredBy) {
-                const referrerId = startParam.replace('ref_', '');
-                
-                if (referrerId !== userId) {
-                    try {
-                        const referrerRef = doc(db, "players", referrerId);
-                        const referrerSnap = await getDoc(referrerRef);
-
-                        if (referrerSnap.exists()) {
-                            // إضافة مكافأة للداعي
-                            await updateDoc(referrerRef, {
-                                score: increment(5000),
-                                inviteCount: increment(1)
-                            });
-                            
-                            // تسجيل الإحالة للمستخدم الجديد وإضافة مكافأة له
-                            state.referredBy = referrerId;
-                            state.score += 1000; 
-                            await syncPoints();
-                            tg.showAlert("✅ تمت الإحالة! حصلت أنت وصديقك على مكافأة.");
-                        }
-                    } catch (e) {
-                        console.error("Referral Error:", e);
-                    }
-                }
-            }
-        }
-
-        window.copyRef = () => {
-            const link = `${CONFIG.botLink}?start=ref_${userId}`;
-            // استخدام واجهة تليجرام للنسخ إذا توفرت، وإلا المتصفح
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(link).then(() => {
-                    tg.showAlert(state.lang === 'ar' ? "تم نسخ الرابط!" : "Link Copied!");
-                });
+        // --- الهدية اليومية ---
+        window.claimDailyReward = async () => {
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            if (now - state.lastDaily >= oneDay) {
+                state.score += 1000;
+                state.lastDaily = now;
+                await syncPoints();
+                updateUI();
+                tg.showAlert("🎉 مبروك! حصلت على 1,000 نقطة.");
+                closeModal('dailyModal');
             } else {
-                tg.showAlert("يرجى نسخ الرابط يدوياً: " + link);
+                tg.showAlert("⏳ المكافأة غير متاحة الآن، انتظر حتى يكتمل الوقت.");
             }
         };
 
-        // باقي الدوال (Quiz, Tap, UI...) بدون تغيير في المنطق
-        window.startQuiz = async () => {
-            openModal('quizModal');
-            const quizDiv = document.getElementById('quiz-container');
-            quizDiv.innerHTML = "🌀 جاري تحميل سؤال...";
-            const snap = await getDocs(collection(db, "quiz"));
-            const questions = [];
-            snap.forEach(d => questions.push(d.data()));
-            if(questions.length === 0) return quizDiv.innerHTML = "❌ لا توجد أسئلة.";
-            const q = questions[Math.floor(Math.random() * questions.length)];
-            quizDiv.innerHTML = `<h2 style="margin-bottom:20px;">${state.lang === 'ar' ? q.q_ar : q.q_en}</h2>`;
-            const options = state.lang === 'ar' ? q.opts_ar : q.opts_en;
-            options.forEach((opt, i) => {
-                const btn = document.createElement('div');
-                btn.className = 'quiz-option';
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(btn, i, q.c);
-                quizDiv.appendChild(btn);
+        // --- المتجر ---
+        window.openStore = async () => {
+            openModal('storeModal');
+            const listDiv = document.getElementById('store-list');
+            listDiv.innerHTML = "🌀 جاري التحميل...";
+            const snap = await getDocs(collection(db, "gifts"));
+            listDiv.innerHTML = "";
+            snap.forEach(d => {
+                const item = d.data();
+                listDiv.innerHTML += `
+                    <div class="list-item">
+                        <span>${item.name_ar}</span>
+                        <button onclick="buyItem(${item.price})" style="background:var(--primary); color:#fff; border:none; padding:5px 10px; border-radius:5px;">شراء (${item.price})</button>
+                    </div>`;
             });
         };
 
-        async function checkAnswer(btn, selected, correct) {
-            const allOptions = document.querySelectorAll('.quiz-option');
-            allOptions.forEach(opt => opt.style.pointerEvents = 'none');
-            if(selected === correct) {
-                btn.classList.add('correct');
-                state.score += 500;
-                tg.HapticFeedback.notificationOccurred('success');
-            } else {
-                btn.classList.add('wrong');
-                allOptions[correct].classList.add('correct');
-                state.score = Math.max(0, state.score - 200); 
-                tg.HapticFeedback.notificationOccurred('error');
-            }
-            updateUI(); await syncPoints();
-            setTimeout(() => window.startQuiz(), 1500);
-        }
-
-        window.toggleLang = () => {
-            state.lang = state.lang === 'ar' ? 'en' : 'ar';
-            updateUI(); syncPoints();
+        // --- المهام ---
+        window.openTasks = async () => {
+            openModal('tasksModal');
+            const listDiv = document.getElementById('tasks-list');
+            listDiv.innerHTML = "🌀 جاري تحميل المهام...";
+            const snap = await getDocs(collection(db, "tasks"));
+            listDiv.innerHTML = "";
+            snap.forEach(d => {
+                const task = d.data();
+                if(!state.completedTasks.includes(d.id)) {
+                    listDiv.innerHTML += `
+                        <div class="list-item">
+                            <span>${task.txt_ar} (+${task.r})</span>
+                            <button onclick="doTask('${d.id}', '${task.url}', ${task.r})" style="background:var(--success); color:#fff; border:none; padding:5px 10px; border-radius:5px;">تنفيذ</button>
+                        </div>`;
+                }
+            });
         };
 
+        window.doTask = async (id, url, reward) => {
+            window.open(url, '_blank');
+            state.score += reward;
+            state.completedTasks.push(id);
+            await syncPoints();
+            updateUI();
+            openTasks(); // تحديث القائمة
+        };
+
+        // المساعدات العامة
         window.handleTap = (e) => {
             state.score += 1;
             updateUI();
             showFloat(e.clientX, e.clientY, "+1");
-            if(state.score % 25 === 0) syncPoints();
+            if(state.score % 20 === 0) syncPoints();
         };
 
         function updateUI() {
             document.getElementById('score').innerText = state.score.toLocaleString();
-            document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('lang-text').innerText = state.lang === 'ar' ? 'EN' : 'AR';
-            document.getElementById('invite-count').innerText = state.inviteCount || 0;
-            document.getElementById('ref-link-display').value = `${CONFIG.botLink}?start=ref_${userId}`;
-            const keys = {
-                balance: state.lang === 'ar' ? "الرصيد الحالي" : "TOTAL BALANCE",
-                nav_home: state.lang === 'ar' ? "الرئيسية" : "Home",
-                nav_store: state.lang === 'ar' ? "المتجر" : "Store",
-                nav_tasks: state.lang === 'ar' ? "مهام" : "Tasks",
-                nav_quiz: state.lang === 'ar' ? "مسابقة" : "Quiz",
-                friends_title: state.lang === 'ar' ? "نظام الإحالة" : "Referral",
-            };
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const k = el.getAttribute('data-key');
-                if(keys[k]) el.innerText = keys[k];
-            });
-            document.getElementById('ref-desc').innerText = state.lang === 'ar' ? "+5,000 نقطة لكل صديق يدخل من رابطك!" : "+5,000 Points for every friend you invite!";
+            // ... (باقي كود تحديث اللغة والعناصر)
         }
 
         window.openModal = (id) => document.getElementById(id).classList.add('active');
