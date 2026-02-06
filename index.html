@@ -32,9 +32,6 @@
         }
 
         .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 10; }
-        
-        .lang-toggle { background: var(--primary); border: 1px solid var(--border); color: #fff; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-weight: 800; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-
         .score-container { text-align: center; margin-top: 20px; }
         .score-val { font-size: 3.2rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--primary); }
         .game-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; }
@@ -45,7 +42,13 @@
         .modal-overlay.active { display: flex; }
         .modal-content { background: #111; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 3px solid var(--primary); max-height: 85vh; overflow-y: auto; }
         
+        .quiz-option { width: 100%; padding: 15px; margin-bottom: 10px; background: var(--surface); border: 1px solid var(--border); color: #fff; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; text-align: center; }
+        .quiz-option.correct { background: var(--success) !important; border-color: #fff; }
+        .quiz-option.wrong { background: var(--danger) !important; border-color: #fff; }
+
         .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        .btn-main:disabled { background: #444; color: #888; cursor: not-allowed; }
+        
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(20,20,20,0.95); border-radius: 25px; display: flex; justify-content: space-around; padding: 12px; border: 1px solid var(--border); }
         .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #777; cursor: pointer; }
         .nav-btn.active { color: #fff; transform: translateY(-3px); }
@@ -55,6 +58,7 @@
         
         #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .list-item { background: var(--surface); padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        #timer-display { font-weight: bold; color: var(--secondary); margin-top: 10px; font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -99,9 +103,18 @@
             <h3 style="text-align:center">المكافأة اليومية</h3>
             <div style="background: var(--surface); padding: 20px; border-radius: 15px; text-align: center;">
                 <p>استلم 1,000 نقطة مجانية كل 24 ساعة!</p>
-                <button class="btn-main" onclick="claimDailyReward()">استلام الآن</button>
+                <div id="timer-display">00:00:00</div>
+                <button id="daily-claim-btn" class="btn-main" onclick="claimDailyReward()">استلام الآن</button>
             </div>
             <button class="btn-main" style="background:#222" onclick="closeModal('dailyModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="quizModal">
+        <div class="modal-content">
+            <h3 style="text-align:center" data-key="nav_quiz">المسابقة</h3>
+            <div id="quiz-container" style="text-align:center; padding: 20px 0;"></div>
+            <button class="btn-main" style="background:#222" onclick="closeModal('quizModal')">خروج</button>
         </div>
     </div>
 
@@ -121,14 +134,21 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="quizModal">...</div>
-    <div class="modal-overlay" id="friendsModal">...</div>
+    <div class="modal-overlay" id="friendsModal">
+        <div class="modal-content">
+            <h3 style="text-align:center">دعوة الأصدقاء</h3>
+            <div id="invite-box" style="text-align:center">
+                <p>شارك الرابط مع أصدقائك واربح 5000 نقطة!</p>
+                <button class="btn-main" onclick="copyRef()">نسخ رابط الإحالة</button>
+            </div>
+            <button class="btn-main" style="background:#222" onclick="closeModal('friendsModal')">إغلاق</button>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // CONFIG (نفس إعداداتك)
         const firebaseConfig = {
             apiKey: "AIzaSyACixZDVCNww716fRN_29xm2kCnFadkL64",
             authDomain: "tele-ea6e7.firebaseapp.com",
@@ -148,8 +168,10 @@
 
         window.onload = async () => {
             if(tg.initDataUnsafe?.user) userId = tg.initDataUnsafe.user.id.toString();
+            document.getElementById('user-display-name').innerText = tg.initDataUnsafe?.user?.first_name || "Player";
             await loadUserData();
             updateUI();
+            startTimerUpdate();
             document.getElementById('loader').style.display = 'none';
         };
 
@@ -164,78 +186,133 @@
             await setDoc(doc(db, "players", userId), state, {merge:true});
         }
 
-        // --- الهدية اليومية ---
+        // --- الهدية اليومية مع الوقت المتبقي ---
+        function startTimerUpdate() {
+            setInterval(() => {
+                const now = Date.now();
+                const timeLeft = (state.lastDaily + 24 * 60 * 60 * 1000) - now;
+                const btn = document.getElementById('daily-claim-btn');
+                const timerEl = document.getElementById('timer-display');
+
+                if (timeLeft <= 0) {
+                    timerEl.innerText = "جاهز للاستلام!";
+                    btn.disabled = false;
+                } else {
+                    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                    timerEl.innerText = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+                    btn.disabled = true;
+                }
+            }, 1000);
+        }
+
         window.claimDailyReward = async () => {
             const now = Date.now();
-            const oneDay = 24 * 60 * 60 * 1000;
-            if (now - state.lastDaily >= oneDay) {
+            if (now - state.lastDaily >= 24 * 60 * 60 * 1000) {
                 state.score += 1000;
                 state.lastDaily = now;
                 await syncPoints();
                 updateUI();
-                tg.showAlert("🎉 مبروك! حصلت على 1,000 نقطة.");
-                closeModal('dailyModal');
-            } else {
-                tg.showAlert("⏳ المكافأة غير متاحة الآن، انتظر حتى يكتمل الوقت.");
+                tg.showAlert("🎉 مبروك! استلمت 1,000 نقطة.");
             }
         };
 
-        // --- المتجر ---
+        // --- نظام المسابقة المصلح ---
+        window.startQuiz = async () => {
+            openModal('quizModal');
+            const quizDiv = document.getElementById('quiz-container');
+            quizDiv.innerHTML = "🌀 جاري تحميل سؤال...";
+            
+            try {
+                const snap = await getDocs(collection(db, "quiz"));
+                const questions = [];
+                snap.forEach(d => questions.push(d.data()));
+                
+                if(questions.length === 0) {
+                    quizDiv.innerHTML = "❌ لا توجد أسئلة حالياً.";
+                    return;
+                }
+
+                const q = questions[Math.floor(Math.random() * questions.length)];
+                quizDiv.innerHTML = `<h2 style="margin-bottom:20px;">${state.lang === 'ar' ? q.q_ar : q.q_en}</h2>`;
+                
+                const opts = state.lang === 'ar' ? q.opts_ar : q.opts_en;
+                opts.forEach((opt, i) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'quiz-option';
+                    btn.innerText = opt;
+                    btn.onclick = () => checkAnswer(btn, i, q.c);
+                    quizDiv.appendChild(btn);
+                });
+            } catch(e) {
+                quizDiv.innerHTML = "خطأ في الاتصال بالقاعدة.";
+            }
+        };
+
+        async function checkAnswer(btn, selected, correct) {
+            const allOptions = document.querySelectorAll('.quiz-option');
+            allOptions.forEach(opt => opt.style.pointerEvents = 'none');
+
+            if(selected === correct) {
+                btn.classList.add('correct');
+                state.score += 500;
+                tg.HapticFeedback.notificationOccurred('success');
+            } else {
+                btn.classList.add('wrong');
+                allOptions[correct].classList.add('correct');
+                state.score = Math.max(0, state.score - 200); 
+                tg.HapticFeedback.notificationOccurred('error');
+            }
+            
+            updateUI();
+            await syncPoints();
+            setTimeout(() => window.startQuiz(), 1500);
+        }
+
+        // --- المتجر والمهام ---
         window.openStore = async () => {
             openModal('storeModal');
             const listDiv = document.getElementById('store-list');
-            listDiv.innerHTML = "🌀 جاري التحميل...";
+            listDiv.innerHTML = "جاري التحميل...";
             const snap = await getDocs(collection(db, "gifts"));
             listDiv.innerHTML = "";
             snap.forEach(d => {
                 const item = d.data();
-                listDiv.innerHTML += `
-                    <div class="list-item">
-                        <span>${item.name_ar}</span>
-                        <button onclick="buyItem(${item.price})" style="background:var(--primary); color:#fff; border:none; padding:5px 10px; border-radius:5px;">شراء (${item.price})</button>
-                    </div>`;
+                listDiv.innerHTML += `<div class="list-item"><span>${item.name_ar}</span><b>${item.price} P</b></div>`;
             });
         };
 
-        // --- المهام ---
         window.openTasks = async () => {
             openModal('tasksModal');
             const listDiv = document.getElementById('tasks-list');
-            listDiv.innerHTML = "🌀 جاري تحميل المهام...";
+            listDiv.innerHTML = "جاري التحميل...";
             const snap = await getDocs(collection(db, "tasks"));
             listDiv.innerHTML = "";
             snap.forEach(d => {
-                const task = d.data();
+                const t = d.data();
                 if(!state.completedTasks.includes(d.id)) {
-                    listDiv.innerHTML += `
-                        <div class="list-item">
-                            <span>${task.txt_ar} (+${task.r})</span>
-                            <button onclick="doTask('${d.id}', '${task.url}', ${task.r})" style="background:var(--success); color:#fff; border:none; padding:5px 10px; border-radius:5px;">تنفيذ</button>
-                        </div>`;
+                    listDiv.innerHTML += `<div class="list-item"><span>${t.txt_ar}</span><button onclick="doTask('${d.id}','${t.url}',${t.r})">تنفيذ</button></div>`;
                 }
             });
         };
 
-        window.doTask = async (id, url, reward) => {
+        window.doTask = async (id, url, r) => {
             window.open(url, '_blank');
-            state.score += reward;
+            state.score += r;
             state.completedTasks.push(id);
-            await syncPoints();
-            updateUI();
-            openTasks(); // تحديث القائمة
+            await syncPoints(); updateUI(); openTasks();
         };
 
-        // المساعدات العامة
         window.handleTap = (e) => {
             state.score += 1;
             updateUI();
             showFloat(e.clientX, e.clientY, "+1");
-            if(state.score % 20 === 0) syncPoints();
+            if(state.score % 25 === 0) syncPoints();
         };
 
         function updateUI() {
             document.getElementById('score').innerText = state.score.toLocaleString();
-            // ... (باقي كود تحديث اللغة والعناصر)
         }
 
         window.openModal = (id) => document.getElementById(id).classList.add('active');
