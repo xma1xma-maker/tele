@@ -53,6 +53,8 @@
         .quiz-option.wrong { background: var(--danger) !important; border-color: #fff; }
 
         .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 152, 234, 0.3); }
+        .btn-main:disabled { background: #444; cursor: not-allowed; box-shadow: none; }
+
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(20,20,20,0.95); border-radius: 25px; display: flex; justify-content: space-around; padding: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #777; cursor: pointer; transition: 0.2s; }
         .nav-btn.active { color: #fff; transform: translateY(-3px); }
@@ -62,10 +64,10 @@
         
         #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         
-        /* New Styles for inputs and rewards */
         .input-field { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #222; color: #fff; margin: 10px 0; font-family: 'Cairo'; }
         .daily-box { background: var(--surface); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid var(--primary); }
         .list-item { background: var(--surface); padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .timer-text { font-size: 0.8rem; color: var(--secondary); margin-top: 5px; display: block; }
     </style>
 </head>
 <body>
@@ -77,8 +79,8 @@
 
     <div class="header">
         <div class="lang-toggle" onclick="toggleLang()">
-            <span id="lang-icon">🇺🇸</span>
-            <span id="lang-text">EN</span>
+            <span id="lang-icon">🇮🇶</span>
+            <span id="lang-text">AR</span>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
              <button onclick="openModal('dailyModal')" style="background: gold; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer;">🎁</button>
@@ -102,13 +104,15 @@
         <div class="nav-btn active" onclick="closeAllModals()">🏠 <span data-key="nav_home">Home</span></div>
         <div class="nav-btn" onclick="openStore()">🛍️ <span data-key="nav_store">Store</span></div>
         <div class="nav-btn" onclick="openTasks()">📋 <span data-key="nav_tasks">Tasks</span></div>
-        <div class="nav-btn" onclick="startQuiz()">🧠 <span data-key="nav_quiz">Quiz</span></div>
+        <div class="nav-btn" onclick="openQuizModal()">🧠 <span data-key="nav_quiz">Quiz</span></div>
     </div>
 
     <div class="modal-overlay" id="quizModal">
         <div class="modal-content">
             <h3 style="text-align:center" data-key="nav_quiz">Quiz Challenge</h3>
+            <div id="quiz-cooldown-timer" style="text-align:center; margin-bottom:10px;"></div>
             <div id="quiz-container" style="text-align:center; padding: 20px 0;"></div>
+            <button id="quiz-start-btn" class="btn-main" onclick="startQuiz()">Start Quiz</button>
             <button class="btn-main" style="background:#222" onclick="closeModal('quizModal')">Exit</button>
         </div>
     </div>
@@ -145,17 +149,9 @@
             <div class="daily-box">
                 <p id="daily-text">Claim 1,000 Points Today!</p>
                 <button id="daily-claim-btn" class="btn-main" onclick="claimDailyReward()">Claim Now</button>
+                <span id="daily-timer" class="timer-text"></span>
             </div>
             <button class="btn-main" style="background:#222" onclick="closeModal('dailyModal')">Close</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="friendsModal">
-        <div class="modal-content" style="text-align:center">
-            <h3 data-key="friends_title">Invite & Earn</h3>
-            <p style="color:#888; font-size:0.9rem;">+5,000 Points per friend!</p>
-            <input type="text" class="inp" id="ref-link-display" readonly style="width:100%; padding:15px; background:#1a1a1a; border:1px solid #333; color:var(--primary); border-radius:12px; margin: 15px 0; text-align:center;">
-            <button class="btn-main" onclick="copyRef()">Copy Link</button>
         </div>
     </div>
 
@@ -180,7 +176,8 @@
 
         const CONFIG = { adminUsername: "SS34SS4", botLink: "https://t.me/tofe109tofebot" };
         let userId = "mustafa_user";
-        let state = { score: 0, lang: 'ar', completedTasks: [], lastDaily: 0 };
+        // إضافة مؤقتات افتراضية في الـ state
+        let state = { score: 0, lang: 'ar', completedTasks: [], lastDaily: 0, lastQuiz: 0 };
         let currentOrderData = null;
 
         window.onload = async () => {
@@ -190,6 +187,7 @@
             await loadUserData();
             updateUI();
             checkReferral();
+            startGlobalTimers(); // تشغيل عداد الوقت العالمي
             document.getElementById('loader').style.display = 'none';
         };
 
@@ -204,6 +202,48 @@
             await setDoc(doc(db, "players", userId), state, {merge:true});
         }
 
+        // --- Timers Logic ---
+        function startGlobalTimers() {
+            setInterval(() => {
+                updateTimersDisplay();
+            }, 1000);
+        }
+
+        function updateTimersDisplay() {
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            const quizWait = 1 * 60 * 60 * 1000; // وقت الانتظار للأسئلة: ساعة واحدة
+
+            // Daily Timer
+            const dailyDiff = oneDay - (now - state.lastDaily);
+            const dailyTimerEl = document.getElementById('daily-timer');
+            if(dailyDiff > 0) {
+                dailyTimerEl.innerText = formatTime(dailyDiff);
+            } else {
+                dailyTimerEl.innerText = "";
+            }
+
+            // Quiz Timer
+            const quizDiff = quizWait - (now - state.lastQuiz);
+            const quizStartBtn = document.getElementById('quiz-start-btn');
+            const quizCooldownEl = document.getElementById('quiz-cooldown-timer');
+            
+            if(quizDiff > 0) {
+                quizStartBtn.style.display = "none";
+                quizCooldownEl.innerText = (state.lang === 'ar' ? "انتظر لإعادة الاختبار: " : "Wait to retry: ") + formatTime(quizDiff);
+            } else {
+                quizStartBtn.style.display = "block";
+                quizCooldownEl.innerText = "";
+            }
+        }
+
+        function formatTime(ms) {
+            const h = Math.floor(ms / 3600000);
+            const m = Math.floor((ms % 3600000) / 60000);
+            const s = Math.floor((ms % 60000) / 1000);
+            return `${h}h ${m}m ${s}s`;
+        }
+
         // --- Daily Rewards ---
         window.claimDailyReward = async () => {
             const now = Date.now();
@@ -216,11 +256,11 @@
                 tg.showAlert(state.lang === 'ar' ? "تم استلام المكافأة اليومية! +1000" : "Daily reward claimed! +1000");
                 closeModal('dailyModal');
             } else {
-                tg.showAlert(state.lang === 'ar' ? "لقد استلمت المكافأة بالفعل، عد غداً!" : "Already claimed, come back tomorrow!");
+                tg.showAlert(state.lang === 'ar' ? "لقد استلمت المكافأة بالفعل، عد لاحقاً!" : "Already claimed, come back later!");
             }
         };
 
-        // --- Store System Update ---
+        // --- Store System ---
         window.openStore = async () => {
             document.getElementById('storeModal').classList.add('active');
             const listDiv = document.getElementById('store-items-list');
@@ -261,21 +301,28 @@
             tg.showAlert(state.lang === 'ar' ? "تم إرسال طلبك بنجاح!" : "Order placed successfully!");
         };
 
-        // --- Quiz Challenge Fixed ---
+        // --- Quiz Challenge ---
+        window.openQuizModal = () => {
+            document.getElementById('quiz-container').innerHTML = "";
+            openModal('quizModal');
+            updateTimersDisplay();
+        };
+
         window.startQuiz = async () => {
-            document.getElementById('quizModal').classList.add('active');
             const quizDiv = document.getElementById('quiz-container');
+            document.getElementById('quiz-start-btn').style.display = "none";
             quizDiv.innerHTML = "🌀 Loading...";
 
             const snap = await getDocs(collection(db, "quiz"));
             const questions = [];
-            snap.forEach(d => questions.push(d.data()));
+            snap.forEach(d => questions.push({id: d.id, ...d.data()}));
             
             if(questions.length === 0) {
-                quizDiv.innerHTML = `<h3 style="color:red">${state.lang === 'ar' ? "لقد انتهت الأسئلة!" : "Questions Finished!"}</h3>`;
+                quizDiv.innerHTML = `<h3 style="color:red">${state.lang === 'ar' ? "لا يوجد أسئلة حالياً!" : "No questions available!"}</h3>`;
                 return;
             }
 
+            // اختيار سؤال عشوائي
             const q = questions[Math.floor(Math.random() * questions.length)];
             const qTxt = state.lang === 'ar' ? q.q_ar : q.q_en;
             const opts = state.lang === 'ar' ? q.opts_ar : q.opts_en;
@@ -301,16 +348,19 @@
             } else {
                 btn.classList.add('wrong');
                 allOptions[correct].classList.add('correct');
-                state.score = Math.max(0, state.score - 200);
+                state.score = Math.max(0, state.score - 200); // خصم نقاط عند الخطأ
                 tg.HapticFeedback.notificationOccurred('error');
             }
 
+            // تسجيل وقت انتهاء الاختبار لتفعيل المؤقت
+            state.lastQuiz = Date.now();
             updateUI();
             await syncPoints();
 
             setTimeout(() => {
-                window.startQuiz();
-            }, 1200);
+                document.getElementById('quiz-container').innerHTML = `<p style="color:var(--success)">${state.lang === 'ar' ? "انتهى الاختبار! انتظر ساعة للإعادة" : "Quiz Finished! Wait 1h to retry"}</p>`;
+                updateTimersDisplay();
+            }, 1500);
         };
 
         // --- Tasks System ---
@@ -320,11 +370,18 @@
             listDiv.innerHTML = "🌀 Loading...";
             const snap = await getDocs(collection(db, "tasks"));
             listDiv.innerHTML = "";
+            
+            let hasTasks = false;
             snap.forEach(dSnap => {
                 const t = dSnap.data();
                 if(state.completedTasks.includes(dSnap.id)) return;
+                hasTasks = true;
                 listDiv.innerHTML += `<div class="list-item"><span>${state.lang === 'ar' ? t.txt_ar : t.txt_en} (+${t.r})</span><button onclick="doTask('${dSnap.id}', '${t.url}', ${t.r})" style="background:var(--primary); color:#fff; border:none; padding:8px 15px; border-radius:10px;">GO</button></div>`;
             });
+
+            if(!hasTasks) {
+                listDiv.innerHTML = `<div style="text-align:center; padding:20px; color:var(--secondary); font-weight:bold;">${state.lang === 'ar' ? "انتظر أسئلة قادمة" : "Wait for upcoming questions"}</div>`;
+            }
         };
 
         window.doTask = async (id, url, reward) => {
@@ -336,7 +393,66 @@
             window.openTasks();
         };
 
-        // --- Referral ---
+        // --- Core Functions ---
+        window.handleTap = (e) => {
+            state.score += 1;
+            updateUI();
+            showFloat(e.clientX, e.clientY, "+1");
+            if(state.score % 15 === 0) syncPoints();
+        };
+
+        window.toggleLang = () => {
+            state.lang = state.lang === 'ar' ? 'en' : 'ar';
+            updateUI();
+            syncPoints();
+        };
+
+        function updateUI() {
+            document.getElementById('score').innerText = state.score.toLocaleString();
+            document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+            
+            // تحديث أيقونات اللغة
+            document.getElementById('lang-text').innerText = state.lang === 'ar' ? 'AR' : 'EN';
+            document.getElementById('lang-icon').innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
+
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const k = el.getAttribute('data-key');
+                const translations = {
+                    balance: state.lang === 'ar' ? "الرصيد الحالي" : "CURRENT BALANCE",
+                    nav_home: state.lang === 'ar' ? "الرئيسية" : "Home",
+                    nav_store: state.lang === 'ar' ? "المتجر" : "Store",
+                    nav_tasks: state.lang === 'ar' ? "المهام" : "Tasks",
+                    nav_quiz: state.lang === 'ar' ? "المسابقة" : "Quiz"
+                };
+                if(translations[k]) el.innerText = translations[k];
+            });
+            
+            // Daily Reward Button UI
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            const dailyBtn = document.getElementById('daily-claim-btn');
+            if (dailyBtn) {
+                if (now - state.lastDaily < oneDay) {
+                    dailyBtn.innerText = state.lang === 'ar' ? "انتظر الموعد" : "Wait for Time";
+                    dailyBtn.disabled = true;
+                } else {
+                    dailyBtn.innerText = state.lang === 'ar' ? "استلم الآن" : "Claim Now";
+                    dailyBtn.disabled = false;
+                    dailyBtn.style.background = "var(--primary)";
+                }
+            }
+        }
+
+        window.openModal = (id) => document.getElementById(id).classList.add('active');
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+        window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        
+        function showFloat(x,y,t){
+            const e = document.createElement('div'); e.className='float-num'; e.style.left=x+'px'; e.style.top=y+'px'; e.innerText=t; document.body.appendChild(e);
+            setTimeout(()=>e.remove(), 700);
+        }
+
+        // Referral logic remains the same
         async function checkReferral() {
             const param = tg.initDataUnsafe?.start_param;
             if(param && param.startsWith('ref_') && !state.referred) {
@@ -350,69 +466,6 @@
                     tg.showAlert("Referral Bonus: +1000!");
                 }
             }
-        }
-
-        window.copyRef = () => {
-            const link = `${CONFIG.botLink}?start=ref_${userId}`;
-            navigator.clipboard.writeText(link);
-            tg.showAlert("Link Copied!");
-        };
-
-        // --- Core ---
-        window.handleTap = (e) => {
-            state.score += 1;
-            updateUI();
-            showFloat(e.clientX, e.clientY, "+1");
-            if(state.score % 15 === 0) syncPoints();
-        };
-
-        window.toggleLang = () => {
-            state.lang = state.lang === 'ar' ? 'en' : 'ar';
-            document.getElementById('lang-text').innerText = state.lang === 'ar' ? 'AR' : 'EN';
-            document.getElementById('lang-icon').innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
-            updateUI();
-            syncPoints();
-        };
-
-        function updateUI() {
-            document.getElementById('score').innerText = state.score.toLocaleString();
-            document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const k = el.getAttribute('data-key');
-                const translations = {
-                    balance: state.lang === 'ar' ? "الرصيد الحالي" : "CURRENT BALANCE",
-                    nav_home: state.lang === 'ar' ? "الرئيسية" : "Home",
-                    nav_store: state.lang === 'ar' ? "المتجر" : "Store",
-                    nav_tasks: state.lang === 'ar' ? "المهام" : "Tasks",
-                    nav_quiz: state.lang === 'ar' ? "المسابقة" : "Quiz",
-                    friends_title: state.lang === 'ar' ? "دعوة الأصدقاء" : "Invite Friends"
-                };
-                if(translations[k]) el.innerText = translations[k];
-            });
-            
-            // Update daily reward button state
-            const now = Date.now();
-            const oneDay = 24 * 60 * 60 * 1000;
-            const dailyBtn = document.getElementById('daily-claim-btn');
-            if (dailyBtn) {
-                if (now - state.lastDaily < oneDay) {
-                    dailyBtn.innerText = state.lang === 'ar' ? "عد غداً" : "Come Back Tomorrow";
-                    dailyBtn.style.background = "#444";
-                } else {
-                    dailyBtn.innerText = state.lang === 'ar' ? "استلم الآن" : "Claim Now";
-                    dailyBtn.style.background = "var(--primary)";
-                }
-            }
-            document.getElementById('ref-link-display').value = `${CONFIG.botLink}?start=ref_${userId}`;
-        }
-
-        window.openModal = (id) => document.getElementById(id).classList.add('active');
-        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-        window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-        
-        function showFloat(x,y,t){
-            const e = document.createElement('div'); e.className='float-num'; e.style.left=x+'px'; e.style.top=y+'px'; e.innerText=t; document.body.appendChild(e);
-            setTimeout(()=>e.remove(), 700);
         }
     </script>
 </body>
