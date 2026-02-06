@@ -134,14 +134,6 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="storeModal">
-        <div class="modal-content">
-            <h3 style="text-align:center" data-key="nav_store">المتجر</h3>
-            <div id="store-items-list"></div>
-            <button class="btn-main" style="background:#222" onclick="closeModal('storeModal')">إغلاق</button>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -169,8 +161,12 @@
             document.getElementById('user-display-name').innerText = tg.initDataUnsafe?.user?.first_name || "Mustafa";
 
             await loadUserData();
-            await processReferral(); 
-            updateUI();
+            // تأخير بسيط لضمان تحميل المعطيات من تليجرام بشكل كامل
+            setTimeout(async () => {
+                await processReferral();
+                updateUI();
+            }, 1000);
+            
             document.getElementById('loader').style.display = 'none';
         };
 
@@ -187,7 +183,8 @@
 
         async function processReferral() {
             const urlParams = new URLSearchParams(window.location.search);
-            const startParam = tg.initDataUnsafe?.start_param || urlParams.get('tgWebAppStartParam');
+            // محاولة جلب الكود من تليجرام مباشرة أو من الرابط
+            const startParam = tg.initDataUnsafe?.start_param || urlParams.get('tgWebAppStartParam') || urlParams.get('start');
             
             if (startParam && startParam.startsWith('ref_') && !state.referredBy) {
                 const referrerId = startParam.replace('ref_', '');
@@ -198,18 +195,17 @@
                         const referrerSnap = await getDoc(referrerRef);
 
                         if (referrerSnap.exists()) {
-                            // إضافة مكافأة للداعي في قاعدة البيانات مباشرة
+                            // إضافة مكافأة للداعي
                             await updateDoc(referrerRef, {
                                 score: increment(5000),
                                 inviteCount: increment(1)
                             });
                             
-                            // تسجيل أن المستخدم الحالي تمت إحالته لمنع التكرار
+                            // تسجيل الإحالة للمستخدم الجديد وإضافة مكافأة له
                             state.referredBy = referrerId;
                             state.score += 1000; 
                             await syncPoints();
                             tg.showAlert("✅ تمت الإحالة! حصلت أنت وصديقك على مكافأة.");
-                            updateUI();
                         }
                     } catch (e) {
                         console.error("Referral Error:", e);
@@ -220,11 +216,17 @@
 
         window.copyRef = () => {
             const link = `${CONFIG.botLink}?start=ref_${userId}`;
-            navigator.clipboard.writeText(link).then(() => {
-                tg.showAlert(state.lang === 'ar' ? "تم نسخ الرابط!" : "Link Copied!");
-            });
+            // استخدام واجهة تليجرام للنسخ إذا توفرت، وإلا المتصفح
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(link).then(() => {
+                    tg.showAlert(state.lang === 'ar' ? "تم نسخ الرابط!" : "Link Copied!");
+                });
+            } else {
+                tg.showAlert("يرجى نسخ الرابط يدوياً: " + link);
+            }
         };
 
+        // باقي الدوال (Quiz, Tap, UI...) بدون تغيير في المنطق
         window.startQuiz = async () => {
             openModal('quizModal');
             const quizDiv = document.getElementById('quiz-container');
