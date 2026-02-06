@@ -16,6 +16,7 @@
             --text-main: #ffffff;
             --success: #2ecc71;
             --danger: #e74c3c;
+            --energy-color: #ffeb3b;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
@@ -41,25 +42,29 @@
         .score-container { text-align: center; margin-top: 20px; }
         .score-val { font-size: 3.2rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--primary); }
         .game-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .coin { width: 230px; height: 230px; border-radius: 50%; border: 10px solid rgba(255,255,255,0.1); box-shadow: 0 0 60px rgba(0, 152, 234, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe); margin-bottom: 25px; }
-        .coin:active { transform: scale(0.95); }
+        .coin { width: 230px; height: 230px; border-radius: 50%; border: 10px solid rgba(255,255,255,0.1); box-shadow: 0 0 60px rgba(0, 152, 234, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe); margin-bottom: 20px; }
+        .coin:active { transform: scale(0.9); }
+        .coin.disabled { filter: grayscale(1); opacity: 0.7; cursor: not-allowed; }
 
         /* --- Energy UI --- */
-        .energy-wrapper { width: 70%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .energy-container { width: 100%; background: rgba(255,255,255,0.1); height: 12px; border-radius: 10px; border: 1px solid var(--border); overflow: hidden; }
-        .energy-bar { height: 100%; background: linear-gradient(90deg, #f39c12, #f1c40f); width: 100%; transition: width 0.3s; }
-        .energy-text { font-size: 0.9rem; color: #aaa; font-weight: bold; }
+        .energy-container { width: 80%; max-width: 300px; text-align: center; }
+        .energy-bar-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+        .energy-bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #f39c12, #ffeb3b); transition: width 0.3s ease; }
+        .energy-text { font-size: 0.9rem; margin-top: 5px; font-weight: bold; color: var(--energy-color); display: flex; align-items: center; justify-content: center; gap: 5px; }
 
         /* --- Modals --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: flex-end; backdrop-filter: blur(8px); }
         .modal-overlay.active { display: flex; }
         .modal-content { background: #111; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 3px solid var(--primary); max-height: 85vh; overflow-y: auto; }
         
-        /* --- Buttons --- */
+        /* --- Quiz UI --- */
+        .quiz-option { width: 100%; padding: 15px; margin-bottom: 10px; background: var(--surface); border: 1px solid var(--border); color: #fff; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; text-align: center; }
+        .quiz-option.correct { background: var(--success) !important; border-color: #fff; }
+        .quiz-option.wrong { background: var(--danger) !important; border-color: #fff; }
+
         .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 152, 234, 0.3); }
         .btn-main:disabled { background: #444; cursor: not-allowed; box-shadow: none; }
 
-        /* --- Nav Bar --- */
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(20,20,20,0.95); border-radius: 25px; display: flex; justify-content: space-around; padding: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #777; cursor: pointer; transition: 0.2s; }
         .nav-btn.active { color: #fff; transform: translateY(-3px); }
@@ -69,8 +74,10 @@
         
         #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         
+        .input-field { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #222; color: #fff; margin: 10px 0; font-family: 'Cairo'; }
         .daily-box { background: var(--surface); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid var(--primary); }
         .list-item { background: var(--surface); padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .timer-text { font-size: 0.8rem; color: var(--secondary); margin-top: 5px; display: block; }
     </style>
 </head>
 <body>
@@ -105,11 +112,13 @@
             <svg viewBox="0 0 24 24" width="110" fill="white"><path d="M12 22L1.5 8 12 2l10.5 6L12 22zm0-2.5l8-10-8-5.5-8 5.5 8 10z"/></svg>
         </div>
 
-        <div class="energy-wrapper">
-            <div class="energy-container">
-                <div id="energy-bar" class="energy-bar"></div>
+        <div class="energy-container">
+            <div class="energy-text">
+                ⚡ <span id="energy-val">1000</span> / <span id="max-energy-val">1000</span>
             </div>
-            <div class="energy-text">⚡ <span id="energy-val">1000</span> / 1000</div>
+            <div class="energy-bar-bg">
+                <div class="energy-bar-fill" id="energy-bar"></div>
+            </div>
         </div>
     </div>
 
@@ -120,84 +129,305 @@
         <div class="nav-btn" onclick="openQuizModal()">🧠 <span data-key="nav_quiz">Quiz</span></div>
     </div>
 
-    <div class="modal-overlay" id="quizModal"><div class="modal-content"><h3 style="text-align:center" data-key="nav_quiz">Quiz</h3><div id="quiz-cooldown-timer"></div><div id="quiz-container" style="text-align:center; padding: 20px 0;"></div><button id="quiz-start-btn" class="btn-main" onclick="startQuiz()">Start Quiz</button><button class="btn-main" style="background:#222" onclick="closeModal('quizModal')">Exit</button></div></div>
-    <div class="modal-overlay" id="storeModal"><div class="modal-content"><h3 style="text-align:center" data-key="nav_store">Store</h3><div id="store-items-list"></div><button class="btn-main" style="background:#222" onclick="closeModal('storeModal')">Close</button></div></div>
-    <div class="modal-overlay" id="tasksModal"><div class="modal-content"><h3 style="text-align:center" data-key="nav_tasks">Tasks</h3><div id="tasks-list"></div><button class="btn-main" style="background:#222" onclick="closeModal('tasksModal')">Close</button></div></div>
-    <div class="modal-overlay" id="dailyModal"><div class="modal-content"><h3 style="text-align:center">Daily Reward</h3><div class="daily-box"><p id="daily-text">Claim 1,000 Points!</p><button id="daily-claim-btn" class="btn-main" onclick="claimDailyReward()">Claim Now</button><span id="daily-timer" style="font-size:0.8rem; color:var(--secondary);"></span></div><button class="btn-main" style="background:#222" onclick="closeModal('dailyModal')">Close</button></div></div>
+    <div class="modal-overlay" id="quizModal">
+        <div class="modal-content">
+            <h3 style="text-align:center" data-key="nav_quiz">Quiz Challenge</h3>
+            <div id="quiz-cooldown-timer" style="text-align:center; margin-bottom:10px;"></div>
+            <div id="quiz-container" style="text-align:center; padding: 20px 0;"></div>
+            <button id="quiz-start-btn" class="btn-main" onclick="startQuiz()">Start Quiz</button>
+            <button class="btn-main" style="background:#222" onclick="closeModal('quizModal')">Exit</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="storeModal">
+        <div class="modal-content">
+            <h3 style="text-align:center" data-key="nav_store">Store</h3>
+            <div id="store-items-list"></div>
+            <button class="btn-main" style="background:#222" onclick="closeModal('storeModal')">Close</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal-content">
+            <h3 style="text-align:center" id="order-title">Request Item</h3>
+            <div id="order-details" style="text-align: center; margin-bottom: 15px; color: #aaa;"></div>
+            <input type="text" id="order-input" class="input-field" placeholder="Username / Account Link">
+            <button class="btn-main" onclick="confirmOrder()">Confirm Request</button>
+            <button class="btn-main" style="background:#222" onclick="closeModal('orderModal')">Cancel</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="tasksModal">
+        <div class="modal-content">
+            <h3 style="text-align:center" data-key="nav_tasks">Tasks</h3>
+            <div id="tasks-list"></div>
+            <button class="btn-main" style="background:#222" onclick="closeModal('tasksModal')">Close</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="dailyModal">
+        <div class="modal-content">
+            <h3 style="text-align:center">Daily Reward</h3>
+            <div class="daily-box">
+                <p id="daily-text">Claim 1,000 Points Today!</p>
+                <button id="daily-claim-btn" class="btn-main" onclick="claimDailyReward()">Claim Now</button>
+                <span id="daily-timer" class="timer-text"></span>
+            </div>
+            <button class="btn-main" style="background:#222" onclick="closeModal('dailyModal')">Close</button>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyACixZDVCNww716fRN_29xm2kCnFadkL64", authDomain: "tele-ea6e7.firebaseapp.com", projectId: "tele-ea6e7", storageBucket: "tele-ea6e7.firebasestorage.app", messagingSenderId: "693110799024", appId: "1:693110799024:web:4dd4057eef17b9ed3e1975", measurementId: "G-902LN1FW97" };
+        const firebaseConfig = {
+            apiKey: "AIzaSyACixZDVCNww716fRN_29xm2kCnFadkL64",
+            authDomain: "tele-ea6e7.firebaseapp.com",
+            projectId: "tele-ea6e7",
+            storageBucket: "tele-ea6e7.firebasestorage.app",
+            messagingSenderId: "693110799024",
+            appId: "1:693110799024:web:4dd4057eef17b9ed3e1975",
+            measurementId: "G-902LN1FW97"
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        const CONFIG = { adminUsername: "SS34SS4", botLink: "https://t.me/tofe109tofebot" };
         let userId = "mustafa_user";
-        // Added energy to state
-        let state = { score: 0, lang: 'ar', completedTasks: [], lastDaily: 0, lastQuiz: 0, isMuted: false, energy: 1000, maxEnergy: 1000 };
+        
+        // تعديل الحالة لتشمل الطاقة
+        let state = { 
+            score: 0, 
+            lang: 'ar', 
+            completedTasks: [], 
+            lastDaily: 0, 
+            lastQuiz: 0, 
+            isMuted: false,
+            energy: 1000,
+            maxEnergy: 1000,
+            lastEnergySync: Date.now()
+        };
+
+        let currentOrderData = null;
 
         const sfx = {
             tap: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'),
-            correct: new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3'),
-            wrong: new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3')
+            correct: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'),
+            wrong: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3')
         };
 
-        function playSound(name) { if (!state.isMuted) { sfx[name].currentTime = 0; sfx[name].play().catch(() => {}); } }
+        function playSound(name) {
+            if (!state.isMuted) {
+                sfx[name].currentTime = 0;
+                sfx[name].play().catch(() => {});
+            }
+        }
 
         window.onload = async () => {
             if(tg.initDataUnsafe?.user) userId = tg.initDataUnsafe.user.id.toString();
+            document.getElementById('user-display-name').innerText = tg.initDataUnsafe?.user?.first_name || "Mustafa";
+
             await loadUserData();
             updateUI();
+            checkReferral();
             startGlobalTimers();
-            startEnergyRecovery(); // Start Energy Recovery Cycle
+            startEnergyRegen(); // بدء تجديد الطاقة
             document.getElementById('loader').style.display = 'none';
         };
 
         async function loadUserData() {
             const docRef = doc(db, "players", userId);
             const snap = await getDoc(docRef);
-            if(snap.exists()) state = {...state, ...snap.data()};
+            if(snap.exists()) {
+                const data = snap.data();
+                // حساب استعادة الطاقة أثناء غياب المستخدم
+                const offlineTime = (Date.now() - (data.lastEnergySync || Date.now())) / 1000;
+                const recovered = Math.floor(offlineTime * 1.5); // استعادة 1.5 طاقة كل ثانية
+                state = {...state, ...data};
+                state.energy = Math.min(state.maxEnergy, (state.energy || 0) + recovered);
+            }
             else await setDoc(docRef, state);
         }
 
-        async function syncPoints() { await setDoc(doc(db, "players", userId), state, {merge:true}); }
+        async function syncPoints() {
+            state.lastEnergySync = Date.now();
+            await setDoc(doc(db, "players", userId), state, {merge:true});
+        }
 
-        // --- Energy Recovery Cycle ---
-        function startEnergyRecovery() {
+        // --- نظام تجديد الطاقة التلقائي ---
+        function startEnergyRegen() {
             setInterval(() => {
                 if (state.energy < state.maxEnergy) {
                     state.energy = Math.min(state.maxEnergy, state.energy + 1);
                     updateEnergyUI();
                 }
-            }, 1000); // 1 point per second
+            }, 1000); // زيادة 1 طاقة كل ثانية
         }
 
         function updateEnergyUI() {
-            const percentage = (state.energy / state.maxEnergy) * 100;
-            document.getElementById('energy-bar').style.width = percentage + '%';
-            document.getElementById('energy-val').innerText = state.energy;
+            const energyFill = document.getElementById('energy-bar');
+            const energyVal = document.getElementById('energy-val');
+            const pct = (state.energy / state.maxEnergy) * 100;
+            energyFill.style.width = pct + "%";
+            energyVal.innerText = state.energy;
+            
+            const coin = document.getElementById('main-coin');
+            if(state.energy <= 0) coin.classList.add('disabled');
+            else coin.classList.remove('disabled');
         }
 
-        // --- Core Tap Logic ---
-        window.handleTap = (e) => {
-            if (state.energy <= 0) {
-                tg.HapticFeedback.notificationOccurred('error');
-                return;
+        function startGlobalTimers() {
+            setInterval(() => {
+                updateTimersDisplay();
+            }, 1000);
+        }
+
+        function updateTimersDisplay() {
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            const quizWait = 1 * 60 * 60 * 1000;
+
+            const dailyDiff = oneDay - (now - state.lastDaily);
+            const dailyTimerEl = document.getElementById('daily-timer');
+            if(dailyDiff > 0) { dailyTimerEl.innerText = formatTime(dailyDiff); } 
+            else { dailyTimerEl.innerText = ""; }
+
+            const quizDiff = quizWait - (now - state.lastQuiz);
+            const quizStartBtn = document.getElementById('quiz-start-btn');
+            const quizCooldownEl = document.getElementById('quiz-cooldown-timer');
+            
+            if(quizDiff > 0) {
+                quizStartBtn.style.display = "none";
+                quizCooldownEl.innerText = (state.lang === 'ar' ? "انتظر لإعادة الاختبار: " : "Wait to retry: ") + formatTime(quizDiff);
+            } else {
+                quizStartBtn.style.display = "block";
+                quizCooldownEl.innerText = "";
             }
-            state.score += 1;
-            state.energy -= 1;
-            playSound('tap');
-            tg.HapticFeedback.impactOccurred('light');
-            updateUI();
-            updateEnergyUI();
-            showFloat(e.clientX, e.clientY, "+1");
-            if(state.score % 20 === 0) syncPoints();
+        }
+
+        function formatTime(ms) {
+            const h = Math.floor(ms / 3600000);
+            const m = Math.floor((ms % 3600000) / 60000);
+            const s = Math.floor((ms % 60000) / 1000);
+            return `${h}h ${m}m ${s}s`;
+        }
+
+        // --- Daily Rewards ---
+        window.claimDailyReward = async () => {
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            if (now - state.lastDaily >= oneDay) {
+                state.score += 1000;
+                state.lastDaily = now;
+                playSound('correct');
+                await syncPoints();
+                updateUI();
+                tg.showAlert(state.lang === 'ar' ? "تم استلام المكافأة اليومية! +1000" : "Daily reward claimed! +1000");
+                closeModal('dailyModal');
+            } else {
+                tg.showAlert(state.lang === 'ar' ? "لقد استلمت المكافأة بالفعل!" : "Already claimed!");
+            }
         };
 
-        // --- Tasks System with Confirmation ---
+        // --- Store System ---
+        window.openStore = async () => {
+            document.getElementById('storeModal').classList.add('active');
+            const listDiv = document.getElementById('store-items-list');
+            listDiv.innerHTML = "🌀 Loading...";
+            const snap = await getDocs(collection(db, "gifts"));
+            listDiv.innerHTML = "";
+            snap.forEach(doc => {
+                const item = doc.data();
+                const itemName = state.lang === 'ar' ? item.name_ar : item.name_en;
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span>${item.icon || '🎁'} ${itemName}</span> <b style="color:var(--secondary)">${item.price} P</b>`;
+                div.onclick = () => window.requestOrder(itemName, item.price);
+                listDiv.appendChild(div);
+            });
+        };
+
+        window.requestOrder = (name, price) => {
+            if (state.score < price) return tg.showAlert(state.lang === 'ar' ? "نقاط غير كافية!" : "Insufficient points!");
+            currentOrderData = { name, price };
+            document.getElementById('order-title').innerText = name;
+            document.getElementById('order-details').innerText = state.lang === 'ar' ? `السعر: ${price} نقطة` : `Price: ${price} Points`;
+            document.getElementById('order-input').placeholder = state.lang === 'ar' ? "معرف الحساب / الرابط" : "Username / Link";
+            openModal('orderModal');
+        };
+
+        window.confirmOrder = async () => {
+            const info = document.getElementById('order-input').value;
+            if (!info || info.length < 3) return tg.showAlert(state.lang === 'ar' ? "يرجى كتابة المعلومات!" : "Please provide details!");
+            state.score -= currentOrderData.price;
+            updateUI();
+            await syncPoints();
+            const msg = `🚨 طلب جديد: ${currentOrderData.name}\n👤 المستخدم: ${userId}\n🔗 الحساب: ${info}`;
+            tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
+            closeAllModals();
+            tg.showAlert(state.lang === 'ar' ? "تم إرسال طلبك بنجاح!" : "Order placed successfully!");
+        };
+
+        // --- Quiz Challenge ---
+        window.openQuizModal = () => {
+            document.getElementById('quiz-container').innerHTML = "";
+            openModal('quizModal');
+            updateTimersDisplay();
+        };
+
+        window.startQuiz = async () => {
+            const quizDiv = document.getElementById('quiz-container');
+            document.getElementById('quiz-start-btn').style.display = "none";
+            quizDiv.innerHTML = "🌀 Loading...";
+            const snap = await getDocs(collection(db, "quiz"));
+            const questions = [];
+            snap.forEach(d => questions.push({id: d.id, ...d.data()}));
+            if(questions.length === 0) {
+                quizDiv.innerHTML = `<h3 style="color:red">${state.lang === 'ar' ? "لا يوجد أسئلة حالياً!" : "No questions available!"}</h3>`;
+                return;
+            }
+            const q = questions[Math.floor(Math.random() * questions.length)];
+            const qTxt = state.lang === 'ar' ? q.q_ar : q.q_en;
+            const opts = state.lang === 'ar' ? q.opts_ar : q.opts_en;
+            quizDiv.innerHTML = `<h2 style="margin-bottom:20px;">${qTxt}</h2>`;
+            opts.forEach((opt, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-option';
+                btn.innerText = opt;
+                btn.onclick = () => window.checkAnswer(btn, i, q.c);
+                quizDiv.appendChild(btn);
+            });
+        };
+
+        window.checkAnswer = async (btn, selected, correct) => {
+            const allOptions = document.querySelectorAll('.quiz-option');
+            allOptions.forEach(opt => opt.style.pointerEvents = 'none');
+            if(selected === correct) {
+                btn.classList.add('correct');
+                state.score += 500;
+                playSound('correct');
+                tg.HapticFeedback.notificationOccurred('success');
+            } else {
+                btn.classList.add('wrong');
+                allOptions[correct].classList.add('correct');
+                state.score = Math.max(0, state.score - 200); 
+                playSound('wrong');
+                tg.HapticFeedback.notificationOccurred('error');
+            }
+            state.lastQuiz = Date.now();
+            updateUI();
+            await syncPoints();
+            setTimeout(() => {
+                document.getElementById('quiz-container').innerHTML = `<p style="color:var(--success)">${state.lang === 'ar' ? "انتهى الاختبار! انتظر ساعة للإعادة" : "Quiz Finished! Wait 1h to retry"}</p>`;
+                updateTimersDisplay();
+            }, 1500);
+        };
+
+        // --- Tasks System ---
         window.openTasks = async () => {
             document.getElementById('tasksModal').classList.add('active');
             const listDiv = document.getElementById('tasks-list');
@@ -211,52 +441,116 @@
                 hasTasks = true;
                 listDiv.innerHTML += `<div class="list-item"><span>${state.lang === 'ar' ? t.txt_ar : t.txt_en} (+${t.r})</span><button onclick="doTask('${dSnap.id}', '${t.url}', ${t.r})" style="background:var(--primary); color:#fff; border:none; padding:8px 15px; border-radius:10px;">GO</button></div>`;
             });
-            if(!hasTasks) listDiv.innerHTML = `<div style="text-align:center; padding:20px; color:var(--secondary); font-weight:bold;">${state.lang === 'ar' ? "انتظر المهام القادمة" : "Wait for tasks"}</div>`;
+            if(!hasTasks) {
+                listDiv.innerHTML = `<div style="text-align:center; padding:20px; color:var(--secondary); font-weight:bold;">${state.lang === 'ar' ? "انتظر المهام القادمة" : "Wait for upcoming tasks"}</div>`;
+            }
         };
 
         window.doTask = async (id, url, reward) => {
             window.open(url, '_blank');
-            tg.showConfirm(state.lang === 'ar' ? "هل قمت بالاشتراك فعلاً؟" : "Did you join?", async (c) => {
-                if(c) {
+            tg.showConfirm(state.lang === 'ar' ? "هل قمت بالاشتراك فعلاً؟" : "Did you actually join?", async (confirmed) => {
+                if(confirmed) {
                     state.score += reward;
                     state.completedTasks.push(id);
-                    updateUI(); await syncPoints();
+                    updateUI(); 
+                    await syncPoints();
                     playSound('correct');
+                    tg.showAlert(state.lang === 'ar' ? "تمت إضافة المكافأة!" : "Reward added!");
                     window.openTasks();
                 }
             });
         };
 
-        // --- Other Systems (UI, Lang, Mute) ---
-        window.toggleLang = () => { state.lang = state.lang === 'ar' ? 'en' : 'ar'; updateUI(); syncPoints(); };
-        window.toggleMute = () => { state.isMuted = !state.isMuted; document.getElementById('mute-btn').innerText = state.isMuted ? '🔇' : '🔊'; syncPoints(); };
-        
+        // --- Core Functions (تعديل النقر ليستهلك طاقة) ---
+        window.handleTap = (e) => {
+            if(state.energy <= 0) {
+                tg.HapticFeedback.notificationOccurred('warning');
+                return;
+            }
+
+            state.score += 1;
+            state.energy -= 1; // استهلاك 1 طاقة لكل نقرة
+            
+            playSound('tap');
+            updateUI();
+            updateEnergyUI();
+            showFloat(e.clientX, e.clientY, "+1");
+            
+            if(state.score % 15 === 0) syncPoints();
+        };
+
+        window.toggleLang = () => {
+            state.lang = state.lang === 'ar' ? 'en' : 'ar';
+            updateUI();
+            syncPoints();
+        };
+
+        window.toggleMute = () => {
+            state.isMuted = !state.isMuted;
+            document.getElementById('mute-btn').innerText = state.isMuted ? '🔇' : '🔊';
+            syncPoints();
+        };
+
         function updateUI() {
             document.getElementById('score').innerText = state.score.toLocaleString();
             document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
             document.getElementById('lang-text').innerText = state.lang === 'ar' ? 'AR' : 'EN';
             document.getElementById('lang-icon').innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
-            document.getElementById('user-display-name').innerText = tg.initDataUnsafe?.user?.first_name || "Mustafa";
+            document.getElementById('mute-btn').innerText = state.isMuted ? '🔇' : '🔊';
+            
+            document.getElementById('max-energy-val').innerText = state.maxEnergy;
             updateEnergyUI();
 
             document.querySelectorAll('[data-key]').forEach(el => {
                 const k = el.getAttribute('data-key');
-                const translations = { balance: state.lang === 'ar' ? "الرصيد الحالي" : "BALANCE", nav_home: state.lang === 'ar' ? "الرئيسية" : "Home", nav_store: state.lang === 'ar' ? "المتجر" : "Store", nav_tasks: state.lang === 'ar' ? "المهام" : "Tasks", nav_quiz: state.lang === 'ar' ? "المسابقة" : "Quiz" };
+                const translations = {
+                    balance: state.lang === 'ar' ? "الرصيد الحالي" : "CURRENT BALANCE",
+                    nav_home: state.lang === 'ar' ? "الرئيسية" : "Home",
+                    nav_store: state.lang === 'ar' ? "المتجر" : "Store",
+                    nav_tasks: state.lang === 'ar' ? "المهام" : "Tasks",
+                    nav_quiz: state.lang === 'ar' ? "المسابقة" : "Quiz"
+                };
                 if(translations[k]) el.innerText = translations[k];
             });
+            
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            const dailyBtn = document.getElementById('daily-claim-btn');
+            if (dailyBtn) {
+                if (now - state.lastDaily < oneDay) {
+                    dailyBtn.innerText = state.lang === 'ar' ? "انتظر الموعد" : "Wait for Time";
+                    dailyBtn.disabled = true;
+                } else {
+                    dailyBtn.innerText = state.lang === 'ar' ? "استلم الآن" : "Claim Now";
+                    dailyBtn.disabled = false;
+                    dailyBtn.style.background = "var(--primary)";
+                }
+            }
         }
 
         window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
         window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-        function showFloat(x,y,t){ const e = document.createElement('div'); e.className='float-num'; e.style.left=x+'px'; e.style.top=y+'px'; e.innerText=t; document.body.appendChild(e); setTimeout(()=>e.remove(), 700); }
-        function startGlobalTimers() { setInterval(() => { /* Timer Sync Logic */ }, 1000); }
         
-        // --- Shared Window Functions ---
-        window.openQuizModal = () => openModal('quizModal');
-        window.openStore = () => openModal('storeModal');
-        window.claimDailyReward = () => { /* Daily Reward Logic */ };
-        window.startQuiz = () => { /* Quiz Logic */ };
+        function showFloat(x,y,t){
+            const e = document.createElement('div'); e.className='float-num'; e.style.left=x+'px'; e.style.top=y+'px'; e.innerText=t; document.body.appendChild(e);
+            setTimeout(()=>e.remove(), 700);
+        }
+
+        async function checkReferral() {
+            const param = tg.initDataUnsafe?.start_param;
+            if(param && param.startsWith('ref_') && !state.referred) {
+                const referrerId = param.split('_')[1];
+                if(referrerId !== userId) {
+                    const refRef = doc(db, "players", referrerId);
+                    await updateDoc(refRef, { score: increment(5000) });
+                    state.score += 1000;
+                    state.referred = true;
+                    await syncPoints();
+                    tg.showAlert("Referral Bonus: +1000!");
+                }
+            }
+        }
     </script>
 </body>
 </html>
