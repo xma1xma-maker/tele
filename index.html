@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clicker Pro V6.2 - Mustafa Alaa</title>
+    <title>Clicker Pro V6.3 - Mustafa Alaa</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -52,7 +52,7 @@
         .quiz-option.correct { background: var(--success) !important; border-color: #fff; }
         .quiz-option.wrong { background: var(--danger) !important; border-color: #fff; }
 
-        .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 152, 234, 0.3); }
+        .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; color: #fff; border-radius: 14px; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 152, 234, 0.3); }
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(20,20,20,0.95); border-radius: 25px; display: flex; justify-content: space-around; padding: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #777; cursor: pointer; transition: 0.2s; }
         .nav-btn.active { color: #fff; transform: translateY(-3px); }
@@ -65,13 +65,15 @@
         .input-field { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #222; color: #fff; margin: 10px 0; font-family: 'Cairo'; text-align: center; }
         .daily-box { background: var(--surface); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid var(--primary); }
         .list-item { background: var(--surface); padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .referral-stat { background: rgba(0, 152, 234, 0.1); border: 1px dashed var(--primary); padding: 10px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; color: var(--primary); }
     </style>
 </head>
 <body>
 
     <div id="loader">
         <div style="width: 50px; height: 50px; border: 5px solid #222; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear;"></div>
-        <h3 style="margin-top:20px; color: #fff;">Clicker Pro V6.2</h3>
+        <h3 style="margin-top:20px; color: #fff;">Clicker Pro V6.3</h3>
     </div>
 
     <div class="header">
@@ -89,6 +91,25 @@
     <div class="score-container">
         <div class="score-val" id="score">0</div>
         <div style="color:#666; font-size:0.8rem; letter-spacing: 1px;" data-key="balance">الرصيد الحالي</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 20px;">
+        <div class="list-item" style="flex-direction:column; cursor:pointer" onclick="openModal('friendsModal')">
+            <span>👥</span>
+            <span style="font-size:0.7rem">أصدقاء</span>
+        </div>
+        <div class="list-item" style="flex-direction:column; cursor:pointer" onclick="openStore()">
+            <span>🛍️</span>
+            <span style="font-size:0.7rem">متجر</span>
+        </div>
+        <div class="list-item" style="flex-direction:column; cursor:pointer" onclick="openTasks()">
+            <span>📋</span>
+            <span style="font-size:0.7rem">مهام</span>
+        </div>
+        <div class="list-item" style="flex-direction:column; cursor:pointer" onclick="startQuiz()">
+            <span>🧠</span>
+            <span style="font-size:0.7rem">مسابقة</span>
+        </div>
     </div>
 
     <div class="game-area" id="game-area">
@@ -152,9 +173,13 @@
     <div class="modal-overlay" id="friendsModal">
         <div class="modal-content" style="text-align:center">
             <h3 data-key="friends_title">دعوة الأصدقاء</h3>
-            <p style="color:#888; font-size:0.9rem;">+5,000 نقطة لكل صديق يدخل من رابطك!</p>
+            <div class="referral-stat">
+                🤝 عدد الأصدقاء الذين دعوتهم: <span id="invite-count">0</span>
+            </div>
+            <p style="color:#888; font-size:0.9rem;">🎁 +5,000 نقطة لك و +1,000 لصديقك!</p>
             <input type="text" class="inp" id="ref-link-display" readonly style="width:100%; padding:15px; background:#1a1a1a; border:1px solid #333; color:var(--primary); border-radius:12px; margin: 15px 0; text-align:center;">
-            <button class="btn-main" onclick="copyRef()">نسخ الرابط</button>
+            <button class="btn-main" onclick="copyRef()">نسخ رابط الدعوة</button>
+            <button class="btn-main" style="background:#222" onclick="closeModal('friendsModal')">إغلاق</button>
         </div>
     </div>
 
@@ -179,7 +204,8 @@
 
         const CONFIG = { adminUsername: "SS34SS4", botLink: "https://t.me/tofe109tofebot" };
         let userId = "mustafa_user";
-        let state = { score: 0, lang: 'ar', completedTasks: [], lastDaily: 0, referredBy: null };
+        // إضافة inviteCount لتتبع الإحالات
+        let state = { score: 0, lang: 'ar', completedTasks: [], lastDaily: 0, referredBy: null, inviteCount: 0 };
         let currentOrderData = null;
 
         window.onload = async () => {
@@ -203,7 +229,7 @@
             await setDoc(doc(db, "players", userId), state, {merge:true});
         }
 
-        // --- نظام الإحالة ---
+        // --- نظام الإحالة (التحقق من الرابط) ---
         async function checkReferral() {
             const param = tg.initDataUnsafe?.start_param;
             if(param && param.startsWith('ref_') && !state.referredBy) {
@@ -211,11 +237,17 @@
                 if(referrerId !== userId) {
                     try {
                         const refRef = doc(db, "players", referrerId);
-                        await updateDoc(refRef, { score: increment(5000) });
+                        // 1. زيادة نقاط الداعي وزيادة عداد إحالاته
+                        await updateDoc(refRef, { 
+                            score: increment(5000),
+                            inviteCount: increment(1)
+                        });
+
+                        // 2. تحديث بيانات المدعو
                         state.score += 1000;
                         state.referredBy = referrerId;
                         await syncPoints();
-                        tg.showAlert(state.lang === 'ar' ? "تم قبول الإحالة! +1000 نقطة" : "Referral accepted! +1000 Points");
+                        tg.showAlert(state.lang === 'ar' ? "تم قبول الإحالة! حصلت على 1000 نقطة." : "Referral accepted! +1000 Points.");
                     } catch(e) { console.error("Ref Error", e); }
                 }
             }
@@ -230,18 +262,18 @@
                 state.lastDaily = now;
                 await syncPoints();
                 updateUI();
-                tg.showAlert(state.lang === 'ar' ? "تم استلام المكافأة! +1000" : "Reward claimed! +1000");
+                tg.showAlert(state.lang === 'ar' ? "تم استلام المكافأة اليومية! +1000" : "Daily reward claimed! +1000");
                 closeModal('dailyModal');
             } else {
                 tg.showAlert(state.lang === 'ar' ? "عد غداً للمطالبة!" : "Come back tomorrow!");
             }
         };
 
-        // --- المتجر (مع مدخلات المستخدم) ---
+        // --- المتجر ---
         window.openStore = async () => {
             document.getElementById('storeModal').classList.add('active');
             const listDiv = document.getElementById('store-items-list');
-            listDiv.innerHTML = "🌀 Loading...";
+            listDiv.innerHTML = "🌀 جاري التحميل...";
             const snap = await getDocs(collection(db, "gifts"));
             listDiv.innerHTML = "";
             snap.forEach(doc => {
@@ -266,15 +298,13 @@
         window.confirmOrder = async () => {
             const info = document.getElementById('order-input').value;
             if (!info || info.length < 3) return tg.showAlert(state.lang === 'ar' ? "أدخل الرابط!" : "Enter link!");
-            
             state.score -= currentOrderData.price;
             updateUI();
             await syncPoints();
-
             const msg = `🚨 طلب جديد: ${currentOrderData.name}\n👤 المستخدم: ${userId}\n🔗 الحساب: ${info}`;
             tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
             closeAllModals();
-            tg.showAlert(state.lang === 'ar' ? "تم الإرسال!" : "Sent!");
+            tg.showAlert("تم الإرسال!");
         };
 
         // --- المسابقة ---
@@ -282,22 +312,16 @@
             document.getElementById('quizModal').classList.add('active');
             const quizDiv = document.getElementById('quiz-container');
             quizDiv.innerHTML = "🌀 Loading...";
-
             const snap = await getDocs(collection(db, "quiz"));
             const questions = [];
             snap.forEach(d => questions.push(d.data()));
-            
             if(questions.length === 0) {
                 quizDiv.innerHTML = `<h3 style="color:#e74c3c">${state.lang === 'ar' ? "لقد انتهت الأسئلة!" : "No more questions!"}</h3>`;
                 return;
             }
-
             const q = questions[Math.floor(Math.random() * questions.length)];
-            const qTxt = state.lang === 'ar' ? q.q_ar : q.q_en;
-            const opts = state.lang === 'ar' ? q.opts_ar : q.opts_en;
-
-            quizDiv.innerHTML = `<h2 style="margin-bottom:20px;">${qTxt}</h2>`;
-            opts.forEach((opt, i) => {
+            quizDiv.innerHTML = `<h2 style="margin-bottom:20px;">${state.lang === 'ar' ? q.q_ar : q.q_en}</h2>`;
+            (state.lang === 'ar' ? q.opts_ar : q.opts_en).forEach((opt, i) => {
                 const btn = document.createElement('div');
                 btn.className = 'quiz-option';
                 btn.innerText = opt;
@@ -309,7 +333,6 @@
         window.checkAnswer = async (btn, selected, correct) => {
             const allOptions = document.querySelectorAll('.quiz-option');
             allOptions.forEach(opt => opt.style.pointerEvents = 'none');
-
             if(selected === correct) {
                 btn.classList.add('correct');
                 state.score += 500;
@@ -320,7 +343,6 @@
                 state.score = Math.max(0, state.score - 200);
                 tg.HapticFeedback.notificationOccurred('error');
             }
-
             updateUI();
             await syncPoints();
             setTimeout(() => { window.startQuiz(); }, 1500);
@@ -345,14 +367,14 @@
             state.score += reward;
             state.completedTasks.push(id);
             updateUI(); await syncPoints();
-            tg.showAlert("Done!");
             window.openTasks();
         };
 
+        // نسخ رابط الإحالة
         window.copyRef = () => {
             const link = `${CONFIG.botLink}?start=ref_${userId}`;
             navigator.clipboard.writeText(link);
-            tg.showAlert(state.lang === 'ar' ? "تم النسخ!" : "Copied!");
+            tg.showAlert(state.lang === 'ar' ? "تم نسخ الرابط! أرسله لأصدقائك." : "Link Copied!");
         };
 
         window.handleTap = (e) => {
@@ -373,6 +395,7 @@
             document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
             document.getElementById('lang-icon').innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
             document.getElementById('lang-text').innerText = state.lang === 'ar' ? 'AR' : 'EN';
+            document.getElementById('invite-count').innerText = state.inviteCount || 0;
             
             document.querySelectorAll('[data-key]').forEach(el => {
                 const k = el.getAttribute('data-key');
@@ -381,8 +404,7 @@
                     nav_home: state.lang === 'ar' ? "الرئيسية" : "Home",
                     nav_store: state.lang === 'ar' ? "المتجر" : "Store",
                     nav_tasks: state.lang === 'ar' ? "المهام" : "Tasks",
-                    nav_quiz: state.lang === 'ar' ? "المسابقة" : "Quiz",
-                    friends_title: state.lang === 'ar' ? "دعوة الأصدقاء" : "Invite Friends"
+                    nav_quiz: state.lang === 'ar' ? "المسابقة" : "Quiz"
                 };
                 if(translations[k]) el.innerText = translations[k];
             });
