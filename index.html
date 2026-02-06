@@ -52,7 +52,7 @@
         .quiz-option.correct { background: var(--success) !important; border-color: #fff; }
         .quiz-option.wrong { background: var(--danger) !important; border-color: #fff; }
 
-        .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; color: #fff; border-radius: 14px; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 152, 234, 0.3); }
+        .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; color: #fff; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 152, 234, 0.3); }
         .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(20,20,20,0.95); border-radius: 25px; display: flex; justify-content: space-around; padding: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #777; cursor: pointer; transition: 0.2s; }
         .nav-btn.active { color: #fff; transform: translateY(-3px); }
@@ -61,6 +61,11 @@
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
         
         #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        
+        /* New Styles for inputs and rewards */
+        .input-field { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #222; color: #fff; margin: 10px 0; font-family: 'Cairo'; }
+        .daily-box { background: var(--surface); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid var(--primary); }
+        .list-item { background: var(--surface); padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -75,7 +80,10 @@
             <span id="lang-icon">🇺🇸</span>
             <span id="lang-text">EN</span>
         </div>
-        <span id="rank-name" style="font-weight:bold; color:var(--secondary); font-size: 0.9rem;">🥉 Bronze</span>
+        <div style="display: flex; gap: 10px; align-items: center;">
+             <button onclick="openModal('dailyModal')" style="background: gold; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer;">🎁</button>
+             <span id="rank-name" style="font-weight:bold; color:var(--secondary); font-size: 0.9rem;">🥉 Bronze</span>
+        </div>
         <div id="user-display-name" style="font-weight:bold; font-size:0.8rem">Player</div>
     </div>
 
@@ -100,8 +108,7 @@
     <div class="modal-overlay" id="quizModal">
         <div class="modal-content">
             <h3 style="text-align:center" data-key="nav_quiz">Quiz Challenge</h3>
-            <div id="quiz-container" style="text-align:center; padding: 20px 0;">
-                </div>
+            <div id="quiz-container" style="text-align:center; padding: 20px 0;"></div>
             <button class="btn-main" style="background:#222" onclick="closeModal('quizModal')">Exit</button>
         </div>
     </div>
@@ -114,11 +121,32 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal-content">
+            <h3 style="text-align:center" id="order-title">Request Item</h3>
+            <div id="order-details" style="text-align: center; margin-bottom: 15px; color: #aaa;"></div>
+            <input type="text" id="order-input" class="input-field" placeholder="Username / Account Link">
+            <button class="btn-main" onclick="confirmOrder()">Confirm Request</button>
+            <button class="btn-main" style="background:#222" onclick="closeModal('orderModal')">Cancel</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="tasksModal">
         <div class="modal-content">
             <h3 style="text-align:center" data-key="nav_tasks">Tasks</h3>
             <div id="tasks-list"></div>
             <button class="btn-main" style="background:#222" onclick="closeModal('tasksModal')">Close</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="dailyModal">
+        <div class="modal-content">
+            <h3 style="text-align:center">Daily Reward</h3>
+            <div class="daily-box">
+                <p id="daily-text">Claim 1,000 Points Today!</p>
+                <button id="daily-claim-btn" class="btn-main" onclick="claimDailyReward()">Claim Now</button>
+            </div>
+            <button class="btn-main" style="background:#222" onclick="closeModal('dailyModal')">Close</button>
         </div>
     </div>
 
@@ -152,7 +180,8 @@
 
         const CONFIG = { adminUsername: "SS34SS4", botLink: "https://t.me/tofe109tofebot" };
         let userId = "mustafa_user";
-        let state = { score: 0, lang: 'ar', completedTasks: [] };
+        let state = { score: 0, lang: 'ar', completedTasks: [], lastDaily: 0 };
+        let currentOrderData = null;
 
         window.onload = async () => {
             if(tg.initDataUnsafe?.user) userId = tg.initDataUnsafe.user.id.toString();
@@ -175,18 +204,75 @@
             await setDoc(doc(db, "players", userId), state, {merge:true});
         }
 
-        // --- نظام المسابقة الجديد (التفاعلي) ---
+        // --- Daily Rewards ---
+        window.claimDailyReward = async () => {
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            if (now - state.lastDaily >= oneDay) {
+                state.score += 1000;
+                state.lastDaily = now;
+                await syncPoints();
+                updateUI();
+                tg.showAlert(state.lang === 'ar' ? "تم استلام المكافأة اليومية! +1000" : "Daily reward claimed! +1000");
+                closeModal('dailyModal');
+            } else {
+                tg.showAlert(state.lang === 'ar' ? "لقد استلمت المكافأة بالفعل، عد غداً!" : "Already claimed, come back tomorrow!");
+            }
+        };
+
+        // --- Store System Update ---
+        window.openStore = async () => {
+            document.getElementById('storeModal').classList.add('active');
+            const listDiv = document.getElementById('store-items-list');
+            listDiv.innerHTML = "🌀 Loading...";
+            const snap = await getDocs(collection(db, "gifts"));
+            listDiv.innerHTML = "";
+            snap.forEach(doc => {
+                const item = doc.data();
+                const itemName = state.lang === 'ar' ? item.name_ar : item.name_en;
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span>${item.icon || '🎁'} ${itemName}</span> <b style="color:var(--secondary)">${item.price} P</b>`;
+                div.onclick = () => window.requestOrder(itemName, item.price);
+                listDiv.appendChild(div);
+            });
+        };
+
+        window.requestOrder = (name, price) => {
+            if (state.score < price) return tg.showAlert(state.lang === 'ar' ? "نقاط غير كافية!" : "Insufficient points!");
+            currentOrderData = { name, price };
+            document.getElementById('order-title').innerText = name;
+            document.getElementById('order-details').innerText = state.lang === 'ar' ? `السعر: ${price} نقطة` : `Price: ${price} Points`;
+            document.getElementById('order-input').placeholder = state.lang === 'ar' ? "معرف الحساب / الرابط" : "Username / Link";
+            openModal('orderModal');
+        };
+
+        window.confirmOrder = async () => {
+            const info = document.getElementById('order-input').value;
+            if (!info || info.length < 3) return tg.showAlert(state.lang === 'ar' ? "يرجى كتابة المعلومات!" : "Please provide details!");
+            
+            state.score -= currentOrderData.price;
+            updateUI();
+            await syncPoints();
+
+            const msg = `🚨 طلب جديد: ${currentOrderData.name}\n👤 المستخدم: ${userId}\n🔗 الحساب: ${info}`;
+            tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
+            closeAllModals();
+            tg.showAlert(state.lang === 'ar' ? "تم إرسال طلبك بنجاح!" : "Order placed successfully!");
+        };
+
+        // --- Quiz Challenge Fixed ---
         window.startQuiz = async () => {
             document.getElementById('quizModal').classList.add('active');
             const quizDiv = document.getElementById('quiz-container');
-            quizDiv.innerHTML = "🌀 Loading Question...";
+            quizDiv.innerHTML = "🌀 Loading...";
 
             const snap = await getDocs(collection(db, "quiz"));
             const questions = [];
             snap.forEach(d => questions.push(d.data()));
             
             if(questions.length === 0) {
-                quizDiv.innerHTML = "No questions available.";
+                quizDiv.innerHTML = `<h3 style="color:red">${state.lang === 'ar' ? "لقد انتهت الأسئلة!" : "Questions Finished!"}</h3>`;
                 return;
             }
 
@@ -206,7 +292,7 @@
 
         window.checkAnswer = async (btn, selected, correct) => {
             const allOptions = document.querySelectorAll('.quiz-option');
-            allOptions.forEach(opt => opt.style.pointerEvents = 'none'); // منع الضغط المكرر
+            allOptions.forEach(opt => opt.style.pointerEvents = 'none');
 
             if(selected === correct) {
                 btn.classList.add('correct');
@@ -215,36 +301,19 @@
             } else {
                 btn.classList.add('wrong');
                 allOptions[correct].classList.add('correct');
-                state.score = Math.max(0, state.score - 200); // خصم 200 نقطة
+                state.score = Math.max(0, state.score - 200);
                 tg.HapticFeedback.notificationOccurred('error');
             }
 
             updateUI();
             await syncPoints();
 
-            // الانتقال التلقائي بعد ثانية واحدة
             setTimeout(() => {
                 window.startQuiz();
             }, 1200);
         };
 
-        // --- المتجر والمهام (جلب من فايربيس) ---
-        window.openStore = async () => {
-            document.getElementById('storeModal').classList.add('active');
-            const listDiv = document.getElementById('store-items-list');
-            listDiv.innerHTML = "🌀 Loading...";
-            const snap = await getDocs(collection(db, "gifts"));
-            listDiv.innerHTML = "";
-            snap.forEach(doc => {
-                const item = doc.data();
-                listDiv.innerHTML += `
-                    <div class="list-item" onclick="processOrder('${state.lang === 'ar' ? item.name_ar : item.name_en}', ${item.price})">
-                        <span>${item.icon || '🎁'} ${state.lang === 'ar' ? item.name_ar : item.name_en}</span>
-                        <b style="color:var(--secondary)">${item.price} P</b>
-                    </div>`;
-            });
-        };
-
+        // --- Tasks System ---
         window.openTasks = async () => {
             document.getElementById('tasksModal').classList.add('active');
             const listDiv = document.getElementById('tasks-list');
@@ -254,11 +323,7 @@
             snap.forEach(dSnap => {
                 const t = dSnap.data();
                 if(state.completedTasks.includes(dSnap.id)) return;
-                listDiv.innerHTML += `
-                    <div class="list-item">
-                        <span>${state.lang === 'ar' ? t.txt_ar : t.txt_en} (+${t.r})</span>
-                        <button onclick="doTask('${dSnap.id}', '${t.url}', ${t.r})" style="background:var(--primary); color:#fff; border:none; padding:8px 15px; border-radius:10px;">GO</button>
-                    </div>`;
+                listDiv.innerHTML += `<div class="list-item"><span>${state.lang === 'ar' ? t.txt_ar : t.txt_en} (+${t.r})</span><button onclick="doTask('${dSnap.id}', '${t.url}', ${t.r})" style="background:var(--primary); color:#fff; border:none; padding:8px 15px; border-radius:10px;">GO</button></div>`;
             });
         };
 
@@ -267,11 +332,11 @@
             state.score += reward;
             state.completedTasks.push(id);
             updateUI(); await syncPoints();
-            tg.showAlert("Task Completed! Points added.");
+            tg.showAlert("Done!");
             window.openTasks();
         };
 
-        // --- الإحالة (Referral) ---
+        // --- Referral ---
         async function checkReferral() {
             const param = tg.initDataUnsafe?.start_param;
             if(param && param.startsWith('ref_') && !state.referred) {
@@ -282,7 +347,7 @@
                     state.score += 1000;
                     state.referred = true;
                     await syncPoints();
-                    tg.showAlert("Referral Bonus: +1000 Points!");
+                    tg.showAlert("Referral Bonus: +1000!");
                 }
             }
         }
@@ -290,23 +355,21 @@
         window.copyRef = () => {
             const link = `${CONFIG.botLink}?start=ref_${userId}`;
             navigator.clipboard.writeText(link);
-            tg.showAlert("Link Copied! Send it to your friends.");
+            tg.showAlert("Link Copied!");
         };
 
-        // --- الأساسيات ---
+        // --- Core ---
         window.handleTap = (e) => {
             state.score += 1;
             updateUI();
             showFloat(e.clientX, e.clientY, "+1");
-            if(state.score % 10 === 0) syncPoints(); // حفظ كل 10 ضغطات
+            if(state.score % 15 === 0) syncPoints();
         };
 
         window.toggleLang = () => {
             state.lang = state.lang === 'ar' ? 'en' : 'ar';
-            const btnText = document.getElementById('lang-text');
-            const btnIcon = document.getElementById('lang-icon');
-            btnText.innerText = state.lang === 'ar' ? 'AR' : 'EN';
-            btnIcon.innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
+            document.getElementById('lang-text').innerText = state.lang === 'ar' ? 'AR' : 'EN';
+            document.getElementById('lang-icon').innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
             updateUI();
             syncPoints();
         };
@@ -321,13 +384,29 @@
                     nav_home: state.lang === 'ar' ? "الرئيسية" : "Home",
                     nav_store: state.lang === 'ar' ? "المتجر" : "Store",
                     nav_tasks: state.lang === 'ar' ? "المهام" : "Tasks",
-                    nav_quiz: state.lang === 'ar' ? "المسابقة" : "Quiz"
+                    nav_quiz: state.lang === 'ar' ? "المسابقة" : "Quiz",
+                    friends_title: state.lang === 'ar' ? "دعوة الأصدقاء" : "Invite Friends"
                 };
                 if(translations[k]) el.innerText = translations[k];
             });
+            
+            // Update daily reward button state
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            const dailyBtn = document.getElementById('daily-claim-btn');
+            if (dailyBtn) {
+                if (now - state.lastDaily < oneDay) {
+                    dailyBtn.innerText = state.lang === 'ar' ? "عد غداً" : "Come Back Tomorrow";
+                    dailyBtn.style.background = "#444";
+                } else {
+                    dailyBtn.innerText = state.lang === 'ar' ? "استلم الآن" : "Claim Now";
+                    dailyBtn.style.background = "var(--primary)";
+                }
+            }
             document.getElementById('ref-link-display').value = `${CONFIG.botLink}?start=ref_${userId}`;
         }
 
+        window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
         window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
         
@@ -335,14 +414,6 @@
             const e = document.createElement('div'); e.className='float-num'; e.style.left=x+'px'; e.style.top=y+'px'; e.innerText=t; document.body.appendChild(e);
             setTimeout(()=>e.remove(), 700);
         }
-
-        window.processOrder = async (name, price) => {
-            if(state.score < price) return tg.showAlert("Insufficient points!");
-            state.score -= price;
-            updateUI(); await syncPoints();
-            const msg = `🚨 Order: ${name}\nUser: ${userId}`;
-            tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
-        };
     </script>
 </body>
 </html>
