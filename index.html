@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Clicker Pro V6 - Mustafa Alaa</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
+        /* تم الإبقاء على نفس الستايل الخاص بك */
         :root {
             --bg-dark: #0a0a0a;
             --primary: #0098EA;
@@ -32,13 +34,11 @@
             overflow-x: hidden;
         }
 
-        /* --- Header --- */
         .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 10; }
         .header-actions { display: flex; gap: 10px; align-items: center; }
         .lang-toggle { background: var(--surface); border: 1px solid var(--border); color: #fff; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
         .mute-toggle { background: var(--surface); border: 1px solid var(--border); padding: 5px 8px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; font-size: 1rem; }
         
-        /* --- Score & Game --- */
         .score-container { text-align: center; margin-top: 20px; }
         .score-val { font-size: 3.2rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--primary); }
         .game-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
@@ -46,18 +46,15 @@
         .coin:active { transform: scale(0.9); }
         .coin.disabled { filter: grayscale(1); opacity: 0.7; cursor: not-allowed; }
 
-        /* --- Energy UI --- */
         .energy-container { width: 80%; max-width: 300px; text-align: center; }
         .energy-bar-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
         .energy-bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #f39c12, #ffeb3b); transition: width 0.3s ease; }
         .energy-text { font-size: 0.9rem; margin-top: 5px; font-weight: bold; color: var(--energy-color); display: flex; align-items: center; justify-content: center; gap: 5px; }
 
-        /* --- Modals --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: flex-end; backdrop-filter: blur(8px); }
         .modal-overlay.active { display: flex; }
         .modal-content { background: #111; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 3px solid var(--primary); max-height: 85vh; overflow-y: auto; }
         
-        /* --- Quiz UI --- */
         .quiz-option { width: 100%; padding: 15px; margin-bottom: 10px; background: var(--surface); border: 1px solid var(--border); color: #fff; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; text-align: center; }
         .quiz-option.correct { background: var(--success) !important; border-color: #fff; }
         .quiz-option.wrong { background: var(--danger) !important; border-color: #fff; }
@@ -124,9 +121,9 @@
 
     <div class="nav-bar">
         <div class="nav-btn active" onclick="closeAllModals()">🏠 <span data-key="nav_home">Home</span></div>
-        <div class="nav-btn" onclick="openStore()">🛍️ <span data-key="nav_store">Store</span></div>
+        <div class="nav-btn" onclick="triggerAdAndOpen('store')">🛍️ <span data-key="nav_store">Store</span></div>
         <div class="nav-btn" onclick="openTasks()">📋 <span data-key="nav_tasks">Tasks</span></div>
-        <div class="nav-btn" onclick="openQuizModal()">🧠 <span data-key="nav_quiz">Quiz</span></div>
+        <div class="nav-btn" onclick="triggerAdAndOpen('quiz')">🧠 <span data-key="nav_quiz">Quiz</span></div>
     </div>
 
     <div class="modal-overlay" id="quizModal">
@@ -196,10 +193,12 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // إعداد إعلانات Adsgram
+        const AdController = window.Adsgram.init({ blockId: "int-22662" });
+
         const CONFIG = { adminUsername: "SS34SS4", botLink: "https://t.me/tofe109tofebot" };
         let userId = "mustafa_user";
         
-        // تعديل الحالة لتشمل الطاقة
         let state = { 
             score: 0, 
             lang: 'ar', 
@@ -235,8 +234,22 @@
             updateUI();
             checkReferral();
             startGlobalTimers();
-            startEnergyRegen(); // بدء تجديد الطاقة
+            startEnergyRegen();
             document.getElementById('loader').style.display = 'none';
+        };
+
+        // --- دالة عرض الإعلان قبل فتح الأقسام ---
+        window.triggerAdAndOpen = async (target) => {
+            try {
+                // عرض الإعلان البيني
+                await AdController.show();
+            } catch (err) {
+                console.log("Ad skipped or error", err);
+            } finally {
+                // فتح القسم المطلوب سواء ظهر الإعلان أو فشل
+                if (target === 'store') window.openStore();
+                if (target === 'quiz') window.openQuizModal();
+            }
         };
 
         async function loadUserData() {
@@ -244,9 +257,8 @@
             const snap = await getDoc(docRef);
             if(snap.exists()) {
                 const data = snap.data();
-                // حساب استعادة الطاقة أثناء غياب المستخدم
                 const offlineTime = (Date.now() - (data.lastEnergySync || Date.now())) / 1000;
-                const recovered = Math.floor(offlineTime * 1.5); // استعادة 1.5 طاقة كل ثانية
+                const recovered = Math.floor(offlineTime * 1.5);
                 state = {...state, ...data};
                 state.energy = Math.min(state.maxEnergy, (state.energy || 0) + recovered);
             }
@@ -258,22 +270,21 @@
             await setDoc(doc(db, "players", userId), state, {merge:true});
         }
 
-        // --- نظام تجديد الطاقة التلقائي ---
         function startEnergyRegen() {
             setInterval(() => {
                 if (state.energy < state.maxEnergy) {
                     state.energy = Math.min(state.maxEnergy, state.energy + 1);
                     updateEnergyUI();
                 }
-            }, 1000); // زيادة 1 طاقة كل ثانية
+            }, 1000);
         }
 
         function updateEnergyUI() {
             const energyFill = document.getElementById('energy-bar');
             const energyVal = document.getElementById('energy-val');
             const pct = (state.energy / state.maxEnergy) * 100;
-            energyFill.style.width = pct + "%";
-            energyVal.innerText = state.energy;
+            if(energyFill) energyFill.style.width = pct + "%";
+            if(energyVal) energyVal.innerText = state.energy;
             
             const coin = document.getElementById('main-coin');
             if(state.energy <= 0) coin.classList.add('disabled');
@@ -293,19 +304,23 @@
 
             const dailyDiff = oneDay - (now - state.lastDaily);
             const dailyTimerEl = document.getElementById('daily-timer');
-            if(dailyDiff > 0) { dailyTimerEl.innerText = formatTime(dailyDiff); } 
-            else { dailyTimerEl.innerText = ""; }
+            if(dailyTimerEl) {
+                if(dailyDiff > 0) dailyTimerEl.innerText = formatTime(dailyDiff);
+                else dailyTimerEl.innerText = "";
+            }
 
             const quizDiff = quizWait - (now - state.lastQuiz);
             const quizStartBtn = document.getElementById('quiz-start-btn');
             const quizCooldownEl = document.getElementById('quiz-cooldown-timer');
             
-            if(quizDiff > 0) {
-                quizStartBtn.style.display = "none";
-                quizCooldownEl.innerText = (state.lang === 'ar' ? "انتظر لإعادة الاختبار: " : "Wait to retry: ") + formatTime(quizDiff);
-            } else {
-                quizStartBtn.style.display = "block";
-                quizCooldownEl.innerText = "";
+            if(quizCooldownEl) {
+                if(quizDiff > 0) {
+                    if(quizStartBtn) quizStartBtn.style.display = "none";
+                    quizCooldownEl.innerText = (state.lang === 'ar' ? "انتظر لإعادة الاختبار: " : "Wait to retry: ") + formatTime(quizDiff);
+                } else {
+                    if(quizStartBtn) quizStartBtn.style.display = "block";
+                    quizCooldownEl.innerText = "";
+                }
             }
         }
 
@@ -316,7 +331,6 @@
             return `${h}h ${m}m ${s}s`;
         }
 
-        // --- Daily Rewards ---
         window.claimDailyReward = async () => {
             const now = Date.now();
             const oneDay = 24 * 60 * 60 * 1000;
@@ -333,7 +347,6 @@
             }
         };
 
-        // --- Store System ---
         window.openStore = async () => {
             document.getElementById('storeModal').classList.add('active');
             const listDiv = document.getElementById('store-items-list');
@@ -372,7 +385,6 @@
             tg.showAlert(state.lang === 'ar' ? "تم إرسال طلبك بنجاح!" : "Order placed successfully!");
         };
 
-        // --- Quiz Challenge ---
         window.openQuizModal = () => {
             document.getElementById('quiz-container').innerHTML = "";
             openModal('quizModal');
@@ -427,7 +439,6 @@
             }, 1500);
         };
 
-        // --- Tasks System ---
         window.openTasks = async () => {
             document.getElementById('tasksModal').classList.add('active');
             const listDiv = document.getElementById('tasks-list');
@@ -461,7 +472,6 @@
             });
         };
 
-        // --- Core Functions (تعديل النقر ليستهلك طاقة) ---
         window.handleTap = (e) => {
             if(state.energy <= 0) {
                 tg.HapticFeedback.notificationOccurred('warning');
@@ -469,7 +479,7 @@
             }
 
             state.score += 1;
-            state.energy -= 1; // استهلاك 1 طاقة لكل نقرة
+            state.energy -= 1;
             
             playSound('tap');
             updateUI();
@@ -498,7 +508,8 @@
             document.getElementById('lang-icon').innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
             document.getElementById('mute-btn').innerText = state.isMuted ? '🔇' : '🔊';
             
-            document.getElementById('max-energy-val').innerText = state.maxEnergy;
+            const maxEnergyEl = document.getElementById('max-energy-val');
+            if(maxEnergyEl) maxEnergyEl.innerText = state.maxEnergy;
             updateEnergyUI();
 
             document.querySelectorAll('[data-key]').forEach(el => {
@@ -530,7 +541,12 @@
 
         window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-        window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        window.closeAllModals = () => {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+            // عند غلق كل النوافذ والرجوع للرئيسية، نجعل زر الرئيسية active
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.nav-btn').classList.add('active');
+        };
         
         function showFloat(x,y,t){
             const e = document.createElement('div'); e.className='float-num'; e.style.left=x+'px'; e.style.top=y+'px'; e.innerText=t; document.body.appendChild(e);
@@ -554,4 +570,3 @@
     </script>
 </body>
 </html>
-
