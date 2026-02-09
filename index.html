@@ -33,13 +33,11 @@
             overflow-x: hidden;
         }
 
-        /* --- Header --- */
         .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 10; }
         .header-actions { display: flex; gap: 10px; align-items: center; }
         .lang-toggle { background: var(--surface); border: 1px solid var(--border); color: #fff; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
         .mute-toggle { background: var(--surface); border: 1px solid var(--border); padding: 5px 8px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; font-size: 1rem; }
         
-        /* --- Score & Game --- */
         .score-container { text-align: center; margin-top: 20px; }
         .score-val { font-size: 3.2rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--primary); }
         .game-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
@@ -47,18 +45,15 @@
         .coin:active { transform: scale(0.9); }
         .coin.disabled { filter: grayscale(1); opacity: 0.7; cursor: not-allowed; }
 
-        /* --- Energy UI --- */
         .energy-container { width: 80%; max-width: 300px; text-align: center; }
         .energy-bar-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
         .energy-bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #f39c12, #ffeb3b); transition: width 0.3s ease; }
         .energy-text { font-size: 0.9rem; margin-top: 5px; font-weight: bold; color: var(--energy-color); display: flex; align-items: center; justify-content: center; gap: 5px; }
 
-        /* --- Modals --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: flex-end; backdrop-filter: blur(8px); }
         .modal-overlay.active { display: flex; }
         .modal-content { background: #111; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 3px solid var(--primary); max-height: 85vh; overflow-y: auto; }
         
-        /* --- Quiz UI --- */
         .quiz-option { width: 100%; padding: 15px; margin-bottom: 10px; background: var(--surface); border: 1px solid var(--border); color: #fff; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; text-align: center; }
         .quiz-option.correct { background: var(--success) !important; border-color: #fff; }
         .quiz-option.wrong { background: var(--danger) !important; border-color: #fff; }
@@ -125,58 +120,16 @@
 
     <div class="nav-bar">
         <div class="nav-btn active" onclick="closeAllModals()">🏠 <span data-key="nav_home">Home</span></div>
-        <div class="nav-btn" onclick="triggerAdAndOpen('store')">🛍️ <span data-key="nav_store">Store</span></div>
+        <div class="nav-btn" onclick="triggerAd('store')">🛍️ <span data-key="nav_store">Store</span></div>
         <div class="nav-btn" onclick="openTasks()">📋 <span data-key="nav_tasks">Tasks</span></div>
-        <div class="nav-btn" onclick="triggerAdAndOpen('quiz')">🧠 <span data-key="nav_quiz">Quiz</span></div>
+        <div class="nav-btn" onclick="triggerAd('quiz')">🧠 <span data-key="nav_quiz">Quiz</span></div>
     </div>
 
-    <div class="modal-overlay" id="quizModal">
-        <div class="modal-content">
-            <h3 style="text-align:center" data-key="nav_quiz">Quiz Challenge</h3>
-            <div id="quiz-cooldown-timer" style="text-align:center; margin-bottom:10px;"></div>
-            <div id="quiz-container" style="text-align:center; padding: 20px 0;"></div>
-            <button id="quiz-start-btn" class="btn-main" onclick="startQuiz()">Start Quiz</button>
-            <button class="btn-main" style="background:#222" onclick="closeModal('quizModal')">Exit</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="storeModal">
-        <div class="modal-content">
-            <h3 style="text-align:center" data-key="nav_store">Store</h3>
-            <div id="store-items-list"></div>
-            <button class="btn-main" style="background:#222" onclick="closeModal('storeModal')">Close</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="orderModal">
-        <div class="modal-content">
-            <h3 style="text-align:center" id="order-title">Request Item</h3>
-            <div id="order-details" style="text-align: center; margin-bottom: 15px; color: #aaa;"></div>
-            <input type="text" id="order-input" class="input-field" placeholder="Username / Account Link">
-            <button class="btn-main" onclick="confirmOrder()">Confirm Request</button>
-            <button class="btn-main" style="background:#222" onclick="closeModal('orderModal')">Cancel</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="tasksModal">
-        <div class="modal-content">
-            <h3 style="text-align:center" data-key="nav_tasks">Tasks</h3>
-            <div id="tasks-list"></div>
-            <button class="btn-main" style="background:#222" onclick="closeModal('tasksModal')">Close</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="dailyModal">
-        <div class="modal-content">
-            <h3 style="text-align:center">Daily Reward</h3>
-            <div class="daily-box">
-                <p id="daily-text">Claim 1,000 Points Today!</p>
-                <button id="daily-claim-btn" class="btn-main" onclick="claimDailyReward()">Claim Now</button>
-                <span id="daily-timer" class="timer-text"></span>
-            </div>
-            <button class="btn-main" style="background:#222" onclick="closeModal('dailyModal')">Close</button>
-        </div>
-    </div>
+    <div class="modal-overlay" id="quizModal"><div class="modal-content"><h3 style="text-align:center" data-key="nav_quiz">Quiz Challenge</h3><div id="quiz-cooldown-timer" style="text-align:center; margin-bottom:10px;"></div><div id="quiz-container" style="text-align:center; padding: 20px 0;"></div><button id="quiz-start-btn" class="btn-main" onclick="startQuiz()">Start Quiz</button><button class="btn-main" style="background:#222" onclick="closeModal('quizModal')">Exit</button></div></div>
+    <div class="modal-overlay" id="storeModal"><div class="modal-content"><h3 style="text-align:center" data-key="nav_store">Store</h3><div id="store-items-list"></div><button class="btn-main" style="background:#222" onclick="closeModal('storeModal')">Close</button></div></div>
+    <div class="modal-overlay" id="orderModal"><div class="modal-content"><h3 style="text-align:center" id="order-title">Request Item</h3><div id="order-details" style="text-align: center; margin-bottom: 15px; color: #aaa;"></div><input type="text" id="order-input" class="input-field" placeholder="Username / Account Link"><button class="btn-main" onclick="confirmOrder()">Confirm Request</button><button class="btn-main" style="background:#222" onclick="closeModal('orderModal')">Cancel</button></div></div>
+    <div class="modal-overlay" id="tasksModal"><div class="modal-content"><h3 style="text-align:center" data-key="nav_tasks">Tasks</h3><div id="tasks-list"></div><button class="btn-main" style="background:#222" onclick="closeModal('tasksModal')">Close</button></div></div>
+    <div class="modal-overlay" id="dailyModal"><div class="modal-content"><h3 style="text-align:center">Daily Reward</h3><div class="daily-box"><p id="daily-text">Claim 1,000 Points Today!</p><button id="daily-claim-btn" class="btn-main" onclick="claimDailyReward()">Claim Now</button><span id="daily-timer" class="timer-text"></span></div><button class="btn-main" style="background:#222" onclick="closeModal('dailyModal')">Close</button></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -197,8 +150,40 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // --- تهيئة إعلانات Adsgram ---
-        const AdController = window.Adsgram.init({ blockId: "int-22662" });
+        // متغيرات الإعلانات
+        let AdsgramController = null;
+
+        // وظيفة تهيئة الإعلان الآمنة
+        function initAds() {
+            if (window.Adsgram) {
+                AdsgramController = window.Adsgram.init({ blockId: "int-22662" });
+            } else {
+                console.error("Adsgram SDK not loaded yet.");
+            }
+        }
+
+        // وظيفة عرض الإعلان
+        window.triggerAd = async (target) => {
+            if (!AdsgramController) initAds(); // محاولة التهيئة إذا لم تكن جاهزة
+
+            if (AdsgramController) {
+                AdsgramController.show().then(() => {
+                    // بعد إغلاق الإعلان بنجاح
+                    openTarget(target);
+                }).catch((err) => {
+                    // في حال فشل الإعلان أو لم يتوفر (No Fill)
+                    console.log("Ad skipped or error:", err);
+                    openTarget(target);
+                });
+            } else {
+                openTarget(target);
+            }
+        };
+
+        function openTarget(target) {
+            if (target === 'store') window.openStore();
+            if (target === 'quiz') window.openQuizModal();
+        }
 
         const CONFIG = { adminUsername: "SS34SS4", botLink: "https://t.me/tofe109tofebot" };
         let userId = "mustafa_user";
@@ -238,22 +223,9 @@
             updateUI();
             checkReferral();
             startGlobalTimers();
-            startEnergyRegen(); 
+            startEnergyRegen();
+            initAds(); // تهيئة الإعلانات عند التحميل
             document.getElementById('loader').style.display = 'none';
-        };
-
-        // --- دالة تشغيل الإعلان البيني (Interstitial) قبل فتح أي نافذة ---
-        window.triggerAdAndOpen = async (target) => {
-            try {
-                // إظهار الإعلان
-                await AdController.show();
-            } catch (err) {
-                // إذا لم يتوفر إعلان أو فشل، سنكمل فتح النافذة للمستخدم دون تعطيله
-                console.log("Ad Error or No Fill:", err);
-            } finally {
-                if (target === 'store') window.openStore();
-                if (target === 'quiz') window.openQuizModal();
-            }
         };
 
         async function loadUserData() {
@@ -287,9 +259,8 @@
             const energyFill = document.getElementById('energy-bar');
             const energyVal = document.getElementById('energy-val');
             const pct = (state.energy / state.maxEnergy) * 100;
-            energyFill.style.width = pct + "%";
-            energyVal.innerText = state.energy;
-            
+            if(energyFill) energyFill.style.width = pct + "%";
+            if(energyVal) energyVal.innerText = state.energy;
             const coin = document.getElementById('main-coin');
             if(state.energy <= 0) coin.classList.add('disabled');
             else coin.classList.remove('disabled');
@@ -304,23 +275,21 @@
         function updateTimersDisplay() {
             const now = Date.now();
             const oneDay = 24 * 60 * 60 * 1000;
-            const quizWait = 1 * 60 * 60 * 1000;
-
             const dailyDiff = oneDay - (now - state.lastDaily);
             const dailyTimerEl = document.getElementById('daily-timer');
-            if(dailyDiff > 0) { dailyTimerEl.innerText = formatTime(dailyDiff); } 
-            else { dailyTimerEl.innerText = ""; }
-
+            if(dailyTimerEl) dailyTimerEl.innerText = dailyDiff > 0 ? formatTime(dailyDiff) : "";
+            const quizWait = 3600000;
             const quizDiff = quizWait - (now - state.lastQuiz);
             const quizStartBtn = document.getElementById('quiz-start-btn');
             const quizCooldownEl = document.getElementById('quiz-cooldown-timer');
-            
-            if(quizDiff > 0) {
-                quizStartBtn.style.display = "none";
-                quizCooldownEl.innerText = (state.lang === 'ar' ? "انتظر لإعادة الاختبار: " : "Wait to retry: ") + formatTime(quizDiff);
-            } else {
-                quizStartBtn.style.display = "block";
-                quizCooldownEl.innerText = "";
+            if(quizCooldownEl) {
+                if(quizDiff > 0) {
+                    if(quizStartBtn) quizStartBtn.style.display = "none";
+                    quizCooldownEl.innerText = (state.lang === 'ar' ? "انتظر: " : "Wait: ") + formatTime(quizDiff);
+                } else {
+                    if(quizStartBtn) quizStartBtn.style.display = "block";
+                    quizCooldownEl.innerText = "";
+                }
             }
         }
 
@@ -333,17 +302,14 @@
 
         window.claimDailyReward = async () => {
             const now = Date.now();
-            const oneDay = 24 * 60 * 60 * 1000;
-            if (now - state.lastDaily >= oneDay) {
+            if (now - state.lastDaily >= 86400000) {
                 state.score += 1000;
                 state.lastDaily = now;
                 playSound('correct');
                 await syncPoints();
                 updateUI();
-                tg.showAlert(state.lang === 'ar' ? "تم استلام المكافأة اليومية! +1000" : "Daily reward claimed! +1000");
+                tg.showAlert(state.lang === 'ar' ? "تم استلام المكافأة!" : "Claimed!");
                 closeModal('dailyModal');
-            } else {
-                tg.showAlert(state.lang === 'ar' ? "لقد استلمت المكافأة بالفعل!" : "Already claimed!");
             }
         };
 
@@ -355,198 +321,90 @@
             listDiv.innerHTML = "";
             snap.forEach(doc => {
                 const item = doc.data();
-                const itemName = state.lang === 'ar' ? item.name_ar : item.name_en;
                 const div = document.createElement('div');
                 div.className = 'list-item';
-                div.innerHTML = `<span>${item.icon || '🎁'} ${itemName}</span> <b style="color:var(--secondary)">${item.price} P</b>`;
-                div.onclick = () => window.requestOrder(itemName, item.price);
+                div.innerHTML = `<span>${item.icon || '🎁'} ${state.lang === 'ar' ? item.name_ar : item.name_en}</span> <b style="color:var(--secondary)">${item.price} P</b>`;
+                div.onclick = () => window.requestOrder(item.name_ar, item.price);
                 listDiv.appendChild(div);
             });
         };
 
         window.requestOrder = (name, price) => {
-            if (state.score < price) return tg.showAlert(state.lang === 'ar' ? "نقاط غير كافية!" : "Insufficient points!");
+            if (state.score < price) return tg.showAlert("Points needed!");
             currentOrderData = { name, price };
             document.getElementById('order-title').innerText = name;
-            document.getElementById('order-details').innerText = state.lang === 'ar' ? `السعر: ${price} نقطة` : `Price: ${price} Points`;
-            document.getElementById('order-input').placeholder = state.lang === 'ar' ? "معرف الحساب / الرابط" : "Username / Link";
             openModal('orderModal');
         };
 
         window.confirmOrder = async () => {
             const info = document.getElementById('order-input').value;
-            if (!info || info.length < 3) return tg.showAlert(state.lang === 'ar' ? "يرجى كتابة المعلومات!" : "Please provide details!");
+            if (!info) return;
             state.score -= currentOrderData.price;
-            updateUI();
-            await syncPoints();
-            const msg = `🚨 طلب جديد: ${currentOrderData.name}\n👤 المستخدم: ${userId}\n🔗 الحساب: ${info}`;
-            tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=${encodeURIComponent(msg)}`);
+            updateUI(); await syncPoints();
+            tg.openTelegramLink(`https://t.me/${CONFIG.adminUsername}?text=Order: ${currentOrderData.name}`);
             closeAllModals();
-            tg.showAlert(state.lang === 'ar' ? "تم إرسال طلبك بنجاح!" : "Order placed successfully!");
         };
 
-        window.openQuizModal = () => {
-            document.getElementById('quiz-container').innerHTML = "";
-            openModal('quizModal');
-            updateTimersDisplay();
-        };
-
+        window.openQuizModal = () => { openModal('quizModal'); };
         window.startQuiz = async () => {
             const quizDiv = document.getElementById('quiz-container');
-            document.getElementById('quiz-start-btn').style.display = "none";
-            quizDiv.innerHTML = "🌀 Loading...";
             const snap = await getDocs(collection(db, "quiz"));
-            const questions = [];
-            snap.forEach(d => questions.push({id: d.id, ...d.data()}));
-            if(questions.length === 0) {
-                quizDiv.innerHTML = `<h3 style="color:red">${state.lang === 'ar' ? "لا يوجد أسئلة حالياً!" : "No questions available!"}</h3>`;
-                return;
-            }
-            const q = questions[Math.floor(Math.random() * questions.length)];
-            const qTxt = state.lang === 'ar' ? q.q_ar : q.q_en;
-            const opts = state.lang === 'ar' ? q.opts_ar : q.opts_en;
-            quizDiv.innerHTML = `<h2 style="margin-bottom:20px;">${qTxt}</h2>`;
-            opts.forEach((opt, i) => {
-                const btn = document.createElement('div');
-                btn.className = 'quiz-option';
-                btn.innerText = opt;
-                btn.onclick = () => window.checkAnswer(btn, i, q.c);
-                quizDiv.appendChild(btn);
+            const qs = []; snap.forEach(d => qs.push(d.data()));
+            if(!qs.length) return;
+            const q = qs[Math.floor(Math.random() * qs.length)];
+            quizDiv.innerHTML = `<h2>${state.lang === 'ar' ? q.q_ar : q.q_en}</h2>`;
+            (state.lang === 'ar' ? q.opts_ar : q.opts_en).forEach((opt, i) => {
+                const b = document.createElement('div'); b.className = 'quiz-option'; b.innerText = opt;
+                b.onclick = () => window.checkAnswer(b, i, q.c); quizDiv.appendChild(b);
             });
         };
 
-        window.checkAnswer = async (btn, selected, correct) => {
-            const allOptions = document.querySelectorAll('.quiz-option');
-            allOptions.forEach(opt => opt.style.pointerEvents = 'none');
-            if(selected === correct) {
-                btn.classList.add('correct');
-                state.score += 500;
-                playSound('correct');
-                tg.HapticFeedback.notificationOccurred('success');
-            } else {
-                btn.classList.add('wrong');
-                allOptions[correct].classList.add('correct');
-                state.score = Math.max(0, state.score - 200); 
-                playSound('wrong');
-                tg.HapticFeedback.notificationOccurred('error');
-            }
+        window.checkAnswer = async (btn, sel, cor) => {
+            if(sel === cor) { btn.classList.add('correct'); state.score += 500; playSound('correct'); }
+            else { btn.classList.add('wrong'); state.score = Math.max(0, state.score - 200); playSound('wrong'); }
             state.lastQuiz = Date.now();
-            updateUI();
-            await syncPoints();
-            setTimeout(() => {
-                document.getElementById('quiz-container').innerHTML = `<p style="color:var(--success)">${state.lang === 'ar' ? "انتهى الاختبار! انتظر ساعة للإعادة" : "Quiz Finished! Wait 1h to retry"}</p>`;
-                updateTimersDisplay();
-            }, 1500);
+            updateUI(); await syncPoints();
+            setTimeout(closeAllModals, 1500);
         };
 
         window.openTasks = async () => {
             document.getElementById('tasksModal').classList.add('active');
             const listDiv = document.getElementById('tasks-list');
-            listDiv.innerHTML = "🌀 Loading...";
             const snap = await getDocs(collection(db, "tasks"));
             listDiv.innerHTML = "";
-            let hasTasks = false;
-            snap.forEach(dSnap => {
-                const t = dSnap.data();
-                if(state.completedTasks.includes(dSnap.id)) return;
-                hasTasks = true;
-                listDiv.innerHTML += `<div class="list-item"><span>${state.lang === 'ar' ? t.txt_ar : t.txt_en} (+${t.r})</span><button onclick="doTask('${dSnap.id}', '${t.url}', ${t.r})" style="background:var(--primary); color:#fff; border:none; padding:8px 15px; border-radius:10px;">GO</button></div>`;
+            snap.forEach(d => {
+                const t = d.data(); if(state.completedTasks.includes(d.id)) return;
+                listDiv.innerHTML += `<div class="list-item"><span>${t.txt_ar}</span><button onclick="doTask('${d.id}', '${t.url}', ${t.r})">GO</button></div>`;
             });
-            if(!hasTasks) {
-                listDiv.innerHTML = `<div style="text-align:center; padding:20px; color:var(--secondary); font-weight:bold;">${state.lang === 'ar' ? "انتظر المهام القادمة" : "Wait for upcoming tasks"}</div>`;
-            }
         };
 
-        window.doTask = async (id, url, reward) => {
+        window.doTask = async (id, url, r) => {
             window.open(url, '_blank');
-            tg.showConfirm(state.lang === 'ar' ? "هل قمت بالاشتراك فعلاً؟" : "Did you actually join?", async (confirmed) => {
-                if(confirmed) {
-                    state.score += reward;
-                    state.completedTasks.push(id);
-                    updateUI(); 
-                    await syncPoints();
-                    playSound('correct');
-                    tg.showAlert(state.lang === 'ar' ? "تمت إضافة المكافأة!" : "Reward added!");
-                    window.openTasks();
-                }
-            });
+            state.score += r; state.completedTasks.push(id);
+            updateUI(); await syncPoints();
         };
 
         window.handleTap = (e) => {
-            if(state.energy <= 0) {
-                tg.HapticFeedback.notificationOccurred('warning');
-                return;
-            }
-
-            state.score += 1;
-            state.energy -= 1; 
-            
-            playSound('tap');
-            updateUI();
-            updateEnergyUI();
+            if(state.energy <= 0) return;
+            state.score += 1; state.energy -= 1;
+            playSound('tap'); updateUI(); updateEnergyUI();
             showFloat(e.clientX, e.clientY, "+1");
-            
             if(state.score % 15 === 0) syncPoints();
         };
 
-        window.toggleLang = () => {
-            state.lang = state.lang === 'ar' ? 'en' : 'ar';
-            updateUI();
-            syncPoints();
-        };
-
-        window.toggleMute = () => {
-            state.isMuted = !state.isMuted;
-            document.getElementById('mute-btn').innerText = state.isMuted ? '🔇' : '🔊';
-            syncPoints();
-        };
+        window.toggleLang = () => { state.lang = state.lang === 'ar' ? 'en' : 'ar'; updateUI(); syncPoints(); };
+        window.toggleMute = () => { state.isMuted = !state.isMuted; document.getElementById('mute-btn').innerText = state.isMuted ? '🔇' : '🔊'; };
 
         function updateUI() {
             document.getElementById('score').innerText = state.score.toLocaleString();
             document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('lang-text').innerText = state.lang === 'ar' ? 'AR' : 'EN';
-            document.getElementById('lang-icon').innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
-            document.getElementById('mute-btn').innerText = state.isMuted ? '🔇' : '🔊';
-            
-            document.getElementById('max-energy-val').innerText = state.maxEnergy;
+            document.getElementById('lang-text').innerText = state.lang.toUpperCase();
             updateEnergyUI();
-
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const k = el.getAttribute('data-key');
-                const translations = {
-                    balance: state.lang === 'ar' ? "الرصيد الحالي" : "CURRENT BALANCE",
-                    nav_home: state.lang === 'ar' ? "الرئيسية" : "Home",
-                    nav_store: state.lang === 'ar' ? "المتجر" : "Store",
-                    nav_tasks: state.lang === 'ar' ? "المهام" : "Tasks",
-                    nav_quiz: state.lang === 'ar' ? "المسابقة" : "Quiz"
-                };
-                if(translations[k]) el.innerText = translations[k];
-            });
-            
-            const now = Date.now();
-            const oneDay = 24 * 60 * 60 * 1000;
-            const dailyBtn = document.getElementById('daily-claim-btn');
-            if (dailyBtn) {
-                if (now - state.lastDaily < oneDay) {
-                    dailyBtn.innerText = state.lang === 'ar' ? "انتظر الموعد" : "Wait for Time";
-                    dailyBtn.disabled = true;
-                } else {
-                    dailyBtn.innerText = state.lang === 'ar' ? "استلم الآن" : "Claim Now";
-                    dailyBtn.disabled = false;
-                    dailyBtn.style.background = "var(--primary)";
-                }
-            }
         }
 
         window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-        window.closeAllModals = () => {
-            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-            // جعل الزر الرئيسي هو النشط عند إغلاق كل شيء
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.nav-btn:first-child').classList.add('active');
-        };
-        
+        window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
         function showFloat(x,y,t){
             const e = document.createElement('div'); e.className='float-num'; e.style.left=x+'px'; e.style.top=y+'px'; e.innerText=t; document.body.appendChild(e);
             setTimeout(()=>e.remove(), 700);
@@ -559,10 +417,7 @@
                 if(referrerId !== userId) {
                     const refRef = doc(db, "players", referrerId);
                     await updateDoc(refRef, { score: increment(5000) });
-                    state.score += 1000;
-                    state.referred = true;
-                    await syncPoints();
-                    tg.showAlert("Referral Bonus: +1000!");
+                    state.score += 1000; state.referred = true; await syncPoints();
                 }
             }
         }
