@@ -125,58 +125,16 @@
 
     <div class="nav-bar">
         <div class="nav-btn active" onclick="closeAllModals()">🏠 <span data-key="nav_home">Home</span></div>
-        <div class="nav-btn" onclick="triggerAd('store')">🛍️ <span data-key="nav_store">Store</span></div>
+        <div class="nav-btn" onclick="triggerInterstitial('store')">🛍️ <span data-key="nav_store">Store</span></div>
         <div class="nav-btn" onclick="openTasks()">📋 <span data-key="nav_tasks">Tasks</span></div>
-        <div class="nav-btn" onclick="triggerAd('quiz')">🧠 <span data-key="nav_quiz">Quiz</span></div>
+        <div class="nav-btn" onclick="triggerInterstitial('quiz')">🧠 <span data-key="nav_quiz">Quiz</span></div>
     </div>
 
-    <div class="modal-overlay" id="quizModal">
-        <div class="modal-content">
-            <h3 style="text-align:center" data-key="nav_quiz">Quiz Challenge</h3>
-            <div id="quiz-cooldown-timer" style="text-align:center; margin-bottom:10px;"></div>
-            <div id="quiz-container" style="text-align:center; padding: 20px 0;"></div>
-            <button id="quiz-start-btn" class="btn-main" onclick="startQuiz()">Start Quiz</button>
-            <button class="btn-main" style="background:#222" onclick="closeModal('quizModal')">Exit</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="storeModal">
-        <div class="modal-content">
-            <h3 style="text-align:center" data-key="nav_store">Store</h3>
-            <div id="store-items-list"></div>
-            <button class="btn-main" style="background:#222" onclick="closeModal('storeModal')">Close</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="orderModal">
-        <div class="modal-content">
-            <h3 style="text-align:center" id="order-title">Request Item</h3>
-            <div id="order-details" style="text-align: center; margin-bottom: 15px; color: #aaa;"></div>
-            <input type="text" id="order-input" class="input-field" placeholder="Username / Account Link">
-            <button class="btn-main" onclick="confirmOrder()">Confirm Request</button>
-            <button class="btn-main" style="background:#222" onclick="closeModal('orderModal')">Cancel</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="tasksModal">
-        <div class="modal-content">
-            <h3 style="text-align:center" data-key="nav_tasks">Tasks</h3>
-            <div id="tasks-list"></div>
-            <button class="btn-main" style="background:#222" onclick="closeModal('tasksModal')">Close</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="dailyModal">
-        <div class="modal-content">
-            <h3 style="text-align:center">Daily Reward</h3>
-            <div class="daily-box">
-                <p id="daily-text">Claim 1,000 Points Today!</p>
-                <button id="daily-claim-btn" class="btn-main" onclick="claimDailyReward()">Claim Now</button>
-                <span id="daily-timer" class="timer-text"></span>
-            </div>
-            <button class="btn-main" style="background:#222" onclick="closeModal('dailyModal')">Close</button>
-        </div>
-    </div>
+    <div class="modal-overlay" id="quizModal"><div class="modal-content"><h3 style="text-align:center" data-key="nav_quiz">Quiz Challenge</h3><div id="quiz-cooldown-timer" style="text-align:center; margin-bottom:10px;"></div><div id="quiz-container" style="text-align:center; padding: 20px 0;"></div><button id="quiz-start-btn" class="btn-main" onclick="startQuiz()">Start Quiz</button><button class="btn-main" style="background:#222" onclick="closeModal('quizModal')">Exit</button></div></div>
+    <div class="modal-overlay" id="storeModal"><div class="modal-content"><h3 style="text-align:center" data-key="nav_store">Store</h3><div id="store-items-list"></div><button class="btn-main" style="background:#222" onclick="closeModal('storeModal')">Close</button></div></div>
+    <div class="modal-overlay" id="orderModal"><div class="modal-content"><h3 style="text-align:center" id="order-title">Request Item</h3><div id="order-details" style="text-align: center; margin-bottom: 15px; color: #aaa;"></div><input type="text" id="order-input" class="input-field" placeholder="Username / Account Link"><button class="btn-main" onclick="confirmOrder()">Confirm Request</button><button class="btn-main" style="background:#222" onclick="closeModal('orderModal')">Cancel</button></div></div>
+    <div class="modal-overlay" id="tasksModal"><div class="modal-content"><h3 style="text-align:center" data-key="nav_tasks">Tasks</h3><div id="tasks-list"></div><button class="btn-main" style="background:#222" onclick="closeModal('tasksModal')">Close</button></div></div>
+    <div class="modal-overlay" id="dailyModal"><div class="modal-content"><h3 style="text-align:center">Daily Reward</h3><div class="daily-box"><p id="daily-text">Claim 1,000 Points Today!</p><button id="daily-claim-btn" class="btn-main" onclick="claimDailyReward()">Claim Now</button><span id="daily-timer" class="timer-text"></span></div><button class="btn-main" style="background:#222" onclick="closeModal('dailyModal')">Close</button></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -197,28 +155,21 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // --- نظام إعلانات Adsgram ---
-        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "int-22662" }) : null;
-
-        window.triggerAd = (target) => {
-            if (AdController) {
-                AdController.show().then((result) => {
-                    // في حال اكتمال الإعلان أو إغلاقه (Interstitial)
-                    openTarget(target);
-                }).catch((error) => {
-                    // في حال وجود خطأ في التحميل أو رفض الإعلان
-                    console.error("Ad failed:", error);
-                    openTarget(target);
-                });
-            } else {
-                openTarget(target);
+        // --- Adsgram Interstitial Implementation ---
+        // الدالة المسؤولة عن عرض الإعلان عند الانتقال بين الصفحات
+        window.triggerInterstitial = async (target) => {
+            try {
+                // تنفيذ الإعلان في سطر واحد حسب التوثيق لنوع Interstitial
+                await window.Adsgram.init({ blockId: "int-22662" }).show();
+            } catch (error) {
+                // في حال حدوث خطأ أو عدم توفر إعلان، لا نفعل شيئاً ونكمل فتح الصفحة
+                console.log("Ad skipped or error:", error);
+            } finally {
+                // هذه الدالة تضمن فتح "المتجر" أو "المسابقة" في كل الحالات
+                if (target === 'store') window.openStore();
+                if (target === 'quiz') window.openQuizModal();
             }
         };
-
-        function openTarget(target) {
-            if (target === 'store') window.openStore();
-            if (target === 'quiz') window.openQuizModal();
-        }
 
         const CONFIG = { adminUsername: "SS34SS4", botLink: "https://t.me/tofe109tofebot" };
         let userId = "mustafa_user";
@@ -293,8 +244,8 @@
             const energyFill = document.getElementById('energy-bar');
             const energyVal = document.getElementById('energy-val');
             const pct = (state.energy / state.maxEnergy) * 100;
-            energyFill.style.width = pct + "%";
-            energyVal.innerText = state.energy;
+            if(energyFill) energyFill.style.width = pct + "%";
+            if(energyVal) energyVal.innerText = state.energy;
             
             const coin = document.getElementById('main-coin');
             if(state.energy <= 0) coin.classList.add('disabled');
@@ -314,19 +265,19 @@
 
             const dailyDiff = oneDay - (now - state.lastDaily);
             const dailyTimerEl = document.getElementById('daily-timer');
-            if(dailyDiff > 0) { dailyTimerEl.innerText = formatTime(dailyDiff); } 
-            else { dailyTimerEl.innerText = ""; }
+            if(dailyDiff > 0) { if(dailyTimerEl) dailyTimerEl.innerText = formatTime(dailyDiff); } 
+            else { if(dailyTimerEl) dailyTimerEl.innerText = ""; }
 
             const quizDiff = quizWait - (now - state.lastQuiz);
             const quizStartBtn = document.getElementById('quiz-start-btn');
             const quizCooldownEl = document.getElementById('quiz-cooldown-timer');
             
             if(quizDiff > 0) {
-                quizStartBtn.style.display = "none";
-                quizCooldownEl.innerText = (state.lang === 'ar' ? "انتظر لإعادة الاختبار: " : "Wait to retry: ") + formatTime(quizDiff);
+                if(quizStartBtn) quizStartBtn.style.display = "none";
+                if(quizCooldownEl) quizCooldownEl.innerText = (state.lang === 'ar' ? "انتظر لإعادة الاختبار: " : "Wait to retry: ") + formatTime(quizDiff);
             } else {
-                quizStartBtn.style.display = "block";
-                quizCooldownEl.innerText = "";
+                if(quizStartBtn) quizStartBtn.style.display = "block";
+                if(quizCooldownEl) quizCooldownEl.innerText = "";
             }
         }
 
@@ -514,7 +465,8 @@
             document.getElementById('lang-icon').innerText = state.lang === 'ar' ? '🇮🇶' : '🇺🇸';
             document.getElementById('mute-btn').innerText = state.isMuted ? '🔇' : '🔊';
             
-            document.getElementById('max-energy-val').innerText = state.maxEnergy;
+            const maxEnergyEl = document.getElementById('max-energy-val');
+            if(maxEnergyEl) maxEnergyEl.innerText = state.maxEnergy;
             updateEnergyUI();
 
             document.querySelectorAll('[data-key]').forEach(el => {
@@ -546,7 +498,12 @@
 
         window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-        window.closeAllModals = () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        window.closeAllModals = () => {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+            // Reset active state for Nav
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.nav-btn:first-child').classList.add('active');
+        };
         
         function showFloat(x,y,t){
             const e = document.createElement('div'); e.className='float-num'; e.style.left=x+'px'; e.style.top=y+'px'; e.innerText=t; document.body.appendChild(e);
@@ -563,7 +520,6 @@
                     state.score += 1000;
                     state.referred = true;
                     await syncPoints();
-                    tg.showAlert("Referral Bonus: +1000!");
                 }
             }
         }
