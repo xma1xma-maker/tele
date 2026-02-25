@@ -38,7 +38,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyD6Jdy-USR8Iy6qvFRGpVQY5qIjSxa-Fc0",
@@ -61,7 +61,12 @@
 
         function runApp(auth, db) {
             const AdController = window.Adsgram.init({ blockId: "int-22662" });
-            const showInterstitialAd = () => { AdController.show().catch(e => console.log("Interstitial Ad failed", e)); };
+            
+            const showInterstitialAd = () => {
+                return new Promise((resolve) => {
+                    AdController.show().finally(() => resolve());
+                });
+            };
 
             let currentUser = null;
             let userData = { balance: 0, lastOpenTime: 0, completedTasks: [], rewardedAdCount: 0, lastRewardedAdTime: 0 };
@@ -71,44 +76,94 @@
             const REWARDED_AD_BONUS = 0.20;
             const REWARDED_AD_LIMIT = 5;
             const REWARDED_AD_COOLDOWN = 10 * 60 * 1000;
+            const MIN_WITHDRAW = 500.00;
+            const STORE = [{ id: 'asia', name: 'رصيد آسيا سيل', price: 500, icon: '📲' }, { id: 'zain', name: 'رصيد زين العراق', price: 500, icon: '📱' }];
 
-            async function syncRemoteData(dataToSync) { if (!currentUser) return; await setDoc(doc(db, "users", currentUser.uid), dataToSync, { merge: true }); }
+            async function syncRemoteData(dataToSync) {
+                if (!currentUser) return;
+                await setDoc(doc(db, "users", currentUser.uid), dataToSync, { merge: true });
+            }
 
-            window.showSection = (name) => { showInterstitialAd(); /* ... */ };
-            window.closeModal = () => { showInterstitialAd(); document.getElementById('prize-modal').classList.add('hidden'); };
-            window.handleOpen = () => { showInterstitialAd(); /* ... */ };
-            window.doTask = (id, bonus, url) => { showInterstitialAd(); /* ... */ };
-            window.requestWithdraw = (price, name) => { showInterstitialAd(); /* ... */ };
+            window.showSection = async (name) => {
+                await showInterstitialAd();
+                document.querySelectorAll('main, section').forEach(s => s.classList.add('hidden'));
+                document.getElementById(`section-${name}`).classList.remove('hidden');
+                document.querySelectorAll('nav button').forEach(b => { b.classList.remove('nav-active', 'text-slate-500'); b.id === `nav-${name}` ? b.classList.add('nav-active') : b.classList.add('text-slate-500'); });
+            };
+            
+            window.closeModal = async () => {
+                await showInterstitialAd();
+                document.getElementById('prize-modal').classList.add('hidden');
+            };
+
+            window.handleOpen = async () => {
+                await showInterstitialAd();
+                
+                if (Date.now() - userData.lastOpenTime < COOLDOWN) return;
+                if (appSettings.prizes.length === 0) { alert("يتم تحميل الجوائز، يرجى المحاولة بعد لحظات."); return; }
+                
+                const prize = appSettings.prizes[Math.floor(Math.random() * appSettings.prizes.length)];
+                userData.balance += prize.val;
+                userData.lastOpenTime = Date.now();
+                
+                await syncRemoteData({ balance: userData.balance, lastOpenTime: userData.lastOpenTime });
+                updateUI();
+                showModal(prize);
+            };
+
+            window.doTask = async (id, bonus, url) => {
+                await showInterstitialAd();
+                if (userData.completedTasks?.includes(id)) return;
+                window.open(url, '_blank');
+                userData.balance += bonus;
+                if (!userData.completedTasks) userData.completedTasks = [];
+                userData.completedTasks.push(id);
+                await syncRemoteData({ balance: userData.balance, completedTasks: userData.completedTasks });
+                updateUI();
+            };
+
+            window.requestWithdraw = async (price, name) => {
+                await showInterstitialAd();
+                if (userData.balance < MIN_WITHDRAW) { alert(`رصيدك الحالي ${userData.balance.toFixed(2)}$، الحد الأدنى للسحب ${MIN_WITHDRAW}$`); return; }
+                if (confirm(`هل أنت متأكد من سحب ${price}$؟`)) {
+                    userData.balance -= price;
+                    await syncRemoteData({ balance: userData.balance });
+                    updateUI();
+                    alert('تم تقديم طلبك!');
+                    window.open(`https://t.me/your_user?text=طلب سحب: ${name} من ID: ${currentUser.uid}` );
+                }
+            };
 
             window.handleWatchAd = () => {
-                showInterstitialAd();
                 const adButton = document.getElementById('rewarded-ad-btn');
                 adButton.disabled = true;
+                adButton.innerText = 'جاري تحميل الإعلان...';
 
-                AdController.show().then((result) => {
+                AdController.show().then(async (result) => {
                     if (result.done) {
                         userData.balance += REWARDED_AD_BONUS;
                         userData.rewardedAdCount++;
+                        let dataToSync = { balance: userData.balance, rewardedAdCount: userData.rewardedAdCount };
                         if (userData.rewardedAdCount >= REWARDED_AD_LIMIT) {
                             userData.lastRewardedAdTime = Date.now();
+                            dataToSync.lastRewardedAdTime = userData.lastRewardedAdTime;
                         }
-                        syncRemoteData({ balance: userData.balance, rewardedAdCount: userData.rewardedAdCount, lastRewardedAdTime: userData.lastRewardedAdTime });
-                        updateUI();
+                        await syncRemoteData(dataToSync);
                         alert(`🎉 مبروك! لقد ربحت ${REWARDED_AD_BONUS.toFixed(2)}$`);
                     } else {
                         alert("يجب مشاهدة الإعلان بالكامل للحصول على المكافأة.");
                     }
-                }).catch((result) => {
+                }).catch(() => {
                     alert("عذرًا، حدث خطأ أثناء تحميل الإعلان. حاول مرة أخرى.");
                 }).finally(() => {
-                    updateAdButtonState();
+                    updateUI();
                 });
             };
 
             function updateAdButtonState() {
                 const adButton = document.getElementById('rewarded-ad-btn');
                 const now = Date.now();
-                const timeSinceLastCycle = now - userData.lastRewardedAdTime;
+                const timeSinceLastCycle = now - (userData.lastRewardedAdTime || 0);
 
                 if (userData.rewardedAdCount >= REWARDED_AD_LIMIT && timeSinceLastCycle < REWARDED_AD_COOLDOWN) {
                     const remaining = REWARDED_AD_COOLDOWN - timeSinceLastCycle;
@@ -123,7 +178,7 @@
                         syncRemoteData({ rewardedAdCount: 0 });
                     }
                     adButton.disabled = false;
-                    const remainingViews = REWARDED_AD_LIMIT - userData.rewardedAdCount;
+                    const remainingViews = REWARDED_AD_LIMIT - (userData.rewardedAdCount || 0);
                     adButton.innerHTML = `<span class="text-xl">📺</span> <span>شاهد إعلان (${remainingViews}/${REWARDED_AD_LIMIT}) واحصل على ${REWARDED_AD_BONUS.toFixed(2)}$</span>`;
                 }
             }
@@ -131,8 +186,15 @@
             function updateUI() {
                 document.getElementById('balance-display').innerText = `${(userData.balance || 0).toFixed(2)}$`;
                 updateAdButtonState();
-                // ... renderTasks, renderStore, checkTimer
+                checkTimer();
+                renderTasks();
+                renderStore();
             }
+
+            function showModal(prize) { document.getElementById('modal-icon').innerText = prize.icon; document.getElementById('modal-status').innerText = prize.val > 0 ? "مبروك!" : "يا للأسف!"; document.getElementById('modal-prize-name').innerText = prize.name; document.getElementById('prize-modal').classList.remove('hidden'); }
+            function checkTimer() { const now = Date.now(), diff = now - (userData.lastOpenTime || 0), remaining = Math.max(0, COOLDOWN - diff), btn = document.getElementById('main-action-btn'), packet = document.getElementById('open-packet-btn'); if (remaining > 0) { const mins = Math.floor(remaining / 60000), secs = Math.floor((remaining % 60000) / 1000), timeStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`; document.getElementById('timer-display').innerText = timeStr; document.getElementById('timer-display').className = "font-black text-red-400 text-lg"; btn.innerText = `انتظر ${timeStr}`; btn.disabled = true; packet.style.opacity = "0.4"; } else { document.getElementById('timer-display').innerText = "متاح"; document.getElementById('timer-display').className = "font-black text-green-400 text-lg"; btn.innerText = "افتح الكيس الآن"; btn.disabled = false; packet.style.opacity = "1"; } }
+            function renderTasks() { const container = document.getElementById('tasks-container'); if (!appSettings.tasks) return; container.innerHTML = appSettings.tasks.map(t => { const done = userData.completedTasks?.includes(t.id); return `<div class="bg-slate-900/50 p-4 rounded-3xl border border-white/5 flex justify-between items-center shadow-lg"><div class="flex items-center gap-4"><span class="text-3xl">${t.icon}</span><div><p class="font-bold text-sm">${t.name}</p><p class="text-xs text-green-500 font-bold">+${t.bonus.toFixed(2)}$</p></div></div><button onclick="doTask('${t.id}', ${t.bonus}, '${t.url}')" ${done ? 'disabled' : ''} class="px-5 py-2 rounded-xl text-[10px] font-black ${done ? 'bg-green-500/20 text-green-500' : 'bg-white text-black'}">${done ? 'تم' : 'تنفيذ'}</button></div>`; }).join(''); }
+            function renderStore() { const container = document.getElementById('store-container'); container.innerHTML = STORE.map(s => `<div class="bg-slate-900/50 p-4 rounded-3xl border border-white/5 flex justify-between items-center"><div class="flex items-center gap-3"><span class="text-3xl">${s.icon}</span><span class="font-bold text-sm">${s.name}</span></div><button onclick="requestWithdraw(${s.price}, '${s.name}')" class="bg-green-600 text-white px-5 py-2 rounded-xl text-[10px] font-black">${s.price.toFixed(2)}$</button></div>`).join(''); }
 
             async function initializeUserSession() {
                 onAuthStateChanged(auth, async (user) => {
@@ -148,21 +210,19 @@
                             await syncRemoteData(userData);
                         }
                         
-                        // ... جلب الإعدادات ...
                         const settingsSnap = await getDoc(doc(db, "configs", "app-settings"));
                         if (settingsSnap.exists()) { appSettings = settingsSnap.data(); }
                         
-                        updateUI();
                         document.getElementById('loading-screen').classList.add('hidden');
+                        updateUI();
                         setInterval(checkTimer, 1000);
-                        setInterval(updateAdButtonState, 1000); // تحديث زر الإعلان كل ثانية
+                        setInterval(updateAdButtonState, 1000);
                     } else {
                         signInAnonymously(auth);
                     }
                 });
             }
             
-            // ربط الأحداث
             document.getElementById('open-packet-btn').onclick = () => window.handleOpen();
             document.getElementById('main-action-btn').onclick = () => window.handleOpen();
             document.getElementById('rewarded-ad-btn').onclick = () => window.handleWatchAd();
