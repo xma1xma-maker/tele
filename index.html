@@ -49,7 +49,7 @@
 </head>
 <body class="bg-theme-bg text-gray-800 min-h-screen flex flex-col pb-20 max-w-md mx-auto relative border-x border-amber-200 shadow-2xl">
 
-    <!-- إشعارات (Toast  ) -->
+    <!-- إشعارات (Toast ) -->
     <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-5 py-3 rounded-full text-sm font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
         <i id="toast-icon" class="fa-solid fa-circle-check text-green-400"></i>
         <span id="toast-msg">تمت العملية بنجاح!</span>
@@ -203,11 +203,17 @@
                     </div>
                 </div>
 
+                <!-- تم إضافة زر المشاركة هنا -->
                 <div class="bg-amber-50 p-2.5 rounded-xl border border-amber-300 flex items-center justify-between gap-2">
-                    <span class="text-xs text-amber-900 font-mono overflow-hidden text-ellipsis whitespace-nowrap" id="ref-link-text">https://t.me/CryptSonBot?start=ref_123456</span>
-                    <button onclick="copyRefLink(  )" class="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg shrink-0 active:scale-95">
-                        <i class="fa-solid fa-copy ml-1"></i> نسخ
-                    </button>
+                    <span class="text-xs text-amber-900 font-mono overflow-hidden text-ellipsis whitespace-nowrap" id="ref-link-text">https://t.me/ddjdifjbot?start=ref_123456</span>
+                    <div class="flex gap-1 shrink-0">
+                        <button onclick="copyRefLink( )" class="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg active:scale-95 flex items-center gap-1">
+                            <i class="fa-solid fa-copy"></i> نسخ
+                        </button>
+                        <button onclick="shareRefLink()" class="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg active:scale-95 flex items-center gap-1">
+                            <i class="fa-solid fa-share-nodes"></i> مشاركة
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
