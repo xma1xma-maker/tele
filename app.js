@@ -71,27 +71,36 @@ function setupUserProfile() {
     document.getElementById('ref-link-text').innerText = `https://t.me/CryptSonBot?start=ref_${telegramUserId}`;
 }
 
-// جلب بيانات المستخدم من Supabase
+// جلب بيانات المستخدم من Supabase بأمان
 async function loadUserData( ) {
-    const { data, error } = await supabase.from('users').select('*').eq('id', telegramUserId).single();
+    try {
+        const { data, error } = await supabase.from('users').select('*').eq('id', telegramUserId).single();
 
-    if (data) {
-        userState.balance = data.balance || 0;
-        userState.hourlyRate = data.hourly_rate || 0;
-        userState.lastCollectTime = data.last_collect_time || Date.now();
-        userState.referrals = data.referrals_count || 0;
-        userState.refEarnings = data.ref_earnings || 0;
-        userState.inventory = data.inventory || [];
-        
-        // حساب الأرباح المتراكمة منذ آخر دخول
-        const now = Date.now();
-        const hoursPassed = (now - userState.lastCollectTime) / (1000 * 60 * 60);
-        if (hoursPassed > 0 && userState.hourlyRate > 0) {
-            userState.unclaimed += (hoursPassed * userState.hourlyRate);
+        if (error && error.code !== 'PGRST116') {
+            console.error("خطأ في جلب البيانات:", error);
         }
-    } else {
-        // مستخدم جديد
-        await registerNewUser();
+
+        if (data) {
+            userState.balance = data.balance || 0;
+            userState.hourlyRate = data.hourly_rate || 0;
+            userState.lastCollectTime = data.last_collect_time || Date.now();
+            userState.referrals = data.referrals_count || 0;
+            userState.refEarnings = data.ref_earnings || 0;
+            userState.inventory = data.inventory || [];
+            
+            // حساب الأرباح المتراكمة منذ آخر دخول
+            const now = Date.now();
+            const hoursPassed = (now - userState.lastCollectTime) / (1000 * 60 * 60);
+            if (hoursPassed > 0 && userState.hourlyRate > 0) {
+                userState.unclaimed += (hoursPassed * userState.hourlyRate);
+            }
+        } else {
+            // مستخدم جديد
+            await registerNewUser();
+        }
+    } catch (err) {
+        console.error("تعذر الاتصال بقاعدة البيانات:", err);
+        showToast("يوجد بطء في الاتصال بالخادم", "fa-wifi", "text-red-400");
     }
 }
 
@@ -115,40 +124,53 @@ async function registerNewUser() {
         }
     }
 
-    // إنشاء الحساب
+    // إنشاء الحساب مع طائر مجاني ومعدل ربح 0.10
+    const defaultBird = [{ id: 1, name: "الطائر البرونزي", image: "https://cdn-icons-png.flaticon.com/512/2585/2585188.png", dailyPercent: 10, count: 1 }];
+    
     const newUser = {
         id: telegramUserId,
         name: userName,
         balance: 0.05, // هدية ترحيبية
-        hourly_rate: 0,
-        last_collect_time: Date.now(),
+        hourly_rate: 0.10, // معدل الربح يبدأ فوراً
+        last_collect_time: Date.now( ),
         referrals_count: 0,
         ref_earnings: 0,
-        inventory: [],
+        inventory: defaultBird,
         referred_by: referredBy
     };
 
     await supabase.from('users').insert([newUser]);
+    
     userState.balance = 0.05;
+    userState.hourlyRate = 0.10;
+    userState.inventory = defaultBird;
     userState.lastCollectTime = Date.now();
 }
 
 // حفظ بيانات المستخدم
 async function saveUserData() {
-    await supabase.from('users').update({
-        balance: userState.balance,
-        hourly_rate: userState.hourlyRate,
-        last_collect_time: userState.lastCollectTime,
-        inventory: userState.inventory
-    }).eq('id', telegramUserId);
+    try {
+        await supabase.from('users').update({
+            balance: userState.balance,
+            hourly_rate: userState.hourlyRate,
+            last_collect_time: userState.lastCollectTime,
+            inventory: userState.inventory
+        }).eq('id', telegramUserId);
+    } catch (err) {
+        console.error("خطأ في الحفظ:", err);
+    }
 }
 
-// جلب المهمات من Supabase
+// جلب المهمات من Supabase بأمان
 async function loadTasks() {
-    const { data, error } = await supabase.from('tasks').select('*').eq('is_active', true);
-    if (data) {
-        tasks = data;
-        renderTasks();
+    try {
+        const { data, error } = await supabase.from('tasks').select('*').eq('is_active', true);
+        if (data) {
+            tasks = data;
+            renderTasks();
+        }
+    } catch (err) {
+        console.error("تعذر جلب المهمات:", err);
     }
 }
 
