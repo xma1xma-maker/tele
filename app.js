@@ -41,14 +41,15 @@ let userState = {
 let tasks = [];
 let tabClicks = 0; // عداد التنقل بين النوافذ للإعلانات
 
-// كتالوج المتجر (تم تحديث صورة الطائر البرونزي)
+// كتالوج المتجر (تم تحديث صورة الطائر البرونزي بصورة طائر حقيقية وتعمل)
 const shopCatalog = [
-    { id: 1, name: "الطائر البرونزي", price: 0.10, monthIncome: 0.30, dailyPercent: 10, image: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png" },
+    { id: 1, name: "الطائر البرونزي", price: 0.10, monthIncome: 0.30, dailyPercent: 10, image: "https://cdn-icons-png.flaticon.com/512/2201/2201646.png" },
     { id: 2, name: "الطائر الناري", price: 3.00, monthIncome: 10.80, dailyPercent: 12, image: "https://cdn-icons-png.flaticon.com/512/2585/2585177.png" },
     { id: 3, name: "الطائر الفضي", price: 15.00, monthIncome: 63.00, dailyPercent: 14, image: "https://cdn-icons-png.flaticon.com/512/2585/2585197.png" },
     { id: 4, name: "الطائر الذهبي", price: 50.00, monthIncome: 240.00, dailyPercent: 16, image: "https://cdn-icons-png.flaticon.com/512/2585/2585202.png" },
     { id: 5, name: "الكاسر الآلي", price: 100.00, monthIncome: 720.00, dailyPercent: 24, image: "https://cdn-icons-png.flaticon.com/512/2585/2585215.png" }
 ];
+
 
 // تهيئة التطبيق عند التحميل
 window.addEventListener('DOMContentLoaded', async ( ) => {
