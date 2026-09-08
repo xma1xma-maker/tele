@@ -14,7 +14,7 @@ if (window.Adsgram) {
 // 3. تهيئة Supabase
 const supabaseUrl = 'https://kqhopvodwxvvvxiqjcyn.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxaG9wdm9kd3h2dnZ4aXFqY3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzM1MjAsImV4cCI6MjEwNDQ0OTUyMH0.X7s4t1afpbHHd4u-jziupItmAjXC8VBarfUljxmd9dk';
-const supabaseClient = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey ) : null;
+const supabaseClient = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey  ) : null;
 
 // 4. بيانات المستخدم
 const tgUser = tg?.initDataUnsafe?.user;
@@ -50,9 +50,8 @@ const shopCatalog = [
     { id: 5, name: "الكاسر الآلي", price: 100.00, monthIncome: 720.00, dailyPercent: 24, image: "https://cdn-icons-png.flaticon.com/512/2585/2585215.png" }
 ];
 
-
 // تهيئة التطبيق عند التحميل
-window.addEventListener('DOMContentLoaded', async ( ) => {
+window.addEventListener('DOMContentLoaded', async (  ) => {
     setupUserProfile();
     
     if (supabaseClient) {
@@ -89,13 +88,13 @@ function setupUserProfile() {
     }
     
     const refLinkEl = document.getElementById('ref-link-text');
-    // تم تعديل الرابط ليصبح خاصاً بالبوت الخاص بك
-    if(refLinkEl) refLinkEl.innerText = `https://t.me/ddjdifjbot?start=ref_${telegramUserId}`;
+    // تم تعديل الرابط ليصبح رابط التطبيق المصغر المباشر لكي تعمل الإحالات
+    // ملاحظة: إذا كان الاسم المختصر لتطبيقك في BotFather ليس "app"، قم بتغيير كلمة app أدناه
+    if(refLinkEl) refLinkEl.innerText = `https://t.me/ddjdifjbot/tofe?startapp=ref_${telegramUserId}`;
     
-    const adminWalletEl = document.getElementById('admin-wallet-display' );
+    const adminWalletEl = document.getElementById('admin-wallet-display'  );
     if(adminWalletEl) adminWalletEl.innerText = ADMIN_WALLET_ADDRESS;
 }
-
 
 // جلب بيانات المستخدم من Supabase
 async function loadUserData() {
@@ -147,7 +146,7 @@ async function registerNewUser() {
         name: userName,
         balance: 0.05,
         hourly_rate: 0.10,
-        last_collect_time: Date.now( ),
+        last_collect_time: Date.now(  ),
         referrals_count: 0,
         ref_earnings: 0,
         inventory: defaultBird,
@@ -445,7 +444,6 @@ window.shareRefLink = function() {
         }
     }
 };
-
 
 // طلب السحب (تم تعديل الحد الأدنى وإضافة التحويل للمسؤول)
 window.processWithdrawal = async function() {
