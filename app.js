@@ -82,17 +82,20 @@ window.addEventListener('DOMContentLoaded', async ( ) => {
 function setupUserProfile() {
     const userNameEl = document.getElementById('user-name');
     if(userNameEl) userNameEl.innerText = userName;
-    
+
     if (userPhoto) {
         const avatarContainer = document.getElementById('avatar-container');
         if(avatarContainer) avatarContainer.innerHTML = `<img src="${userPhoto}" class="w-full h-full object-cover">`;
     }
+    
     const refLinkEl = document.getElementById('ref-link-text');
-    if(refLinkEl) refLinkEl.innerText = `https://t.me/CryptSonBot?start=ref_${telegramUserId}`;
+    // تم تعديل الرابط ليصبح خاصاً بالبوت الخاص بك
+    if(refLinkEl) refLinkEl.innerText = `https://t.me/ddjdifjbot?start=ref_${telegramUserId}`;
     
     const adminWalletEl = document.getElementById('admin-wallet-display' );
     if(adminWalletEl) adminWalletEl.innerText = ADMIN_WALLET_ADDRESS;
 }
+
 
 // جلب بيانات المستخدم من Supabase
 async function loadUserData() {
