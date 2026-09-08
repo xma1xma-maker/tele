@@ -20,9 +20,6 @@
     <!-- Google Arabic Font: Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- ربط ملف التصميم الخارجي -->
-    <link rel="stylesheet" href="styles.css">
-    
     <!-- إعدادات Tailwind -->
     <script>
         tailwind.config = {
@@ -43,19 +40,64 @@
             }
         }
     </script>
+
+    <!-- التنسيقات (CSS ) -->
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #efe8d8;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .vintage-border {
+            border: 2px solid #d4b886;
+            box-shadow: inset 0 0 10px rgba(180, 140, 80, 0.15), 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .gold-glow {
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c3a875;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body class="bg-theme-bg text-gray-800 min-h-screen flex flex-col pb-20 max-w-md mx-auto relative border-x border-amber-200 shadow-2xl">
 
-    <!-- Toast Notification -->
+    <!-- إشعارات (Toast) -->
     <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-5 py-3 rounded-full text-sm font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
         <i id="toast-icon" class="fa-solid fa-circle-check text-green-400"></i>
         <span id="toast-msg">تمت العملية بنجاح!</span>
     </div>
 
-    <!-- Header Section -->
+    <!-- نافذة الإيداع المنبثقة (Deposit Modal) -->
+    <div id="deposit-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-card-bg p-5 rounded-2xl w-full max-w-sm border-2 border-amber-300">
+            <h3 class="font-black text-amber-900 text-lg mb-2">إيداع رصيد</h3>
+            <p class="text-xs text-amber-800 mb-4">قم بتحويل المبلغ (USDT أو TON) إلى المحفظة التالية، ثم أدخل رقم العملية (TxID) للتحقق.</p>
+            
+            <div class="bg-amber-100 p-3 rounded-xl border border-amber-300 mb-4 text-center">
+                <div class="text-[10px] font-bold text-amber-700 mb-1">عنوان المحفظة:</div>
+                <div class="text-xs font-mono font-black text-gray-800 break-all select-all" id="admin-wallet-display">UQDO_YOUR_TON_WALLET_ADDRESS_HERE</div>
+            </div>
+
+            <input type="text" id="deposit-txid" placeholder="أدخل رقم العملية (TxID / Hash)..." class="w-full p-3 rounded-xl border border-amber-300 mb-3 text-xs font-bold focus:outline-none">
+            <input type="number" id="deposit-amount" placeholder="المبلغ الذي أرسلته ($)" class="w-full p-3 rounded-xl border border-amber-300 mb-4 text-xs font-bold focus:outline-none">
+
+            <div class="flex gap-2">
+                <button onclick="submitDeposit()" class="flex-1 bg-green-600 text-white py-2 rounded-xl font-bold text-sm">تأكيد الإيداع</button>
+                <button onclick="document.getElementById('deposit-modal').classList.add('hidden')" class="flex-1 bg-gray-400 text-white py-2 rounded-xl font-bold text-sm">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- الهيدر (Header) -->
     <header class="p-4 bg-amber-100/80 border-b border-amber-200 backdrop-blur-sm sticky top-0 z-30 flex justify-between items-center">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-amber-600 text-white font-bold flex items-center justify-center text-lg border-2 border-amber-400 shadow">
+            <div class="w-10 h-10 rounded-full bg-amber-600 text-white font-bold flex items-center justify-center text-lg border-2 border-amber-400 shadow overflow-hidden" id="avatar-container">
                 <i class="fa-solid fa-user-astronaut"></i>
             </div>
             <div>
@@ -75,9 +117,10 @@
         </div>
     </header>
 
-    <!-- Main Content Container -->
+    <!-- المحتوى الرئيسي (Main Content) -->
     <main class="flex-1 p-4 overflow-y-auto">
-        <!-- TAB 1: HOME / MINING HOME -->
+        
+        <!-- TAB 1: HOME -->
         <section id="tab-home" class="tab-content flex flex-col gap-4">
             <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-3 rounded-2xl shadow-md text-center text-xs font-bold flex justify-between items-center">
                 <span><i class="fa-solid fa-bolt text-yellow-300 ml-1"></i> معدل الأرباح الحالي:</span>
@@ -106,7 +149,7 @@
                     </div>
                 </div>
 
-                <button onclick="collectEarnings( )" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-lg rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+                <button onclick="collectEarnings()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-lg rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
                     <i class="fa-solid fa-hand-holding-dollar"></i>
                     يجمع (Collect)
                 </button>
@@ -120,7 +163,7 @@
             </div>
         </section>
 
-        <!-- TAB 2: SHOP / BIRDS -->
+        <!-- TAB 2: SHOP -->
         <section id="tab-shop" class="tab-content hidden flex flex-col gap-4">
             <div class="text-center bg-amber-100 p-3 rounded-xl border border-amber-200">
                 <h2 class="font-bold text-amber-900 text-base">متجر الطيور والمعدات</h2>
@@ -129,7 +172,7 @@
             <div id="shop-items-list" class="grid grid-cols-2 gap-3"></div>
         </section>
 
-        <!-- TAB 3: TASKS / MISSIONS -->
+        <!-- TAB 3: TASKS -->
         <section id="tab-tasks" class="tab-content hidden flex flex-col gap-4">
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-2xl shadow-md">
                 <h2 class="font-black text-base flex items-center gap-2">
@@ -137,22 +180,6 @@
                 </h2>
                 <p class="text-xs text-blue-100 mt-1">أكمل المهمات البسيطة التالية واصلح قناة تليجرام لتحصل على دولار مجاني فوراً!</p>
             </div>
-
-            <div class="vintage-border bg-card-bg p-4 rounded-2xl flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 text-xl font-bold">
-                        <i class="fa-solid fa-calendar-day"></i>
-                    </div>
-                    <div>
-                        <div class="font-bold text-xs text-amber-950">المكافأة اليومية</div>
-                        <div class="text-[11px] text-green-600 font-bold">+ $0.05 دولار</div>
-                    </div>
-                </div>
-                <button id="daily-btn" onclick="claimDailyReward()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg shadow active:scale-95">
-                    مطالبة
-                </button>
-            </div>
-
             <div class="text-xs font-bold text-amber-900 mt-2">المهمات الإجبارية والقنوات:</div>
             <div id="tasks-list" class="flex flex-col gap-2"></div>
         </section>
@@ -186,8 +213,14 @@
             </div>
         </section>
 
-        <!-- TAB 5: WALLET / WITHDRAW -->
+        <!-- TAB 5: WALLET -->
         <section id="tab-wallet" class="tab-content hidden flex flex-col gap-4">
+            
+            <!-- زر الإيداع -->
+            <button onclick="document.getElementById('deposit-modal').classList.remove('hidden')" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-black text-sm rounded-xl shadow active:scale-95 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-download"></i> إيداع رصيد لشراء الطيور
+            </button>
+
             <div class="vintage-border bg-card-bg p-4 rounded-2xl">
                 <h2 class="font-bold text-amber-900 text-sm mb-3 flex items-center gap-2">
                     <i class="fa-solid fa-wallet text-amber-600"></i> طلب سحب الأرباح
@@ -220,17 +253,10 @@
                     </button>
                 </div>
             </div>
-
-            <div class="bg-card-bg p-4 rounded-2xl border border-amber-200">
-                <h3 class="text-xs font-bold text-amber-900 mb-2">سجل العمليات الأخيرة</h3>
-                <div id="tx-history" class="text-center py-4 text-xs text-gray-500">
-                    لا توجد عمليات سحب معالجة حالياً.
-                </div>
-            </div>
         </section>
     </main>
 
-    <!-- Bottom Navigation Bar -->
+    <!-- شريط التنقل السفلي (Bottom Navigation) -->
     <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-amber-100/95 border-t border-amber-300 backdrop-blur-md z-40 flex justify-around py-2 px-1 shadow-lg">
         <button onclick="switchTab('home')" id="nav-home" class="nav-btn active flex flex-col items-center gap-1 text-amber-800 font-bold text-[10px] w-1/5 py-1 rounded-xl transition-all">
             <i class="fa-solid fa-house text-lg"></i>
@@ -254,7 +280,390 @@
         </button>
     </nav>
 
-    <!-- ربط ملف الجافاسكريبت الخارجي -->
-    <script src="app.js"></script>
+    <!-- الجافاسكريبت (Logic) -->
+    <script>
+        // تهيئة Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // تهيئة Supabase
+        const supabaseUrl = 'https://kqhopvodwxvvvxiqjcyn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxaG9wdm9kd3h2dnZ4aXFqY3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzM1MjAsImV4cCI6MjEwNDQ0OTUyMH0.X7s4t1afpbHHd4u-jziupItmAjXC8VBarfUljxmd9dk';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey );
+
+        // بيانات المستخدم من تيليجرام
+        const tgUser = tg.initDataUnsafe?.user;
+        const telegramUserId = tgUser ? tgUser.id : Math.floor(Math.random() * 1000000);
+        const userName = tgUser ? tgUser.first_name : "مستخدم تجريبي";
+        const userPhoto = tgUser && tgUser.photo_url ? tgUser.photo_url : null;
+        const startParam = tg.initDataUnsafe?.start_param;
+
+        // عنوان محفظتك للإيداع (قم بتغييره إلى عنوانك الحقيقي)
+        const ADMIN_WALLET_ADDRESS = "UQDO_YOUR_TON_WALLET_ADDRESS_HERE";
+        document.getElementById('admin-wallet-display').innerText = ADMIN_WALLET_ADDRESS;
+
+        // إدارة حالة المستخدم
+        let userState = {
+            balance: 0.00,
+            unclaimed: 0.000000,
+            hourlyRate: 0.00,
+            referrals: 0,
+            refEarnings: 0.00,
+            lastCollectTime: 0,
+            inventory: []
+        };
+
+        let tasks = [];
+
+        // كتالوج المتجر
+        const shopCatalog = [
+            { id: 1, name: "الطائر البرونزي", price: 0.10, monthIncome: 0.30, dailyPercent: 10, image: "https://cdn-icons-png.flaticon.com/512/2585/2585188.png" },
+            { id: 2, name: "الطائر الناري", price: 3.00, monthIncome: 10.80, dailyPercent: 12, image: "https://cdn-icons-png.flaticon.com/512/2585/2585177.png" },
+            { id: 3, name: "الطائر الفضي", price: 15.00, monthIncome: 63.00, dailyPercent: 14, image: "https://cdn-icons-png.flaticon.com/512/2585/2585197.png" },
+            { id: 4, name: "الطائر الذهبي", price: 50.00, monthIncome: 240.00, dailyPercent: 16, image: "https://cdn-icons-png.flaticon.com/512/2585/2585202.png" },
+            { id: 5, name: "الكاسر الآلي", price: 100.00, monthIncome: 720.00, dailyPercent: 24, image: "https://cdn-icons-png.flaticon.com/512/2585/2585215.png" }
+        ];
+
+        // تهيئة التطبيق
+        window.addEventListener('DOMContentLoaded', async ( ) => {
+            setupUserProfile();
+            await loadUserData();
+            await loadTasks();
+            
+            renderActiveBirds();
+            renderShop();
+            updateUI();
+
+            // تحديث الأرباح الحية
+            setInterval(() => {
+                if (userState.hourlyRate > 0) {
+                    const perSecond = (userState.hourlyRate / 3600);
+                    userState.unclaimed += perSecond / 10;
+                    document.getElementById('unclaimed-balance').innerText = userState.unclaimed.toFixed(6);
+                }
+            }, 100);
+        });
+
+        // إعداد صورة واسم المستخدم
+        function setupUserProfile() {
+            document.getElementById('user-name').innerText = userName;
+            if (userPhoto) {
+                document.getElementById('avatar-container').innerHTML = `<img src="${userPhoto}" class="w-full h-full object-cover">`;
+            }
+            document.getElementById('ref-link-text').innerText = `https://t.me/CryptSonBot?start=ref_${telegramUserId}`;
+        }
+
+        // جلب بيانات المستخدم من Supabase
+        async function loadUserData( ) {
+            try {
+                const { data, error } = await supabase.from('users').select('*').eq('id', telegramUserId).single();
+
+                if (data) {
+                    userState.balance = data.balance || 0;
+                    userState.hourlyRate = data.hourly_rate || 0;
+                    userState.lastCollectTime = data.last_collect_time || Date.now();
+                    userState.referrals = data.referrals_count || 0;
+                    userState.refEarnings = data.ref_earnings || 0;
+                    userState.inventory = data.inventory || [];
+                    
+                    const now = Date.now();
+                    const hoursPassed = (now - userState.lastCollectTime) / (1000 * 60 * 60);
+                    if (hoursPassed > 0 && userState.hourlyRate > 0) {
+                        userState.unclaimed += (hoursPassed * userState.hourlyRate);
+                    }
+                } else {
+                    await registerNewUser();
+                }
+            } catch (err) {
+                console.error("تعذر الاتصال بقاعدة البيانات:", err);
+                showToast("يوجد بطء في الاتصال بالخادم", "fa-wifi", "text-red-400");
+            }
+        }
+
+        // تسجيل مستخدم جديد
+        async function registerNewUser() {
+            let referredBy = null;
+            
+            if (startParam && startParam.startsWith('ref_')) {
+                referredBy = parseInt(startParam.split('_')[1]);
+                if (referredBy !== telegramUserId) {
+                    const { data: referrer } = await supabase.from('users').select('referrals_count, ref_earnings, balance').eq('id', referredBy).single();
+                    if (referrer) {
+                        await supabase.from('users').update({
+                            referrals_count: referrer.referrals_count + 1,
+                            ref_earnings: referrer.ref_earnings + 0.10,
+                            balance: referrer.balance + 0.10
+                        }).eq('id', referredBy);
+                    }
+                }
+            }
+
+            const defaultBird = [{ id: 1, name: "الطائر البرونزي", image: "https://cdn-icons-png.flaticon.com/512/2585/2585188.png", dailyPercent: 10, count: 1 }];
+            
+            const newUser = {
+                id: telegramUserId,
+                name: userName,
+                balance: 0.05,
+                hourly_rate: 0.10,
+                last_collect_time: Date.now(),
+                referrals_count: 0,
+                ref_earnings: 0,
+                inventory: defaultBird,
+                referred_by: referredBy
+            };
+
+
+            await supabase.from('users').insert([newUser]);
+            
+            userState.balance = 0.05;
+            userState.hourlyRate = 0.10;
+            userState.inventory = defaultBird;
+            userState.lastCollectTime = Date.now();
+        }
+
+        // حفظ بيانات المستخدم
+        async function saveUserData() {
+            try {
+                await supabase.from('users').update({
+                    balance: userState.balance,
+                    hourly_rate: userState.hourlyRate,
+                    last_collect_time: userState.lastCollectTime,
+                    inventory: userState.inventory
+                }).eq('id', telegramUserId);
+            } catch (err) {
+                console.error("خطأ في الحفظ:", err);
+            }
+        }
+
+        // جلب المهمات من Supabase
+        async function loadTasks() {
+            try {
+                const { data, error } = await supabase.from('tasks').select('*').eq('is_active', true);
+                if (data) {
+                    tasks = data;
+                    renderTasks();
+                }
+            } catch (err) {
+                console.error("تعذر جلب المهمات:", err);
+            }
+        }
+
+        // تحديث الواجهة
+        function updateUI() {
+            document.getElementById('user-balance').innerText = userState.balance.toFixed(2);
+            document.getElementById('hourly-rate-badge').innerText = `+$${userState.hourlyRate.toFixed(2)} / ساعة`;
+            document.getElementById('stat-hour').innerText = `$${(userState.hourlyRate).toFixed(2)}`;
+            document.getElementById('stat-day').innerText = `$${(userState.hourlyRate * 24).toFixed(2)}`;
+            document.getElementById('stat-month').innerText = `$${(userState.hourlyRate * 24 * 30).toFixed(2)}`;
+            document.getElementById('ref-count').innerText = userState.referrals;
+            document.getElementById('ref-earnings').innerText = `$${userState.refEarnings.toFixed(2)}`;
+        }
+
+        // التبديل بين النوافذ
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-amber-800', 'bg-amber-200/60');
+                btn.classList.add('text-amber-700/60');
+            });
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabName}`);
+            activeBtn.classList.add('active', 'text-amber-800', 'bg-amber-200/60');
+            activeBtn.classList.remove('text-amber-700/60');
+        }
+
+        // جمع الأرباح (كل ساعة)
+        function collectEarnings() {
+            const now = Date.now();
+            const cooldown = 60 * 60 * 1000; // ساعة واحدة
+
+            if (userState.lastCollectTime !== 0 && (now - userState.lastCollectTime) < cooldown) {
+                const minutesLeft = Math.ceil((cooldown - (now - userState.lastCollectTime)) / (60 * 1000));
+                showToast(`انتظر ${minutesLeft} دقيقة للجمع مرة أخرى!`, "fa-clock", "text-amber-400");
+                return;
+            }
+
+            if (userState.unclaimed <= 0.00001) {
+                showToast("لا توجد أرباح كافية للجمع!", "fa-circle-exclamation", "text-amber-400");
+                return;
+            }
+
+            userState.balance += userState.unclaimed;
+            userState.unclaimed = 0;
+            userState.lastCollectTime = now;
+            
+            updateUI();
+            saveUserData();
+            showToast("تم جمع الأرباح بنجاح!", "fa-circle-check", "text-green-400");
+        }
+
+        // عرض الطيور
+        function renderActiveBirds() {
+            const container = document.getElementById('active-birds-grid');
+            container.innerHTML = '';
+            userState.inventory.forEach(item => {
+                for (let i = 0; i < item.count; i++) {
+                    container.innerHTML += `
+                        <div class="vintage-border bg-card-bg p-2 rounded-xl text-center flex flex-col items-center justify-center shadow-sm">
+                            <img src="${item.image}" class="w-10 h-10 object-contain mb-1 drop-shadow">
+                            <div class="text-[10px] font-bold text-amber-950">${item.name}</div>
+                            <div class="text-[9px] text-green-700 font-bold">+${item.dailyPercent}% يومياً</div>
+                        </div>`;
+                }
+            });
+        }
+
+        // عرض المتجر
+        function renderShop() {
+            const container = document.getElementById('shop-items-list');
+            container.innerHTML = '';
+            shopCatalog.forEach(item => {
+                container.innerHTML += `
+                    <div class="vintage-border bg-card-bg p-3 rounded-2xl text-center flex flex-col justify-between">
+                        <div>
+                            <div class="text-[10px] text-amber-800 font-bold mb-1">دخل $${item.monthIncome.toFixed(2)} / شهرياً</div>
+                            <img src="${item.image}" class="w-16 h-16 mx-auto object-contain my-2">
+                            <div class="font-bold text-xs text-amber-950">${item.name}</div>
+                        </div>
+                        <button onclick="buyBird(${item.id})" class="mt-2 w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl active:scale-95 transition-transform">
+                            <i class="fa-solid fa-cart-shopping"></i> شراء $${item.price.toFixed(2)}
+                        </button>
+                    </div>`;
+            });
+        }
+
+        // شراء طائر
+        function buyBird(id) {
+            const item = shopCatalog.find(x => x.id === id);
+            if (userState.balance < item.price) {
+                showToast("رصيدك غير كافٍ! قم بعمل إيداع أولاً.", "fa-circle-xmark", "text-red-400");
+                document.getElementById('deposit-modal').classList.remove('hidden');
+                return;
+            }
+
+            userState.balance -= item.price;
+            userState.hourlyRate += (item.price * (item.dailyPercent / 100)) / 24;
+
+            const existing = userState.inventory.find(x => x.id === id);
+            if (existing) existing.count++;
+            else userState.inventory.push({ id: item.id, name: item.name, image: item.image, dailyPercent: item.dailyPercent, count: 1 });
+
+            renderActiveBirds();
+            updateUI();
+            saveUserData();
+            showToast(`تم شراء ${item.name} بنجاح!`, "fa-circle-check", "text-green-400");
+        }
+
+        // عرض المهمات
+        function renderTasks() {
+            const container = document.getElementById('tasks-list');
+            container.innerHTML = '';
+            tasks.forEach(t => {
+                container.innerHTML += `
+                    <div class="vintage-border bg-card-bg p-3 rounded-2xl flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 text-sm">
+                                <i class="fa-brands fa-telegram"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-xs text-amber-950">${t.title}</div>
+                                <div class="text-[10px] text-green-700 font-bold">+ $${t.reward.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        <button onclick="doTask(${t.id}, '${t.link}', ${t.reward})" class="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg shadow active:scale-95">تنفيذ</button>
+                    </div>`;
+            });
+        }
+
+        // تنفيذ المهمة
+        function doTask(id, link, reward) {
+            window.open(link, '_blank');
+            setTimeout(() => {
+                userState.balance += reward;
+                updateUI();
+                saveUserData();
+                showToast(`تمت إضافة مكافأة المهمة $${reward}!`, "fa-circle-check", "text-green-400");
+            }, 5000);
+        }
+
+        // المكافأة اليومية
+        function claimDailyReward() {
+            showToast("تم دمج المكافأة اليومية مع نظام الأرباح التلقائي!", "fa-circle-info", "text-blue-400");
+        }
+
+        // نسخ الرابط
+        function copyRefLink() {
+            navigator.clipboard.writeText(document.getElementById('ref-link-text').innerText);
+            showToast("تم نسخ الرابط!", "fa-copy", "text-blue-400");
+        }
+
+        // طلب السحب
+        async function processWithdrawal() {
+            const method = document.getElementById('withdraw-method').value;
+            const address = document.getElementById('withdraw-address').value.trim();
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+
+            if (userState.referrals < 20) {
+                showToast("عذراً! يجب أن تدعو 20 شخصاً على الأقل لتتمكن من السحب.", "fa-circle-xmark", "text-red-500");
+                return;
+            }
+            if (!address || isNaN(amount) || amount < 0.50 || amount > userState.balance) {
+                showToast("تأكد من البيانات والرصيد (الحد الأدنى $0.50)", "fa-circle-exclamation", "text-amber-400");
+                return;
+            }
+
+            userState.balance -= amount;
+            updateUI();
+            saveUserData();
+
+            await supabase.from('withdrawals').insert([{
+                user_id: telegramUserId,
+                method: method,
+                address: address,
+                amount: amount,
+                status: 'pending'
+            }]);
+
+            document.getElementById('withdraw-address').value = '';
+            document.getElementById('withdraw-amount').value = '';
+            showToast("تم إرسال طلب السحب للمراجعة!", "fa-circle-check", "text-green-400");
+        }
+
+        // تأكيد الإيداع
+        async function submitDeposit() {
+            const txid = document.getElementById('deposit-txid').value.trim();
+            const amount = parseFloat(document.getElementById('deposit-amount').value);
+
+            if (!txid || isNaN(amount) || amount <= 0) {
+                showToast("يرجى إدخال رقم العملية والمبلغ بشكل صحيح!", "fa-circle-xmark", "text-red-400");
+                return;
+            }
+
+            await supabase.from('deposits').insert([{
+                user_id: telegramUserId,
+                tx_hash: txid,
+                amount: amount,
+                status: 'pending'
+            }]);
+
+            document.getElementById('deposit-modal').classList.add('hidden');
+            document.getElementById('deposit-txid').value = '';
+            document.getElementById('deposit-amount').value = '';
+            showToast("تم إرسال طلب الإيداع! سيتم إضافة الرصيد بعد المراجعة.", "fa-clock", "text-blue-400");
+        }
+
+        // إشعارات
+        function showToast(message, iconClass = "fa-circle-check", iconColor = "text-green-400") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            document.getElementById('toast-icon').className = `fa-solid ${iconClass} ${iconColor}`;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+                toast.classList.remove('opacity-100');
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
