@@ -5,20 +5,27 @@ if (window.Telegram && window.Telegram.WebApp) {
     try { tg.expand(); } catch (e) {}
 }
 
-// 2. تهيئة Supabase (تم تغيير الاسم إلى supabaseClient لحل مشكلة التضارب)
+// 2. تهيئة إعلانات Adsgram
+let AdController = null;
+if (window.Adsgram) {
+    AdController = window.Adsgram.init({ blockId: "int-22662" });
+}
+
+// 3. تهيئة Supabase
 const supabaseUrl = 'https://kqhopvodwxvvvxiqjcyn.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxaG9wdm9kd3h2dnZ4aXFqY3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzM1MjAsImV4cCI6MjEwNDQ0OTUyMH0.X7s4t1afpbHHd4u-jziupItmAjXC8VBarfUljxmd9dk';
 const supabaseClient = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey ) : null;
 
-// 3. بيانات المستخدم
+// 4. بيانات المستخدم
 const tgUser = tg?.initDataUnsafe?.user;
 const telegramUserId = tgUser ? tgUser.id : Math.floor(Math.random() * 1000000);
 const userName = tgUser ? tgUser.first_name : "مستخدم تجريبي";
 const userPhoto = tgUser?.photo_url || null;
 const startParam = tg?.initDataUnsafe?.start_param || null;
 
-// عنوان محفظتك للإيداع
-const ADMIN_WALLET_ADDRESS = "UQDO_YOUR_TON_WALLET_ADDRESS_HERE";
+// عنوان محفظتك للإيداع وحسابك للتواصل
+const ADMIN_WALLET_ADDRESS = "TVNLE1LbVYMSyUr5ndXuT4SfKSu13U3Lwx";
+const ADMIN_TELEGRAM_USERNAME = "hamsterze"; // ضع يوزرك هنا بدون @
 
 // إدارة حالة المستخدم
 let userState = {
@@ -32,10 +39,11 @@ let userState = {
 };
 
 let tasks = [];
+let tabClicks = 0; // عداد التنقل بين النوافذ للإعلانات
 
-// كتالوج المتجر
+// كتالوج المتجر (تم تحديث صورة الطائر البرونزي)
 const shopCatalog = [
-    { id: 1, name: "الطائر البرونزي", price: 0.10, monthIncome: 0.30, dailyPercent: 10, image: "https://cdn-icons-png.flaticon.com/512/2585/2585188.png" },
+    { id: 1, name: "الطائر البرونزي", price: 0.10, monthIncome: 0.30, dailyPercent: 10, image: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png" },
     { id: 2, name: "الطائر الناري", price: 3.00, monthIncome: 10.80, dailyPercent: 12, image: "https://cdn-icons-png.flaticon.com/512/2585/2585177.png" },
     { id: 3, name: "الطائر الفضي", price: 15.00, monthIncome: 63.00, dailyPercent: 14, image: "https://cdn-icons-png.flaticon.com/512/2585/2585197.png" },
     { id: 4, name: "الطائر الذهبي", price: 50.00, monthIncome: 240.00, dailyPercent: 16, image: "https://cdn-icons-png.flaticon.com/512/2585/2585202.png" },
@@ -56,6 +64,7 @@ window.addEventListener('DOMContentLoaded', async ( ) => {
     renderActiveBirds();
     renderShop();
     updateUI();
+    updateAdsLeftUI();
 
     // تحديث الأرباح الحية
     setInterval(() => {
@@ -128,7 +137,7 @@ async function registerNewUser() {
         }
     }
 
-    const defaultBird = [{ id: 1, name: "الطائر البرونزي", image: "https://cdn-icons-png.flaticon.com/512/2585/2585188.png", dailyPercent: 10, count: 1 }];
+    const defaultBird = [{ id: 1, name: "الطائر البرونزي", image: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png", dailyPercent: 10, count: 1 }];
     const newUser = {
         id: telegramUserId,
         name: userName,
@@ -203,7 +212,18 @@ function updateUI() {
     if(refEarnings) refEarnings.innerText = `$${userState.refEarnings.toFixed(2)}`;
 }
 
-// التبديل بين النوافذ
+// تحديث واجهة الإعلانات المتبقية
+function updateAdsLeftUI() {
+    let today = new Date().toDateString();
+    let storedDate = localStorage.getItem('lastAdDate');
+    let watched = parseInt(localStorage.getItem('adsWatchedToday') || '0');
+    if (storedDate !== today) watched = 0;
+    
+    const adsLeftEl = document.getElementById('ads-left');
+    if(adsLeftEl) adsLeftEl.innerText = Math.max(0, 5 - watched);
+}
+
+// التبديل بين النوافذ (مع إعلان كل 3 ضغطات)
 window.switchTab = function(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
     document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -219,9 +239,15 @@ window.switchTab = function(tabName) {
         activeBtn.classList.add('active', 'text-amber-800', 'bg-amber-200/60');
         activeBtn.classList.remove('text-amber-700/60');
     }
+
+    // إظهار إعلان كل 3 تنقلات
+    tabClicks++;
+    if (tabClicks % 3 === 0 && AdController) {
+        AdController.show().catch(() => {}); // تجاهل الخطأ إذا أغلقه
+    }
 };
 
-// جمع الأرباح
+// جمع الأرباح (مع مشاهدة إعلان)
 window.collectEarnings = function() {
     const now = Date.now();
     const cooldown = 60 * 60 * 1000; // ساعة واحدة
@@ -237,13 +263,62 @@ window.collectEarnings = function() {
         return;
     }
 
-    userState.balance += userState.unclaimed;
-    userState.unclaimed = 0;
-    userState.lastCollectTime = now;
-    
-    updateUI();
-    saveUserData();
-    showToast("تم جمع الأرباح بنجاح!", "fa-circle-check", "text-green-400");
+    // دالة تنفيذ الجمع
+    const processCollect = () => {
+        userState.balance += userState.unclaimed;
+        userState.unclaimed = 0;
+        userState.lastCollectTime = Date.now();
+        updateUI();
+        saveUserData();
+        showToast("تم جمع الأرباح بنجاح!", "fa-circle-check", "text-green-400");
+    };
+
+    // عرض الإعلان قبل الجمع
+    if (AdController) {
+        AdController.show().then((result) => {
+            processCollect();
+        }).catch((err) => {
+            // إذا فشل الإعلان أو تخطاه، نعطيه الأرباح أيضاً لكي لا ينزعج
+            processCollect();
+        });
+    } else {
+        processCollect();
+    }
+};
+
+// شاهد واربح (5 إعلانات يومياً)
+window.watchAdForReward = function() {
+    let today = new Date().toDateString();
+    let storedDate = localStorage.getItem('lastAdDate');
+    let watched = parseInt(localStorage.getItem('adsWatchedToday') || '0');
+
+    if (storedDate !== today) {
+        watched = 0;
+        localStorage.setItem('lastAdDate', today);
+    }
+
+    if (watched >= 5) {
+        showToast("لقد شاهدت الحد الأقصى للإعلانات اليوم (5/5)", "fa-circle-xmark", "text-red-400");
+        return;
+    }
+
+    if (AdController) {
+        AdController.show().then((result) => {
+            if (result.done) {
+                watched++;
+                localStorage.setItem('adsWatchedToday', watched.toString());
+                userState.balance += 0.01;
+                updateUI();
+                saveUserData();
+                updateAdsLeftUI();
+                showToast("تمت إضافة 0.01$ لرصيدك!", "fa-circle-check", "text-green-400");
+            }
+        }).catch((err) => {
+            showToast("حدث خطأ أو قمت بإغلاق الإعلان مبكراً", "fa-circle-exclamation", "text-amber-400");
+        });
+    } else {
+        showToast("نظام الإعلانات غير متوفر حالياً", "fa-circle-exclamation", "text-amber-400");
+    }
 };
 
 // عرض الطيور
@@ -341,11 +416,6 @@ window.doTask = function(id, link, reward) {
     }, 5000);
 };
 
-// المكافأة اليومية
-window.claimDailyReward = function() {
-    showToast("تم دمج المكافأة اليومية مع نظام الأرباح التلقائي!", "fa-circle-info", "text-blue-400");
-};
-
 // نسخ الرابط
 window.copyRefLink = function() {
     const refText = document.getElementById('ref-link-text');
@@ -355,18 +425,24 @@ window.copyRefLink = function() {
     }
 };
 
-// طلب السحب
+// طلب السحب (تم تعديل الحد الأدنى وإضافة التحويل للمسؤول)
 window.processWithdrawal = async function() {
     const method = document.getElementById('withdraw-method').value;
     const address = document.getElementById('withdraw-address').value.trim();
     const amount = parseFloat(document.getElementById('withdraw-amount').value);
 
+    // شرط 20 إحالة
     if (userState.referrals < 20) {
-        showToast("عذراً! يجب أن تدعو 20 شخصاً على الأقل لتتمكن من السحب.", "fa-circle-xmark", "text-red-500");
+        showToast("يجب دعوة 20 شخصاً! سيتم تحويلك للمسؤول.", "fa-circle-xmark", "text-red-500");
+        setTimeout(() => {
+            window.open(`https://t.me/${ADMIN_TELEGRAM_USERNAME}`, '_blank' );
+        }, 2000);
         return;
     }
-    if (!address || isNaN(amount) || amount < 0.50 || amount > userState.balance) {
-        showToast("تأكد من البيانات والرصيد (الحد الأدنى $0.50)", "fa-circle-exclamation", "text-amber-400");
+
+    // شرط 50 دولار
+    if (!address || isNaN(amount) || amount < 50 || amount > userState.balance) {
+        showToast("تأكد من البيانات (الحد الأدنى 50$)", "fa-circle-exclamation", "text-amber-400");
         return;
     }
 
