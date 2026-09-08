@@ -5,10 +5,10 @@ if (window.Telegram && window.Telegram.WebApp) {
     try { tg.expand(); } catch (e) {}
 }
 
-// 2. تهيئة Supabase
+// 2. تهيئة Supabase (تم تغيير الاسم إلى supabaseClient لحل مشكلة التضارب)
 const supabaseUrl = 'https://kqhopvodwxvvvxiqjcyn.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxaG9wdm9kd3h2dnZ4aXFqY3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzM1MjAsImV4cCI6MjEwNDQ0OTUyMH0.X7s4t1afpbHHd4u-jziupItmAjXC8VBarfUljxmd9dk';
-const supabase = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey ) : null;
+const supabaseClient = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey ) : null;
 
 // 3. بيانات المستخدم
 const tgUser = tg?.initDataUnsafe?.user;
@@ -46,7 +46,7 @@ const shopCatalog = [
 window.addEventListener('DOMContentLoaded', async ( ) => {
     setupUserProfile();
     
-    if (supabase) {
+    if (supabaseClient) {
         await loadUserData();
         await loadTasks();
     } else {
@@ -87,7 +87,7 @@ function setupUserProfile() {
 // جلب بيانات المستخدم من Supabase
 async function loadUserData() {
     try {
-        const { data, error } = await supabase.from('users').select('*').eq('id', telegramUserId).single();
+        const { data, error } = await supabaseClient.from('users').select('*').eq('id', telegramUserId).single();
         if (data) {
             userState.balance = data.balance || 0;
             userState.hourlyRate = data.hourly_rate || 0;
@@ -116,9 +116,9 @@ async function registerNewUser() {
         referredBy = parseInt(startParam.split('_')[1]);
         if (referredBy !== telegramUserId) {
             try {
-                const { data: referrer } = await supabase.from('users').select('referrals_count, ref_earnings, balance').eq('id', referredBy).single();
+                const { data: referrer } = await supabaseClient.from('users').select('referrals_count, ref_earnings, balance').eq('id', referredBy).single();
                 if (referrer) {
-                    await supabase.from('users').update({
+                    await supabaseClient.from('users').update({
                         referrals_count: referrer.referrals_count + 1,
                         ref_earnings: referrer.ref_earnings + 0.10,
                         balance: referrer.balance + 0.10
@@ -142,7 +142,7 @@ async function registerNewUser() {
     };
 
     try {
-        await supabase.from('users').insert([newUser]);
+        await supabaseClient.from('users').insert([newUser]);
     } catch (e) { console.error(e); }
     
     userState.balance = 0.05;
@@ -153,9 +153,9 @@ async function registerNewUser() {
 
 // حفظ بيانات المستخدم
 async function saveUserData() {
-    if (!supabase) return;
+    if (!supabaseClient) return;
     try {
-        await supabase.from('users').update({
+        await supabaseClient.from('users').update({
             balance: userState.balance,
             hourly_rate: userState.hourlyRate,
             last_collect_time: userState.lastCollectTime,
@@ -169,7 +169,7 @@ async function saveUserData() {
 // جلب المهمات
 async function loadTasks() {
     try {
-        const { data, error } = await supabase.from('tasks').select('*').eq('is_active', true);
+        const { data, error } = await supabaseClient.from('tasks').select('*').eq('is_active', true);
         if (data) {
             tasks = data;
             renderTasks();
@@ -374,8 +374,8 @@ window.processWithdrawal = async function() {
     updateUI();
     saveUserData();
 
-    if (supabase) {
-        await supabase.from('withdrawals').insert([{
+    if (supabaseClient) {
+        await supabaseClient.from('withdrawals').insert([{
             user_id: telegramUserId,
             method: method,
             address: address,
@@ -409,8 +409,8 @@ window.submitDeposit = async function() {
         return;
     }
 
-    if (supabase) {
-        await supabase.from('deposits').insert([{
+    if (supabaseClient) {
+        await supabaseClient.from('deposits').insert([{
             user_id: telegramUserId,
             tx_hash: txid,
             amount: amount,
