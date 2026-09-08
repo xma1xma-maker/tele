@@ -62,14 +62,17 @@ window.addEventListener('DOMContentLoaded', async ( ) => {
         if (userState.hourlyRate > 0) {
             const perSecond = (userState.hourlyRate / 3600);
             userState.unclaimed += perSecond / 10;
-            document.getElementById('unclaimed-balance').innerText = userState.unclaimed.toFixed(6);
+            const unclaimedEl = document.getElementById('unclaimed-balance');
+            if(unclaimedEl) unclaimedEl.innerText = userState.unclaimed.toFixed(6);
         }
     }, 100);
 });
 
 // إعداد صورة واسم المستخدم
 function setupUserProfile() {
-    document.getElementById('user-name').innerText = userName;
+    const userNameEl = document.getElementById('user-name');
+    if(userNameEl) userNameEl.innerText = userName;
+    
     if (userPhoto) {
         const avatarContainer = document.getElementById('avatar-container');
         if(avatarContainer) avatarContainer.innerHTML = `<img src="${userPhoto}" class="w-full h-full object-cover">`;
@@ -178,17 +181,30 @@ async function loadTasks() {
 
 // تحديث الواجهة
 function updateUI() {
-    document.getElementById('user-balance').innerText = userState.balance.toFixed(2);
-    document.getElementById('hourly-rate-badge').innerText = `+$${userState.hourlyRate.toFixed(2)} / ساعة`;
-    document.getElementById('stat-hour').innerText = `$${(userState.hourlyRate).toFixed(2)}`;
-    document.getElementById('stat-day').innerText = `$${(userState.hourlyRate * 24).toFixed(2)}`;
-    document.getElementById('stat-month').innerText = `$${(userState.hourlyRate * 24 * 30).toFixed(2)}`;
-    document.getElementById('ref-count').innerText = userState.referrals;
-    document.getElementById('ref-earnings').innerText = `$${userState.refEarnings.toFixed(2)}`;
+    const balanceEl = document.getElementById('user-balance');
+    if(balanceEl) balanceEl.innerText = userState.balance.toFixed(2);
+    
+    const rateBadge = document.getElementById('hourly-rate-badge');
+    if(rateBadge) rateBadge.innerText = `+$${userState.hourlyRate.toFixed(2)} / ساعة`;
+    
+    const statHour = document.getElementById('stat-hour');
+    if(statHour) statHour.innerText = `$${(userState.hourlyRate).toFixed(2)}`;
+    
+    const statDay = document.getElementById('stat-day');
+    if(statDay) statDay.innerText = `$${(userState.hourlyRate * 24).toFixed(2)}`;
+    
+    const statMonth = document.getElementById('stat-month');
+    if(statMonth) statMonth.innerText = `$${(userState.hourlyRate * 24 * 30).toFixed(2)}`;
+    
+    const refCount = document.getElementById('ref-count');
+    if(refCount) refCount.innerText = userState.referrals;
+    
+    const refEarnings = document.getElementById('ref-earnings');
+    if(refEarnings) refEarnings.innerText = `$${userState.refEarnings.toFixed(2)}`;
 }
 
-// التبديل بين النوافذ (Tab Switching)
-function switchTab(tabName) {
+// التبديل بين النوافذ
+window.switchTab = function(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active', 'text-amber-800', 'bg-amber-200/60');
@@ -203,10 +219,10 @@ function switchTab(tabName) {
         activeBtn.classList.add('active', 'text-amber-800', 'bg-amber-200/60');
         activeBtn.classList.remove('text-amber-700/60');
     }
-}
+};
 
-// جمع الأرباح (كل ساعة)
-function collectEarnings() {
+// جمع الأرباح
+window.collectEarnings = function() {
     const now = Date.now();
     const cooldown = 60 * 60 * 1000; // ساعة واحدة
 
@@ -228,7 +244,7 @@ function collectEarnings() {
     updateUI();
     saveUserData();
     showToast("تم جمع الأرباح بنجاح!", "fa-circle-check", "text-green-400");
-}
+};
 
 // عرض الطيور
 function renderActiveBirds() {
@@ -270,7 +286,7 @@ function renderShop() {
 }
 
 // شراء طائر
-function buyBird(id) {
+window.buyBird = function(id) {
     const item = shopCatalog.find(x => x.id === id);
     if (userState.balance < item.price) {
         showToast("رصيدك غير كافٍ! قم بعمل إيداع أولاً.", "fa-circle-xmark", "text-red-400");
@@ -289,7 +305,7 @@ function buyBird(id) {
     updateUI();
     saveUserData();
     showToast(`تم شراء ${item.name} بنجاح!`, "fa-circle-check", "text-green-400");
-}
+};
 
 // عرض المهمات
 function renderTasks() {
@@ -315,7 +331,7 @@ function renderTasks() {
 }
 
 // تنفيذ المهمة
-function doTask(id, link, reward) {
+window.doTask = function(id, link, reward) {
     window.open(link, '_blank');
     setTimeout(() => {
         userState.balance += reward;
@@ -323,24 +339,24 @@ function doTask(id, link, reward) {
         saveUserData();
         showToast(`تمت إضافة مكافأة المهمة $${reward}!`, "fa-circle-check", "text-green-400");
     }, 5000);
-}
+};
 
 // المكافأة اليومية
-function claimDailyReward() {
+window.claimDailyReward = function() {
     showToast("تم دمج المكافأة اليومية مع نظام الأرباح التلقائي!", "fa-circle-info", "text-blue-400");
-}
+};
 
 // نسخ الرابط
-function copyRefLink() {
+window.copyRefLink = function() {
     const refText = document.getElementById('ref-link-text');
     if (refText) {
         navigator.clipboard.writeText(refText.innerText);
         showToast("تم نسخ الرابط!", "fa-copy", "text-blue-400");
     }
-}
+};
 
 // طلب السحب
-async function processWithdrawal() {
+window.processWithdrawal = async function() {
     const method = document.getElementById('withdraw-method').value;
     const address = document.getElementById('withdraw-address').value.trim();
     const amount = parseFloat(document.getElementById('withdraw-amount').value);
@@ -371,20 +387,20 @@ async function processWithdrawal() {
     document.getElementById('withdraw-address').value = '';
     document.getElementById('withdraw-amount').value = '';
     showToast("تم إرسال طلب السحب للمراجعة!", "fa-circle-check", "text-green-400");
-}
+};
 
 // دوال نافذة الإيداع
-function openDepositModal() {
+window.openDepositModal = function() {
     const modal = document.getElementById('deposit-modal');
     if (modal) modal.classList.remove('hidden');
-}
+};
 
-function closeDepositModal() {
+window.closeDepositModal = function() {
     const modal = document.getElementById('deposit-modal');
     if (modal) modal.classList.add('hidden');
-}
+};
 
-async function submitDeposit() {
+window.submitDeposit = async function() {
     const txid = document.getElementById('deposit-txid').value.trim();
     const amount = parseFloat(document.getElementById('deposit-amount').value);
 
@@ -406,10 +422,10 @@ async function submitDeposit() {
     document.getElementById('deposit-txid').value = '';
     document.getElementById('deposit-amount').value = '';
     showToast("تم إرسال طلب الإيداع! سيتم إضافة الرصيد بعد المراجعة.", "fa-clock", "text-blue-400");
-}
+};
 
 // إشعارات
-function showToast(message, iconClass = "fa-circle-check", iconColor = "text-green-400") {
+window.showToast = function(message, iconClass = "fa-circle-check", iconColor = "text-green-400") {
     const toast = document.getElementById('toast');
     const toastMsg = document.getElementById('toast-msg');
     const toastIcon = document.getElementById('toast-icon');
@@ -425,5 +441,4 @@ function showToast(message, iconClass = "fa-circle-check", iconColor = "text-gre
         toast.classList.add('opacity-0', 'pointer-events-none');
         toast.classList.remove('opacity-100');
     }, 3000);
-}
-
+};
