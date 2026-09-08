@@ -429,6 +429,24 @@ window.copyRefLink = function() {
     }
 };
 
+// مشاركة الرابط مباشرة عبر تيليجرام
+window.shareRefLink = function() {
+    const refText = document.getElementById('ref-link-text');
+    if (refText) {
+        const url = refText.innerText;
+        const text = encodeURIComponent("انضم إلي في بوت CryptSon وابدأ في ربح الدولارات مجاناً! 🚀💸");
+        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url )}&text=${text}`;
+        
+        // فتح نافذة المشاركة الخاصة بتيليجرام
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
+            window.Telegram.WebApp.openTelegramLink(shareUrl);
+        } else {
+            window.open(shareUrl, '_blank');
+        }
+    }
+};
+
+
 // طلب السحب (تم تعديل الحد الأدنى وإضافة التحويل للمسؤول)
 window.processWithdrawal = async function() {
     const method = document.getElementById('withdraw-method').value;
