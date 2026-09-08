@@ -11,6 +11,9 @@
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- Adsgram SDK -->
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -46,7 +49,7 @@
 </head>
 <body class="bg-theme-bg text-gray-800 min-h-screen flex flex-col pb-20 max-w-md mx-auto relative border-x border-amber-200 shadow-2xl">
 
-    <!-- إشعارات (Toast ) -->
+    <!-- إشعارات (Toast  ) -->
     <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-5 py-3 rounded-full text-sm font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
         <i id="toast-icon" class="fa-solid fa-circle-check text-green-400"></i>
         <span id="toast-msg">تمت العملية بنجاح!</span>
@@ -159,6 +162,23 @@
                 </h2>
                 <p class="text-xs text-blue-100 mt-1">أكمل المهمات البسيطة التالية واصلح قناة تليجرام لتحصل على دولار مجاني فوراً!</p>
             </div>
+
+            <!-- قسم مشاهدة الإعلانات -->
+            <div class="vintage-border bg-card-bg p-4 rounded-2xl flex items-center justify-between mt-2">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-green-600 text-xl font-bold">
+                        <i class="fa-solid fa-video"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-xs text-amber-950">شاهد إعلان واربح</div>
+                        <div class="text-[11px] text-green-600 font-bold">+ $0.01 دولار (<span id="ads-left">5</span> متبقي اليوم)</div>
+                    </div>
+                </div>
+                <button onclick="watchAdForReward()" class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold rounded-lg shadow active:scale-95">
+                    شاهد الآن
+                </button>
+            </div>
+
             <div class="text-xs font-bold text-amber-900 mt-2">المهمات الإجبارية والقنوات:</div>
             <div id="tasks-list" class="flex flex-col gap-2"></div>
         </section>
@@ -185,7 +205,7 @@
 
                 <div class="bg-amber-50 p-2.5 rounded-xl border border-amber-300 flex items-center justify-between gap-2">
                     <span class="text-xs text-amber-900 font-mono overflow-hidden text-ellipsis whitespace-nowrap" id="ref-link-text">https://t.me/CryptSonBot?start=ref_123456</span>
-                    <button onclick="copyRefLink( )" class="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg shrink-0 active:scale-95">
+                    <button onclick="copyRefLink(  )" class="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg shrink-0 active:scale-95">
                         <i class="fa-solid fa-copy ml-1"></i> نسخ
                     </button>
                 </div>
@@ -204,7 +224,7 @@
                 </h2>
 
                 <div class="bg-yellow-50 border-r-4 border-amber-500 p-2.5 rounded text-xs text-amber-900 mb-4 font-bold">
-                    <i class="fa-solid fa-circle-info ml-1"></i> الحد الأدنى للسحب هو: <span class="text-red-600">$0.50 دولار</span>
+                    <i class="fa-solid fa-circle-info ml-1"></i> الحد الأدنى للسحب هو: <span class="text-red-600">$50 دولار</span>
                 </div>
 
                 <div class="space-y-3">
@@ -223,7 +243,7 @@
                     </div>
                     <div>
                         <label class="text-xs font-bold text-amber-900 block mb-1">المبلغ المراد سحبه ($):</label>
-                        <input type="number" id="withdraw-amount" placeholder="0.50" step="0.1" class="w-full p-2.5 rounded-xl border border-amber-300 bg-white text-xs font-bold text-gray-800 focus:outline-none focus:border-amber-500">
+                        <input type="number" id="withdraw-amount" placeholder="50.00" step="1" class="w-full p-2.5 rounded-xl border border-amber-300 bg-white text-xs font-bold text-gray-800 focus:outline-none focus:border-amber-500">
                     </div>
                     <button onclick="processWithdrawal()" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-black text-sm rounded-xl shadow active:scale-95 transition-transform flex items-center justify-center gap-2 mt-2">
                         <i class="fa-solid fa-paper-plane"></i> تأكيد السحب الان
