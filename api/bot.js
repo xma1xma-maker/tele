@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function(req, res) {
     if (req.method === 'POST') {
         const update = req.body;
 
@@ -9,14 +9,12 @@ export default async function handler(req, res) {
 
             if (text.startsWith('/start')) {
                 
-                // ==========================================
-                // هنا سيقوم الكود بسحب التوكن من إعدادات Vercel سرياً
+                // سحب التوكن من إعدادات Vercel
                 const BOT_TOKEN = process.env.BOT_TOKEN; 
-                // ==========================================
 
                 if (!BOT_TOKEN) {
                     console.error("لم يتم العثور على التوكن في Vercel!");
-                    return res.status(500).send('Error');
+                    return res.status(500).send('Error: No Token');
                 }
 
                 const messageText = `أهلاً بك يا ${firstName} في *CryptSon*! 🚀\n\nلقد حصلت للتو على *طائر برونزي مجاني* ورصيد ترحيبي لتبدأ رحلتك معنا. 🎁\nطيورك تعمل الآن وتجمع لك الأرباح حتى وأنت نائم!\n\n🎮 *كيف تبدأ؟*\n1️⃣ افتح التطبيق من الزر بالأسفل.\n2️⃣ اجمع أرباحك كل ساعة.\n3️⃣ أكمل المهمات وشاهد الإعلانات لزيادة رصيدك.\n4️⃣ اسحب أرباحك عند الوصول للحد الأدنى!\n\n👇 *اضغط على الزر أدناه لفتح اللعبة الآن!*`;
@@ -27,18 +25,23 @@ export default async function handler(req, res) {
                     ]
                 };
 
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: messageText,
-                        parse_mode: 'Markdown',
-                        reply_markup: replyMarkup
-                    } )
-                });
+                try {
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: messageText,
+                            parse_mode: 'Markdown',
+                            reply_markup: replyMarkup
+                        } )
+                    });
+                } catch (error) {
+                    console.error("خطأ في إرسال الرسالة:", error);
+                }
             }
         }
     }
+    // إخبار تيليجرام أن الرسالة وصلت
     res.status(200).send('OK');
-}
+};
