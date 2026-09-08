@@ -138,7 +138,7 @@ async function registerNewUser() {
         }
     }
 
-    const defaultBird = [{ id: 1, name: "الطائر البرونزي", image: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png", dailyPercent: 10, count: 1 }];
+    const defaultBird = [{ id: 1, name: "الطائر البرونزي", image: "https://cdn-icons-png.flaticon.com/512/2201/2201646.png", dailyPercent: 10, count: 1 }];
     const newUser = {
         id: telegramUserId,
         name: userName,
