@@ -5,6 +5,14 @@ if (window.Telegram && window.Telegram.WebApp) {
     try { tg.expand(); } catch (e) {}
 }
 
+// 🟢 تحويل جميع الإشعارات المزعجة إلى إشعارات تليجرام الاحترافية
+window.alert = function(message) {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+        window.Telegram.WebApp.showAlert(message);
+    } else {
+        console.log(message); // في حال فتحه خارج تليجرام
+    }
+};
 // 2. تهيئة إعلانات Adsgram
 let AdController = null;
 if (window.Adsgram) {
