@@ -1,4 +1,4 @@
-// 1. تهيئة تيليجرام (مع حماية لكي يعمل في المتصفح العادي للتجربة)
+// 1. تهيئة تيليجرام
 let tg = null;
 if (window.Telegram && window.Telegram.WebApp) {
     tg = window.Telegram.WebApp;
@@ -14,7 +14,7 @@ if (window.Adsgram) {
 // 3. تهيئة Supabase
 const supabaseUrl = 'https://kqhopvodwxvvvxiqjcyn.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxaG9wdm9kd3h2dnZ4aXFqY3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzM1MjAsImV4cCI6MjEwNDQ0OTUyMH0.X7s4t1afpbHHd4u-jziupItmAjXC8VBarfUljxmd9dk';
-const supabaseClient = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey  ) : null;
+const supabaseClient = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey ) : null;
 
 // 4. بيانات المستخدم
 const tgUser = tg?.initDataUnsafe?.user;
@@ -25,7 +25,7 @@ const startParam = tg?.initDataUnsafe?.start_param || null;
 
 // عنوان محفظتك للإيداع وحسابك للتواصل
 const ADMIN_WALLET_ADDRESS = "TVNLE1LbVYMSyUr5ndXuT4SfKSu13U3Lwx";
-const ADMIN_TELEGRAM_USERNAME = "hamsterze"; // ضع يوزرك هنا بدون @
+const ADMIN_TELEGRAM_USERNAME = "hamsterze"; 
 
 // إدارة حالة المستخدم
 let userState = {
@@ -35,13 +35,15 @@ let userState = {
     referrals: 0,
     refEarnings: 0.00,
     lastCollectTime: 0,
-    inventory: []
+    inventory: [],
+    completedTasks: [] // مصفوفة لحفظ المهمات المكتملة
 };
 
 let tasks = [];
-let tabClicks = 0; // عداد التنقل بين النوافذ للإعلانات
+let pendingTasks = []; // مهمات قيد التحقق
+let tabClicks = 0; 
 
-// كتالوج المتجر (تم تحديث صورة الطائر البرونزي بصورة طائر حقيقية وتعمل)
+// كتالوج المتجر
 const shopCatalog = [
     { id: 1, name: "الطائر البرونزي", price: 0.10, monthIncome: 0.30, dailyPercent: 10, image: "https://cdn-icons-png.flaticon.com/512/2201/2201646.png" },
     { id: 2, name: "الطائر الناري", price: 3.00, monthIncome: 10.80, dailyPercent: 12, image: "https://cdn-icons-png.flaticon.com/512/2585/2585177.png" },
@@ -51,7 +53,7 @@ const shopCatalog = [
 ];
 
 // تهيئة التطبيق عند التحميل
-window.addEventListener('DOMContentLoaded', async (  ) => {
+window.addEventListener('DOMContentLoaded', async ( ) => {
     setupUserProfile();
     
     if (supabaseClient) {
@@ -66,7 +68,6 @@ window.addEventListener('DOMContentLoaded', async (  ) => {
     updateUI();
     updateAdsLeftUI();
 
-    // تحديث الأرباح الحية
     setInterval(() => {
         if (userState.hourlyRate > 0) {
             const perSecond = (userState.hourlyRate / 3600);
@@ -77,7 +78,6 @@ window.addEventListener('DOMContentLoaded', async (  ) => {
     }, 100);
 });
 
-// إعداد صورة واسم المستخدم
 function setupUserProfile() {
     const userNameEl = document.getElementById('user-name');
     if(userNameEl) userNameEl.innerText = userName;
@@ -88,15 +88,12 @@ function setupUserProfile() {
     }
     
     const refLinkEl = document.getElementById('ref-link-text');
-    // تم تعديل الرابط ليصبح رابط التطبيق المصغر المباشر لكي تعمل الإحالات
-    // ملاحظة: إذا كان الاسم المختصر لتطبيقك في BotFather ليس "app"، قم بتغيير كلمة app أدناه
     if(refLinkEl) refLinkEl.innerText = `https://t.me/ddjdifjbot/tofe?startapp=ref_${telegramUserId}`;
     
-    const adminWalletEl = document.getElementById('admin-wallet-display'  );
+    const adminWalletEl = document.getElementById('admin-wallet-display' );
     if(adminWalletEl) adminWalletEl.innerText = ADMIN_WALLET_ADDRESS;
 }
 
-// جلب بيانات المستخدم من Supabase
 async function loadUserData() {
     try {
         const { data, error } = await supabaseClient.from('users').select('*').eq('id', telegramUserId).single();
@@ -107,6 +104,7 @@ async function loadUserData() {
             userState.referrals = data.referrals_count || 0;
             userState.refEarnings = data.ref_earnings || 0;
             userState.inventory = data.inventory || [];
+            userState.completedTasks = data.completed_tasks || []; // تحميل المهمات المكتملة
             
             const now = Date.now();
             const hoursPassed = (now - userState.lastCollectTime) / (1000 * 60 * 60);
@@ -121,7 +119,6 @@ async function loadUserData() {
     }
 }
 
-// تسجيل مستخدم جديد
 async function registerNewUser() {
     let referredBy = null;
     if (startParam && startParam.startsWith('ref_')) {
@@ -146,10 +143,11 @@ async function registerNewUser() {
         name: userName,
         balance: 0.05,
         hourly_rate: 0.10,
-        last_collect_time: Date.now(  ),
+        last_collect_time: Date.now( ),
         referrals_count: 0,
         ref_earnings: 0,
         inventory: defaultBird,
+        completed_tasks: [],
         referred_by: referredBy
     };
 
@@ -160,10 +158,10 @@ async function registerNewUser() {
     userState.balance = 0.05;
     userState.hourlyRate = 0.10;
     userState.inventory = defaultBird;
+    userState.completedTasks = [];
     userState.lastCollectTime = Date.now();
 }
 
-// حفظ بيانات المستخدم
 async function saveUserData() {
     if (!supabaseClient) return;
     try {
@@ -171,14 +169,14 @@ async function saveUserData() {
             balance: userState.balance,
             hourly_rate: userState.hourlyRate,
             last_collect_time: userState.lastCollectTime,
-            inventory: userState.inventory
+            inventory: userState.inventory,
+            completed_tasks: userState.completedTasks // حفظ المهمات المكتملة
         }).eq('id', telegramUserId);
     } catch (err) {
         console.error("خطأ في الحفظ:", err);
     }
 }
 
-// جلب المهمات
 async function loadTasks() {
     try {
         const { data, error } = await supabaseClient.from('tasks').select('*').eq('is_active', true);
@@ -191,7 +189,6 @@ async function loadTasks() {
     }
 }
 
-// تحديث الواجهة
 function updateUI() {
     const balanceEl = document.getElementById('user-balance');
     if(balanceEl) balanceEl.innerText = userState.balance.toFixed(2);
@@ -215,7 +212,6 @@ function updateUI() {
     if(refEarnings) refEarnings.innerText = `$${userState.refEarnings.toFixed(2)}`;
 }
 
-// تحديث واجهة الإعلانات المتبقية
 function updateAdsLeftUI() {
     let today = new Date().toDateString();
     let storedDate = localStorage.getItem('lastAdDate');
@@ -226,7 +222,6 @@ function updateAdsLeftUI() {
     if(adsLeftEl) adsLeftEl.innerText = Math.max(0, 5 - watched);
 }
 
-// التبديل بين النوافذ (مع إعلان كل 3 ضغطات)
 window.switchTab = function(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
     document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -243,17 +238,15 @@ window.switchTab = function(tabName) {
         activeBtn.classList.remove('text-amber-700/60');
     }
 
-    // إظهار إعلان كل 3 تنقلات
     tabClicks++;
     if (tabClicks % 3 === 0 && AdController) {
-        AdController.show().catch(() => {}); // تجاهل الخطأ إذا أغلقه
+        AdController.show().catch(() => {}); 
     }
 };
 
-// جمع الأرباح (مع مشاهدة إعلان)
 window.collectEarnings = function() {
     const now = Date.now();
-    const cooldown = 60 * 60 * 1000; // ساعة واحدة
+    const cooldown = 60 * 60 * 1000; 
 
     if (userState.lastCollectTime !== 0 && (now - userState.lastCollectTime) < cooldown) {
         const minutesLeft = Math.ceil((cooldown - (now - userState.lastCollectTime)) / (60 * 1000));
@@ -266,7 +259,6 @@ window.collectEarnings = function() {
         return;
     }
 
-    // دالة تنفيذ الجمع
     const processCollect = () => {
         userState.balance += userState.unclaimed;
         userState.unclaimed = 0;
@@ -276,12 +268,10 @@ window.collectEarnings = function() {
         showToast("تم جمع الأرباح بنجاح!", "fa-circle-check", "text-green-400");
     };
 
-    // عرض الإعلان قبل الجمع
     if (AdController) {
         AdController.show().then((result) => {
             processCollect();
         }).catch((err) => {
-            // إذا فشل الإعلان أو تخطاه، نعطيه الأرباح أيضاً لكي لا ينزعج
             processCollect();
         });
     } else {
@@ -289,7 +279,6 @@ window.collectEarnings = function() {
     }
 };
 
-// شاهد واربح (5 إعلانات يومياً)
 window.watchAdForReward = function() {
     let today = new Date().toDateString();
     let storedDate = localStorage.getItem('lastAdDate');
@@ -324,7 +313,6 @@ window.watchAdForReward = function() {
     }
 };
 
-// عرض الطيور
 function renderActiveBirds() {
     const container = document.getElementById('active-birds-grid');
     if (!container) return;
@@ -342,7 +330,6 @@ function renderActiveBirds() {
     });
 }
 
-// عرض المتجر
 function renderShop() {
     const container = document.getElementById('shop-items-list');
     if (!container) return;
@@ -363,9 +350,16 @@ function renderShop() {
     });
 }
 
-// شراء طائر
+// منع شراء الطائر أكثر من مرة
 window.buyBird = function(id) {
     const item = shopCatalog.find(x => x.id === id);
+    
+    const existing = userState.inventory.find(x => x.id === id);
+    if (existing) {
+        showToast("لقد قمت بشراء هذا الطائر مسبقاً!", "fa-circle-xmark", "text-amber-500");
+        return;
+    }
+
     if (userState.balance < item.price) {
         showToast("رصيدك غير كافٍ! قم بعمل إيداع أولاً.", "fa-circle-xmark", "text-red-400");
         openDepositModal();
@@ -375,9 +369,7 @@ window.buyBird = function(id) {
     userState.balance -= item.price;
     userState.hourlyRate += (item.price * (item.dailyPercent / 100)) / 24;
 
-    const existing = userState.inventory.find(x => x.id === id);
-    if (existing) existing.count++;
-    else userState.inventory.push({ id: item.id, name: item.name, image: item.image, dailyPercent: item.dailyPercent, count: 1 });
+    userState.inventory.push({ id: item.id, name: item.name, image: item.image, dailyPercent: item.dailyPercent, count: 1 });
 
     renderActiveBirds();
     updateUI();
@@ -385,13 +377,25 @@ window.buyBird = function(id) {
     showToast(`تم شراء ${item.name} بنجاح!`, "fa-circle-check", "text-green-400");
 };
 
-// عرض المهمات
+// نظام المهمات الجديد (تنفيذ -> تحقق -> مكتمل)
 function renderTasks() {
     const container = document.getElementById('tasks-list');
     if (!container) return;
     container.innerHTML = '';
     
     tasks.forEach(t => {
+        const isCompleted = userState.completedTasks.includes(t.id);
+        const isPending = pendingTasks.includes(t.id);
+        let btnHtml = '';
+
+        if (isCompleted) {
+            btnHtml = `<button disabled class="px-3 py-1.5 bg-gray-400 text-white text-xs font-bold rounded-lg flex items-center gap-1"><i class="fa-solid fa-check"></i> مكتمل</button>`;
+        } else if (isPending) {
+            btnHtml = `<button onclick="verifyTask(${t.id}, ${t.reward})" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg shadow active:scale-95">تحقق</button>`;
+        } else {
+            btnHtml = `<button onclick="startTask(${t.id}, '${t.link}')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow active:scale-95">تنفيذ</button>`;
+        }
+
         container.innerHTML += `
             <div class="vintage-border bg-card-bg p-3 rounded-2xl flex items-center justify-between mb-2">
                 <div class="flex items-center gap-3">
@@ -403,20 +407,31 @@ function renderTasks() {
                         <div class="text-[10px] text-green-700 font-bold">+ $${t.reward.toFixed(2)}</div>
                     </div>
                 </div>
-                <button onclick="doTask(${t.id}, '${t.link}', ${t.reward})" class="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg shadow active:scale-95">تنفيذ</button>
+                ${btnHtml}
             </div>`;
     });
 }
 
-// تنفيذ المهمة
-window.doTask = function(id, link, reward) {
+// بدء المهمة (يفتح الرابط ويحول الزر إلى تحقق)
+window.startTask = function(id, link) {
     window.open(link, '_blank');
-    setTimeout(() => {
-        userState.balance += reward;
-        updateUI();
-        saveUserData();
-        showToast(`تمت إضافة مكافأة المهمة $${reward}!`, "fa-circle-check", "text-green-400");
-    }, 5000);
+    pendingTasks.push(id); // إضافة المهمة لقائمة الانتظار
+    renderTasks(); // تحديث الواجهة ليظهر زر "تحقق"
+};
+
+// التحقق من المهمة (يضيف الرصيد ويحولها لمكتملة)
+window.verifyTask = function(id, reward) {
+    // إزالة المهمة من قائمة الانتظار وإضافتها للمكتملة
+    pendingTasks = pendingTasks.filter(taskId => taskId !== id);
+    userState.completedTasks.push(id);
+    
+    // إضافة المكافأة
+    userState.balance += reward;
+    
+    updateUI();
+    saveUserData();
+    renderTasks();
+    showToast(`أحسنت! تمت إضافة مكافأة المهمة $${reward}!`, "fa-circle-check", "text-green-400");
 };
 
 // نسخ الرابط
@@ -433,10 +448,9 @@ window.shareRefLink = function() {
     const refText = document.getElementById('ref-link-text');
     if (refText) {
         const url = refText.innerText;
-        const text = encodeURIComponent("انضم إلي في بوت CryptSon وابدأ في ربح الدولارات مجاناً! 🚀💸");
+        const text = encodeURIComponent("انضم إلي في بوت Golden Birds وابدأ في ربح الدولارات مجاناً! 🚀💸");
         const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url )}&text=${text}`;
         
-        // فتح نافذة المشاركة الخاصة بتيليجرام
         if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
             window.Telegram.WebApp.openTelegramLink(shareUrl);
         } else {
@@ -445,13 +459,12 @@ window.shareRefLink = function() {
     }
 };
 
-// طلب السحب (تم تعديل الحد الأدنى وإضافة التحويل للمسؤول)
+// طلب السحب
 window.processWithdrawal = async function() {
     const method = document.getElementById('withdraw-method').value;
     const address = document.getElementById('withdraw-address').value.trim();
     const amount = parseFloat(document.getElementById('withdraw-amount').value);
 
-    // شرط 20 إحالة
     if (userState.referrals < 20) {
         showToast("يجب دعوة 20 شخصاً! سيتم تحويلك للمسؤول.", "fa-circle-xmark", "text-red-500");
         setTimeout(() => {
@@ -460,7 +473,6 @@ window.processWithdrawal = async function() {
         return;
     }
 
-    // شرط 50 دولار
     if (!address || isNaN(amount) || amount < 50 || amount > userState.balance) {
         showToast("تأكد من البيانات (الحد الأدنى 50$)", "fa-circle-exclamation", "text-amber-400");
         return;
