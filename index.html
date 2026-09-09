@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CryptSon - Telegram Mini App</title>
+    <title>Golden Birds - Telegram Mini App</title>
+    
+    <!-- إعدادات المشاركة (Open Graph) لتيليجرام لكي يظهر بشكل فخم -->
+    <meta property="og:title" content="Golden Birds 💰">
+    <meta property="og:description" content="انضم إلي في بوت Golden Birds وابدأ في ربح الدولارات مجاناً! 🚀💸">
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/2585/2585202.png">
+    <meta property="og:url" content="https://t.me/ddjdifjbot/tofe">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
     
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -49,7 +57,7 @@
 </head>
 <body class="bg-theme-bg text-gray-800 min-h-screen flex flex-col pb-20 max-w-md mx-auto relative border-x border-amber-200 shadow-2xl">
 
-    <!-- إشعارات (Toast ) -->
+    <!-- إشعارات (Toast  ) -->
     <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-5 py-3 rounded-full text-sm font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
         <i id="toast-icon" class="fa-solid fa-circle-check text-green-400"></i>
         <span id="toast-msg">تمت العملية بنجاح!</span>
@@ -207,7 +215,7 @@
                 <div class="bg-amber-50 p-2.5 rounded-xl border border-amber-300 flex items-center justify-between gap-2">
                     <span class="text-xs text-amber-900 font-mono overflow-hidden text-ellipsis whitespace-nowrap" id="ref-link-text">https://t.me/ddjdifjbot?start=ref_123456</span>
                     <div class="flex gap-1 shrink-0">
-                        <button onclick="copyRefLink( )" class="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg active:scale-95 flex items-center gap-1">
+                        <button onclick="copyRefLink(  )" class="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg active:scale-95 flex items-center gap-1">
                             <i class="fa-solid fa-copy"></i> نسخ
                         </button>
                         <button onclick="shareRefLink()" class="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg active:scale-95 flex items-center gap-1">
